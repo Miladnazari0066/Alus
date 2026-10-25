@@ -78,18 +78,20 @@ button{cursor:pointer}
 .splash-logo svg{width:68px;height:68px;stroke-width:2.6;filter:drop-shadow(0 4px 12px rgba(0,0,0,.3));overflow:visible}
 .splash-logo .splash-path-1,.splash-logo .splash-path-2{stroke-dasharray:1;stroke-dashoffset:1;animation:splashDraw 1s cubic-bezier(.55,0,.35,1) forwards}
 .splash-logo .splash-path-2{animation-delay:.4s}
-.splash-wordmark{display:flex;gap:2px;font-size:52px;font-weight:900;letter-spacing:-2px;color:#fff;line-height:1;text-shadow:0 6px 30px rgba(0,0,0,.35);font-feature-settings:"ss01"}
+/* FIX: direction:ltr تا Alus برعکس رندر نشود */
+.splash-wordmark{display:flex;direction:ltr;gap:2px;font-size:52px;font-weight:900;letter-spacing:-2px;color:#fff;line-height:1;text-shadow:0 6px 30px rgba(0,0,0,.35);font-feature-settings:"ss01"}
 .splash-wordmark span{display:inline-block;opacity:0;transform:translateY(22px);animation:splashLetterIn .6s cubic-bezier(.34,1.56,.64,1) forwards}
 .splash-wordmark span:nth-child(1){animation-delay:.5s}
 .splash-wordmark span:nth-child(2){animation-delay:.66s}
 .splash-wordmark span:nth-child(3){animation-delay:.82s}
 .splash-wordmark span:nth-child(4){animation-delay:.98s}
-.splash-tagline{font-size:11px;font-weight:700;letter-spacing:4px;text-transform:uppercase;color:rgba(255,255,255,.85);margin-top:-8px;opacity:0;animation:splashTaglineIn .7s ease-out 1.15s forwards}
+.splash-tagline{font-size:11px;font-weight:700;letter-spacing:4px;text-transform:uppercase;color:rgba(255,255,255,.85);margin-top:-8px;opacity:0;animation:splashTaglineIn .7s ease-out 1.15s forwards;direction:ltr}
 .splash-progress-track{width:190px;height:4px;border-radius:100px;background:rgba(255,255,255,.22);overflow:hidden;margin-top:8px;opacity:0;animation:splashTaglineIn .5s ease-out 1.25s forwards}
 .splash-progress-bar{width:0%;height:100%;border-radius:100px;background:linear-gradient(90deg,rgba(255,255,255,.6),#fff);box-shadow:0 0 12px rgba(255,255,255,.7);animation:splashProgress 1.4s cubic-bezier(.4,0,.2,1) 1.3s forwards}
-.splash-percent{font-size:11px;font-weight:700;color:rgba(255,255,255,.7);font-variant-numeric:tabular-nums;letter-spacing:1px;margin-top:-6px;opacity:0;animation:splashTaglineIn .4s ease-out 1.3s forwards;min-width:50px;text-align:center}
+.splash-percent{font-size:11px;font-weight:700;color:rgba(255,255,255,.7);font-variant-numeric:tabular-nums;letter-spacing:1px;margin-top:-6px;opacity:0;animation:splashTaglineIn .4s ease-out 1.3s forwards;min-width:50px;text-align:center;direction:ltr}
 @keyframes splashFade{0%,80%{opacity:1}100%{opacity:0}}
-@keyframes splashIn{0%{transform:scale(.92)}12%{transform:scale(1)}78%{transform:scale(1);opacity:1}100%{transform:scale(1.08);opacity:0;filter:blur(4px)}}
+/* FIX: حذف filter:blur(4px) از ۱۰۰٪ */
+@keyframes splashIn{0%{transform:scale(.92)}12%{transform:scale(1)}78%{transform:scale(1);opacity:1}100%{transform:scale(1.08);opacity:0}}
 @keyframes splashMeshShift{0%{transform:scale(1) rotate(0)}100%{transform:scale(1.15) rotate(6deg)}}
 @keyframes splashGridShift{0%{transform:translate(0,0)}100%{transform:translate(32px,32px)}}
 @keyframes splashGlowPulse{0%,100%{transform:scale(1);opacity:.55}50%{transform:scale(1.18);opacity:1}}
@@ -117,9 +119,10 @@ button{cursor:pointer}
 @keyframes sheetDown{to{transform:translateY(100%)}}
 @keyframes notifIn{from{opacity:0;transform:translateX(-100%)}to{opacity:1;transform:none}}
 @keyframes notifOut{to{opacity:0;transform:translateX(-100%)}}
+@keyframes notifShimmer{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}
 
 /* ============================================================
-   TOAST SYSTEM (جدید — برای عملیات کوچک)
+   TOAST SYSTEM
    ============================================================ */
 .toast-wrap{position:fixed;bottom:32px;left:50%;transform:translateX(-50%);z-index:2200;display:flex;flex-direction:column;gap:8px;align-items:center;pointer-events:none;max-width:calc(100vw - 32px)}
 @media (max-width:900px){.toast-wrap{bottom:calc(90px + env(safe-area-inset-bottom, 0px))}}
@@ -140,9 +143,6 @@ button{cursor:pointer}
 .toast.error{border-color:rgba(255,59,48,.32)}
 .toast.warn{border-color:rgba(255,149,0,.32)}
 
-/* ============================================================
-   SOLID CARDS (به‌جای شیشه‌ای)
-   ============================================================ */
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:40px;padding:0 18px;border-radius:100px;font-size:13.5px;font-weight:600;background:var(--g2);color:var(--text);border:1px solid var(--gb);box-shadow:var(--ghl),0 4px 14px -6px rgba(15,23,42,.14);transition:all .28s var(--ease);position:relative;overflow:hidden;white-space:nowrap;cursor:pointer}
 .btn:hover{transform:translateY(-2px);box-shadow:var(--ghl),0 12px 28px -10px rgba(15,23,42,.24);background:var(--g3)}
 .btn:active{transform:translateY(0) scale(.97)}
@@ -228,7 +228,6 @@ button{cursor:pointer}
 @media (max-width:1100px){.w-3{grid-column:span 6}.w-4,.w-5,.w-6,.w-7,.w-8{grid-column:span 12}}
 @media (max-width:640px){.bento>*{grid-column:span 12!important}}
 
-/* ============ SOLID WIDGET / STAT / TABLE ============ */
 .widget{background:var(--surface);border:1px solid var(--border);border-radius:22px;padding:18px;box-shadow:var(--card-shadow);transition:box-shadow .25s var(--ease)}
 .widget:hover{box-shadow:var(--card-shadow-hover)}
 .w-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:14px;flex-wrap:wrap}
@@ -253,8 +252,6 @@ button{cursor:pointer}
 .hero-quick button{display:inline-flex;align-items:center;gap:7px;height:40px;padding:0 16px;border-radius:100px;background:rgba(255,255,255,.2);color:#fff;font-size:12.5px;font-weight:600;border:1px solid rgba(255,255,255,.3);cursor:pointer;box-shadow:inset 0 1px 0 rgba(255,255,255,.5);transition:background .25s var(--ease)}
 .hero-quick button:hover{background:rgba(255,255,255,.3)}
 .hero-quick button svg{width:14px;height:14px}
-
-/* ============ STAT CARD (بازطراحی با sparkline) ============ */
 .stat{display:flex;flex-direction:column;padding:18px;background:var(--surface);border:1px solid var(--border);border-radius:22px;box-shadow:var(--card-shadow);transition:all .25s var(--ease);position:relative;overflow:hidden}
 .stat:hover{box-shadow:var(--card-shadow-hover);transform:translateY(-1px)}
 .stat-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;gap:8px}
@@ -271,13 +268,10 @@ button{cursor:pointer}
 .stat-spark .sparkline{width:80px;height:34px;overflow:visible}
 .stat-foot{font-size:10.5px;color:var(--muted);display:flex;align-items:center;gap:5px;opacity:.85}
 .stat-foot svg{width:11px;height:11px}
-
-/* ============ WH SECTION TITLE ============ */
 .wh-section{display:flex;align-items:center;gap:10px;margin:6px 0 -4px;padding:0 4px;grid-column:span 12}
 .wh-section-title{font-size:11.5px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.8px}
 .wh-section-line{flex:1;height:1px;background:var(--border)}
 .wh-section-count{font-size:11px;font-weight:600;color:var(--muted);padding:1px 8px;border-radius:100px;background:var(--surface-2);border:1px solid var(--border)}
-
 .qa{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .qa-btn{display:flex;flex-direction:column;align-items:flex-start;gap:8px;padding:15px;border-radius:18px;background:var(--surface-2);border:1px solid var(--border);text-align:right;cursor:pointer;transition:all .3s var(--ease)}
 .qa-btn:hover{transform:translateY(-2px);background:var(--surface);box-shadow:var(--card-shadow)}
@@ -288,8 +282,6 @@ button{cursor:pointer}
 .qa-btn.alt-3 .ic{background:var(--grad-info)}
 .qa-btn b{font-size:12.5px;font-weight:700}
 .qa-btn span{font-size:11px;color:var(--muted)}
-
-/* ============ PIPE with mini bars ============ */
 .pipe{display:flex;flex-direction:column;gap:8px}
 .pipe-step{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:16px;background:var(--surface-2);border:1px solid var(--border)}
 .pipe-num{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;font-weight:800;font-size:12px;background:var(--surface);color:var(--muted);border:1px solid var(--border);flex-shrink:0}
@@ -302,8 +294,6 @@ button{cursor:pointer}
 .pipe-step.active .pipe-bar-fill{background:var(--grad-warn)}
 .pipe-step.done .pipe-bar-fill{background:var(--grad-success)}
 .pipe-count{font-size:13px;font-weight:800;padding:4px 11px;border-radius:100px;background:var(--surface);border:1px solid var(--border);flex-shrink:0;font-variant-numeric:tabular-nums}
-
-/* ============ FEED ============ */
 .feed{display:flex;flex-direction:column;gap:2px}
 .feed-item{display:flex;gap:12px;padding:11px;border-radius:14px;cursor:pointer;transition:background .2s var(--ease)}
 .feed-item:hover{background:var(--surface-2)}
@@ -346,7 +336,6 @@ button{cursor:pointer}
 [data-theme="dark"] .badge.pending_manager{color:#c4b5fd}
 [data-theme="dark"] .badge.approved{color:#34d399}
 [data-theme="dark"] .badge.rejected{color:#f87171}
-
 .t-list{display:flex;flex-direction:column;gap:10px}
 .t-item{background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:14px 16px;cursor:pointer;transition:all .3s var(--ease)}
 .t-item:hover{border-color:var(--border-2);box-shadow:var(--card-shadow-hover);transform:translateY(-2px)}
@@ -422,7 +411,6 @@ button{cursor:pointer}
 .pw-toggle{position:absolute;left:6px;top:50%;transform:translateY(-50%);width:36px;height:36px;border-radius:50%;display:grid;place-items:center;color:var(--muted);cursor:pointer;transition:all .2s var(--ease)}
 .pw-toggle:hover{background:var(--surface-2);color:var(--text-2)}
 .pw-toggle svg{width:16px;height:16px}
-
 .kit-box{background:linear-gradient(135deg,rgba(0,122,255,.06),rgba(175,82,222,.05));border:1px solid rgba(0,122,255,.22);border-radius:20px;padding:16px;position:relative;overflow:hidden}
 .kit-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px}
 .kit-head-title{display:flex;align-items:center;gap:10px;font-size:13px;font-weight:800;color:var(--text)}
@@ -482,60 +470,136 @@ button{cursor:pointer}
 .cmd-item .kbd{margin-right:auto;font-size:10.5px;color:var(--muted);padding:2px 8px;border-radius:100px;background:rgba(15,23,42,.08)}
 .cmd-sec{font-size:10.5px;color:var(--muted);padding:10px 16px 4px;font-weight:700;text-transform:uppercase}
 .cmd-empty{padding:30px;text-align:center;color:var(--muted);font-size:13px}
-.notif-bd{position:fixed;inset:0;z-index:250;background:rgba(10,15,25,.4);backdrop-filter:blur(8px);animation:fadeIn .22s var(--ease)}
-.notif-panel{position:fixed;top:0;bottom:0;left:0;z-index:251;width:100%;max-width:520px;background:var(--g3);backdrop-filter:blur(38px) saturate(1.9);border-right:1px solid var(--gb);display:flex;flex-direction:column;animation:notifIn .4s var(--ease)}
-@media (max-width:560px){.notif-panel{max-width:none}}
-.notif-head{padding:20px 22px 14px;display:flex;align-items:center;justify-content:space-between;gap:12px;border-bottom:1px solid var(--border)}
-.notif-title{display:flex;align-items:center;gap:12px}
-.notif-title-icon{width:44px;height:44px;border-radius:14px;display:grid;place-items:center;color:#fff;background:var(--grad);position:relative}
-.notif-title-icon svg{width:20px;height:20px}
-.notif-title-icon .badge-dot{position:absolute;top:-2px;left:-2px;min-width:20px;height:20px;padding:0 6px;border-radius:100px;background:var(--grad-danger);color:#fff;font-size:11px;font-weight:800;display:grid;place-items:center;border:2px solid var(--g3)}
-.notif-tabs{display:flex;gap:4px;padding:12px 16px;border-bottom:1px solid var(--border);background:var(--surface-2)}
-.notif-tab{flex:1;display:flex;align-items:center;justify-content:center;gap:8px;height:38px;padding:0 12px;border-radius:100px;font-size:12.5px;font-weight:700;color:var(--muted);border:1px solid transparent;cursor:pointer}
-.notif-tab:hover{color:var(--text);background:var(--g1)}
-.notif-tab.active{background:var(--g3);color:var(--text);border-color:var(--gb)}
-.notif-tab.active[data-tab="pending"]{color:var(--orange)}
-.notif-count{display:inline-flex;align-items:center;justify-content:center;min-width:20px;height:20px;padding:0 6px;border-radius:100px;font-size:10.5px;font-weight:800;background:var(--grad-danger);color:#fff}
-.notif-tab[data-tab="activity"] .notif-count{background:var(--surface-3);color:var(--text-2)}
-.notif-tab.active[data-tab="pending"] .notif-count{background:var(--grad-warn)}
-.notif-body{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:12px}
-.notif-card{background:var(--surface);border:1px solid var(--border-2);border-radius:18px;padding:14px 16px}
-.notif-card.pending{border-right:3px solid var(--orange)}
-.notif-card.pending.pending_accountant{border-right-color:var(--teal)}
-.notif-card.pending.pending_manager{border-right-color:var(--purple)}
-.notif-card.pending.inbound{border-right-color:var(--blue)}
-.notif-card.activity{display:flex;gap:12px;align-items:flex-start;cursor:pointer}
-.notif-card.activity.ok{border-right:3px solid var(--green)}
-.notif-card.activity.no{border-right:3px solid var(--red)}
-.notif-card-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px}
-.notif-time{font-size:11px;color:var(--muted);font-weight:600}
-.notif-card-title{font-size:14px;font-weight:700;color:var(--text);display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-.notif-qty{font-family:monospace;font-size:11.5px;font-weight:700;padding:2px 8px;border-radius:100px;background:rgba(0,122,255,.12);color:var(--blue)}
-.notif-card-route{display:flex;align-items:center;gap:8px;margin-top:8px;font-size:12.5px;color:var(--text-2);flex-wrap:wrap}
-.notif-card-route svg{width:14px;height:14px;color:var(--muted)}
-.wh-chip{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:100px;background:var(--surface-2);border:1px solid var(--border);font-size:11.5px;font-weight:600;color:var(--text-2);white-space:nowrap}
-.notif-card-meta{display:flex;align-items:center;gap:14px;margin-top:10px;font-size:11.5px;color:var(--muted);flex-wrap:wrap}
-.notif-card-meta .m{display:inline-flex;align-items:center;gap:5px}
-.notif-card-meta .m b{color:var(--text-2);font-weight:700}
-.notif-card-meta svg{width:12px;height:12px}
-.notif-card-desc{margin-top:10px;padding:8px 12px;background:var(--surface-2);border-radius:12px;font-size:12px;color:var(--text-2);line-height:1.7}
-.notif-card-actions{display:flex;align-items:center;gap:8px;margin-top:14px;padding-top:12px;border-top:1px dashed var(--border);flex-wrap:wrap}
-.notif-mark{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;color:#fff;flex-shrink:0}
-.notif-mark.ok{background:var(--grad-success)}
-.notif-mark.no{background:var(--grad-danger)}
-.notif-mark.in{background:var(--grad-info)}
-.notif-mark svg{width:16px;height:16px}
-.notif-activity-body{flex:1;min-width:0}
-.notif-change{display:inline-flex;align-items:center;padding:2px 8px;border-radius:100px;font-size:10.5px;font-weight:700}
-.notif-change.ok{background:rgba(52,199,89,.14);color:#047857}
-.notif-change.no{background:rgba(255,59,48,.14);color:#b91c1c}
-.notif-change.in{background:rgba(90,200,250,.14);color:#0369a1}
-.notif-empty{display:flex;flex-direction:column;align-items:center;gap:10px;padding:60px 24px;text-align:center}
-.notif-empty svg{width:56px;height:56px;opacity:.3;color:var(--muted)}
-.notif-empty b{font-size:14.5px;font-weight:700;color:var(--text)}
-.notif-empty p{font-size:12.5px;color:var(--muted);max-width:280px;line-height:1.9}
 
-/* ============ CELEBRATE (فقط برای عملیات مهم) ============ */
+/* ============================================================
+   NOTIFICATION PANEL — REDESIGNED
+   ============================================================ */
+.notif-bd{position:fixed;inset:0;z-index:250;background:rgba(10,15,25,.4);backdrop-filter:blur(8px);animation:fadeIn .22s var(--ease)}
+.notif-panel{position:fixed;top:0;bottom:0;left:0;z-index:251;width:100%;max-width:540px;background:var(--surface-2);border-right:1px solid var(--border);display:flex;flex-direction:column;animation:notifIn .4s var(--ease);box-shadow:12px 0 48px -12px rgba(15,23,42,.22)}
+[data-theme="dark"] .notif-panel{background:#0d1218;box-shadow:12px 0 48px -12px rgba(0,0,0,.5)}
+@media (max-width:560px){.notif-panel{max-width:none}}
+
+.notif-head{padding:20px 20px 14px;display:flex;align-items:center;gap:13px;background:var(--surface);border-bottom:1px solid var(--border);flex-shrink:0}
+.notif-head-icon{width:46px;height:46px;border-radius:15px;display:grid;place-items:center;color:#fff;background:var(--grad);position:relative;box-shadow:0 10px 24px -8px rgba(0,122,255,.55),inset 0 1px 0 rgba(255,255,255,.4);flex-shrink:0}
+.notif-head-icon svg{width:22px;height:22px}
+.notif-head-icon .notif-head-badge{position:absolute;top:-4px;left:-4px;min-width:22px;height:22px;padding:0 7px;border-radius:100px;background:var(--grad-danger);color:#fff;font-size:11px;font-weight:800;display:grid;place-items:center;border:2.5px solid var(--surface);font-variant-numeric:tabular-nums}
+.notif-head-titles{flex:1;min-width:0}
+.notif-head-title{font-weight:800;font-size:16px;line-height:1.3;letter-spacing:-.3px}
+.notif-head-sub{font-size:12px;color:var(--muted);margin-top:3px;display:flex;align-items:center;gap:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.notif-head-sub svg{width:12px;height:12px;flex-shrink:0}
+.notif-head-sub b{color:var(--text-2);font-weight:700}
+.notif-close{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;color:var(--text-2);background:var(--surface-2);border:1px solid var(--border);cursor:pointer;transition:all .2s var(--ease);flex-shrink:0}
+.notif-close:hover{background:var(--surface-3);color:var(--text)}
+.notif-close svg{width:16px;height:16px}
+
+.notif-tabs{display:flex;gap:5px;padding:12px 16px;background:var(--surface);border-bottom:1px solid var(--border);flex-shrink:0}
+.notif-tab{flex:1;display:flex;align-items:center;justify-content:center;gap:7px;height:40px;padding:0 14px;border-radius:12px;font-size:12.5px;font-weight:700;color:var(--muted);border:1px solid transparent;cursor:pointer;transition:all .25s var(--ease);background:transparent;white-space:nowrap}
+.notif-tab:hover{color:var(--text-2);background:var(--surface-2)}
+.notif-tab svg{width:15px;height:15px;flex-shrink:0}
+.notif-tab.active{background:linear-gradient(135deg, rgba(0,122,255,.14), rgba(88,86,214,.10));color:var(--blue);border-color:rgba(0,122,255,.24);box-shadow:inset 0 1px 0 rgba(255,255,255,.45)}
+.notif-tab.active[data-tab="activity"]{background:linear-gradient(135deg, rgba(255,149,0,.15), rgba(234,88,12,.08));color:var(--orange);border-color:rgba(255,149,0,.24)}
+.notif-tab-count{min-width:20px;height:20px;padding:0 6px;border-radius:100px;font-size:10.5px;font-weight:800;background:rgba(0,0,0,.07);color:var(--text-2);display:grid;place-items:center;font-variant-numeric:tabular-nums}
+.notif-tab.active .notif-tab-count{background:rgba(0,122,255,.2);color:var(--blue)}
+.notif-tab.active[data-tab="activity"] .notif-tab-count{background:rgba(255,149,0,.2);color:var(--orange)}
+[data-theme="dark"] .notif-tab-count{background:rgba(255,255,255,.08)}
+
+.notif-body{flex:1;overflow-y:auto;padding:12px 14px 20px;display:flex;flex-direction:column;gap:4px}
+.notif-group{display:flex;flex-direction:column;gap:8px}
+.notif-group-label{display:flex;align-items:center;gap:8px;padding:12px 4px 6px;font-size:11px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.8px}
+.notif-group-label::after{content:'';flex:1;height:1px;background:var(--border)}
+.notif-group-count{padding:1px 8px;border-radius:100px;background:var(--surface);border:1px solid var(--border);font-size:10.5px;font-weight:700;color:var(--text-2);letter-spacing:0;font-variant-numeric:tabular-nums}
+
+.notif-card{background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:14px 16px 14px 14px;position:relative;overflow:hidden;transition:all .25s var(--ease)}
+.notif-card::before{content:'';position:absolute;top:0;bottom:0;right:0;width:3px;background:transparent}
+.notif-card.pending::before{background:var(--grad-warn)}
+.notif-card.pending.pending_accountant::before{background:var(--grad-info)}
+.notif-card.pending.pending_manager::before{background:linear-gradient(135deg, #AF52DE, #7c3aed)}
+.notif-card.pending.inbound::before{background:var(--grad-2)}
+.notif-card.pending:hover{border-color:var(--border-2);box-shadow:var(--card-shadow);transform:translateY(-1px)}
+
+.notif-card-head{display:flex;align-items:flex-start;gap:10px;margin-bottom:10px}
+.notif-card-head-left{display:flex;align-items:center;gap:8px;flex-wrap:wrap;flex:1;min-width:0}
+.notif-stage-badge{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:100px;font-size:10.5px;font-weight:800;letter-spacing:-.1px;white-space:nowrap}
+.notif-stage-badge.stage-1{background:rgba(255,149,0,.15);color:#b45309;border:1px solid rgba(255,149,0,.28)}
+.notif-stage-badge.stage-2{background:rgba(90,200,250,.18);color:#0369a1;border:1px solid rgba(90,200,250,.32)}
+.notif-stage-badge.stage-3{background:rgba(175,82,222,.15);color:#6d28d9;border:1px solid rgba(175,82,222,.28)}
+[data-theme="dark"] .notif-stage-badge.stage-1{color:#fbbf24}
+[data-theme="dark"] .notif-stage-badge.stage-2{color:#38bdf8}
+[data-theme="dark"] .notif-stage-badge.stage-3{color:#c4b5fd}
+.notif-stage-badge .notif-stage-dot{width:6px;height:6px;border-radius:50%;background:currentColor;animation:pulse 1.6s ease-in-out infinite}
+.notif-type-badge{display:inline-flex;align-items:center;gap:4px;padding:4px 9px;border-radius:100px;font-size:10.5px;font-weight:700;background:rgba(14,165,233,.15);color:#0369a1;border:1px solid rgba(14,165,233,.24)}
+.notif-type-badge svg{width:11px;height:11px}
+[data-theme="dark"] .notif-type-badge{color:#38bdf8}
+.notif-card-time{font-size:11px;color:var(--muted);font-weight:600;white-space:nowrap;padding-top:3px;flex-shrink:0}
+
+.notif-card-title{display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap}
+.notif-card-title b{font-size:15px;font-weight:800;color:var(--text);letter-spacing:-.2px}
+.notif-qty-badge{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:100px;background:linear-gradient(135deg, rgba(0,122,255,.14), rgba(88,86,214,.10));color:var(--blue);font-size:12px;font-weight:800;font-variant-numeric:tabular-nums}
+.notif-qty-badge .notif-qty-unit{font-size:10px;font-weight:600;opacity:.7}
+
+.notif-route{display:flex;align-items:center;gap:6px;margin-bottom:10px;padding:8px 10px;background:var(--surface-2);border-radius:12px;flex-wrap:wrap}
+.notif-route-chip{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:600;color:var(--text-2);padding:3px 9px;background:var(--surface);border-radius:100px;border:1px solid var(--border);white-space:nowrap}
+.notif-route-chip .notif-route-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.notif-route-arrow{color:var(--muted);flex-shrink:0;display:inline-flex}
+.notif-route-arrow svg{width:13px;height:13px;display:block}
+
+.notif-steps{display:flex;gap:4px;margin-bottom:12px}
+.notif-step{flex:1;height:4px;border-radius:100px;background:var(--surface-3);position:relative;overflow:hidden}
+.notif-step.done{background:var(--grad-success)}
+.notif-step.active{background:var(--grad);animation:pulse 2s ease-in-out infinite}
+.notif-step.done::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg, transparent, rgba(255,255,255,.35), transparent);animation:notifShimmer 2s linear infinite}
+
+.notif-meta-row{display:flex;align-items:center;gap:12px;margin-bottom:12px;flex-wrap:wrap;font-size:11.5px;color:var(--muted)}
+.notif-meta-item{display:inline-flex;align-items:center;gap:5px}
+.notif-meta-item svg{width:12px;height:12px;opacity:.7}
+.notif-meta-item b{color:var(--text-2);font-weight:600}
+
+.notif-desc{margin-bottom:12px;padding:9px 12px;background:var(--surface-2);border-radius:12px;font-size:12px;color:var(--text-2);line-height:1.7;border-right:2px solid var(--border-2)}
+
+.notif-actions{display:flex;gap:6px;padding-top:12px;border-top:1px dashed var(--border);flex-wrap:wrap;align-items:center}
+.notif-btn{display:inline-flex;align-items:center;justify-content:center;gap:5px;height:34px;padding:0 14px;border-radius:100px;font-size:12px;font-weight:700;border:1px solid transparent;cursor:pointer;transition:all .2s var(--ease);white-space:nowrap;position:relative;overflow:hidden}
+.notif-btn svg{width:13px;height:13px;flex-shrink:0}
+.notif-btn.approve{background:var(--grad-success);color:#fff;box-shadow:0 6px 16px -6px rgba(52,199,89,.5)}
+.notif-btn.approve:hover{transform:translateY(-1px);box-shadow:0 8px 20px -6px rgba(52,199,89,.6)}
+.notif-btn.reject{background:rgba(255,59,48,.08);color:var(--red);border-color:rgba(255,59,48,.2)}
+.notif-btn.reject:hover{background:rgba(255,59,48,.14)}
+.notif-btn.ghost{background:var(--surface-2);color:var(--text-2);border-color:var(--border-2)}
+.notif-btn.ghost:hover{background:var(--surface-3)}
+.notif-btn.detail{margin-right:auto}
+.notif-no-action{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;color:var(--muted);padding:6px 10px;border-radius:10px;background:var(--surface-2)}
+.notif-no-action svg{width:12px;height:12px}
+
+.notif-card.activity{display:flex;align-items:flex-start;gap:12px;cursor:pointer;padding:12px 14px;position:relative}
+.notif-card.activity::before{display:none}
+.notif-card.activity:hover{border-color:var(--border-2);box-shadow:var(--card-shadow);transform:translateY(-1px)}
+.notif-timeline-wrap{display:flex;flex-direction:column;align-items:center;align-self:stretch;flex-shrink:0}
+.notif-timeline-dot{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;color:#fff;flex-shrink:0;position:relative;z-index:1;box-shadow:0 4px 12px -3px rgba(0,0,0,.2)}
+.notif-timeline-dot.ok{background:var(--grad-success)}
+.notif-timeline-dot.no{background:var(--grad-danger)}
+.notif-timeline-dot.in{background:var(--grad-info)}
+.notif-timeline-dot svg{width:15px;height:15px;stroke-width:2.5}
+.notif-timeline-line{width:2px;flex:1;background:var(--border);margin:4px 0;min-height:12px}
+.notif-card.activity:last-child .notif-timeline-line{display:none}
+
+.notif-activity-body{flex:1;min-width:0;padding-top:2px}
+.notif-activity-title{display:flex;align-items:center;gap:6px;margin-bottom:4px;flex-wrap:wrap}
+.notif-activity-title b{font-size:13.5px;font-weight:700;color:var(--text)}
+.notif-activity-action{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:100px;font-size:10.5px;font-weight:700}
+.notif-activity-action.ok{background:rgba(52,199,89,.14);color:#047857}
+.notif-activity-action.no{background:rgba(255,59,48,.14);color:#b91c1c}
+.notif-activity-action.in{background:rgba(90,200,250,.14);color:#0369a1}
+[data-theme="dark"] .notif-activity-action.ok{color:#34d399}
+[data-theme="dark"] .notif-activity-action.no{color:#f87171}
+[data-theme="dark"] .notif-activity-action.in{color:#38bdf8}
+.notif-activity-meta{display:flex;align-items:center;gap:10px;font-size:11.5px;color:var(--muted);flex-wrap:wrap;margin-top:4px}
+.notif-activity-meta .notif-meta-item b{color:var(--text-2);font-weight:600}
+
+.notif-empty{display:flex;flex-direction:column;align-items:center;gap:12px;padding:60px 24px;text-align:center}
+.notif-empty-art{width:88px;height:88px;border-radius:50%;background:linear-gradient(135deg, rgba(52,199,89,.10), rgba(0,161,75,.06));display:grid;place-items:center;color:var(--green);border:1px solid rgba(52,199,89,.2);position:relative}
+.notif-empty-art svg{width:36px;height:36px;opacity:.7;stroke-width:1.8}
+.notif-empty b{font-size:15px;font-weight:700;color:var(--text)}
+.notif-empty p{font-size:12.5px;color:var(--muted);max-width:260px;line-height:1.9}
+
 .celebrate{position:fixed;inset:0;z-index:1500;display:grid;place-items:center;background:rgba(10,15,25,.5);backdrop-filter:blur(20px);animation:fadeIn .25s var(--ease);overflow:hidden}
 .celebrate.exit{animation:celebrateOut .5s var(--ease) forwards}
 .celebrate-card{position:relative;display:flex;flex-direction:column;align-items:center;gap:22px;padding:40px 50px;text-align:center}
@@ -557,8 +621,8 @@ button{cursor:pointer}
 .llogo{display:flex;align-items:center;gap:14px}
 .llogo .badge-i{width:56px;height:56px;border-radius:50%;display:grid;place-items:center;background:rgba(255,255,255,.22);border:1px solid rgba(255,255,255,.35);color:#fff;backdrop-filter:blur(10px)}
 .llogo .badge-i svg{width:30px;height:30px}
-.llogo .wm{color:#fff!important;-webkit-text-fill-color:#fff!important;background:none!important;font-size:28px;letter-spacing:-1px}
-.llogo .tagline{font-size:11.5px;opacity:.75;margin-top:2px;letter-spacing:.5px}
+.llogo .wm{color:#fff!important;-webkit-text-fill-color:#fff!important;background:none!important;font-size:28px;letter-spacing:-1px;direction:ltr;display:inline-block}
+.llogo .tagline{font-size:11.5px;opacity:.75;margin-top:2px;letter-spacing:.5px;direction:ltr}
 .ltag h2{font-size:38px;font-weight:800;line-height:1.2;margin-bottom:16px}
 .ltag p{font-size:15px;opacity:.9;line-height:2;max-width:420px}
 .lfeat{display:flex;flex-direction:column;gap:15px;margin-top:34px}
@@ -599,8 +663,6 @@ button{cursor:pointer}
 .tl-title{font-weight:700;font-size:13.5px;margin-bottom:3px}
 .tl-meta{font-size:12px;color:var(--muted);line-height:1.75}
 .tl-meta b{color:var(--text-2);font-weight:600}
-
-/* ============ EMPTY STATE (بازطراحی) ============ */
 .empty{padding:44px 20px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:14px}
 .empty-art{position:relative;width:96px;height:96px;margin-bottom:2px}
 .empty-circle{width:96px;height:96px;border-radius:50%;background:linear-gradient(135deg,rgba(0,122,255,.10),rgba(175,82,222,.06));display:grid;place-items:center;color:var(--blue);border:1px solid rgba(0,122,255,.14)}
@@ -688,8 +750,6 @@ button{cursor:pointer}
   .pdf-toolbar .btn .lbl{display:none}
   .pdf-toolbar .btn svg{width:15px;height:15px}
 }
-
-/* ============ RESPONSIVE ============ */
 @media (min-width:1400px){
   .page{padding:30px 24px 60px}
   .bento{gap:18px}
@@ -833,15 +893,28 @@ button{cursor:pointer}
   .drawer-body{padding:18px}
   .drawer-foot{padding:14px 18px;gap:8px}
   .drawer-foot .btn{flex:1}
-  .notif-head{padding:16px 18px 12px}
-  .notif-title-icon{width:40px;height:40px;border-radius:12px}
-  .notif-tabs{padding:10px 12px}
-  .notif-tab{height:36px;font-size:12px;padding:0 10px}
-  .notif-body{padding:12px}
-  .notif-card{padding:12px 14px;border-radius:16px}
-  .notif-card-title{font-size:13px}
-  .notif-card-actions{gap:6px}
-  .notif-card-actions .btn{flex:1;justify-content:center}
+  .notif-head{padding:16px 16px 12px;gap:10px}
+  .notif-head-icon{width:42px;height:42px;border-radius:13px}
+  .notif-head-icon svg{width:20px;height:20px}
+  .notif-head-title{font-size:15px}
+  .notif-tabs{padding:10px 12px;gap:4px}
+  .notif-tab{height:38px;font-size:12px;padding:0 10px;gap:6px}
+  .notif-tab svg{width:14px;height:14px}
+  .notif-body{padding:10px 10px 16px}
+  .notif-card{padding:12px 12px 12px 10px;border-radius:16px}
+  .notif-card-title b{font-size:14px}
+  .notif-qty-badge{font-size:11.5px;padding:2px 9px}
+  .notif-route{padding:7px 8px;margin-bottom:9px}
+  .notif-route-chip{font-size:11px;padding:2px 8px}
+  .notif-meta-row{gap:10px;font-size:11px}
+  .notif-actions{gap:5px}
+  .notif-btn{height:32px;padding:0 12px;font-size:11.5px}
+  .notif-btn svg{width:12px;height:12px}
+  .notif-no-action{font-size:11px;padding:5px 9px}
+  .notif-timeline-dot{width:30px;height:30px}
+  .notif-timeline-dot svg{width:13px;height:13px}
+  .notif-activity-title b{font-size:13px}
+  .notif-group-label{font-size:10.5px;padding:10px 2px 4px}
   .cmd-bd{padding:60px 12px 12px}
   .cmd input{height:52px;font-size:14px;padding:0 18px}
   .cmd-item{padding:10px 12px;font-size:13px;border-radius:14px}
@@ -959,10 +1032,14 @@ button{cursor:pointer}
   .drawer-head{padding:16px}
   .drawer-body{padding:16px}
   .drawer-foot{padding:12px 16px}
-  .notif-head{padding:14px 16px 10px}
-  .notif-body{padding:10px}
-  .notif-tabs{padding:8px 10px;gap:2px}
+  .notif-head{padding:14px 14px 10px}
+  .notif-body{padding:8px 8px 14px}
+  .notif-tabs{padding:8px 10px;gap:3px}
   .notif-tab{font-size:11.5px;padding:0 8px;gap:5px}
+  .notif-card{padding:11px 11px 11px 9px}
+  .notif-actions{gap:4px}
+  .notif-btn{height:30px;font-size:11px;padding:0 10px}
+  .notif-route-chip{font-size:10.5px;padding:2px 7px}
   .sheet-user .avatar{width:44px;height:44px;font-size:14px}
   .sheet-user .info b{font-size:14.5px}
   .sheet-item{padding:9px 10px;font-size:13px}
@@ -1027,6 +1104,8 @@ button{cursor:pointer}
   .t-item:hover{transform:none}
   .qa-btn:hover{transform:none}
   .stat:hover{transform:none}
+  .notif-card.pending:hover{transform:none}
+  .notif-card.activity:hover{transform:none}
   .feed-item:hover{background:transparent}
   .dt tbody tr:hover{background:transparent}
   .btn:active{transform:scale(.96)}
@@ -1725,71 +1804,222 @@ function closeSheet() {
   $$('.sheet').forEach(function(sh) { sh.classList.add('closing'); setTimeout(function() { if (sh.parentNode) sh.remove(); }, 260); });
 }
 
+/* ============================================================
+   NOTIFICATION — جدید
+   ============================================================ */
+function getActivityTime(t) {
+  if (t.status === 'approved') return t.completedAt || t.createdAt;
+  if (t.status === 'rejected' && t.rejection) return t.rejection.at || t.createdAt;
+  return t.createdAt;
+}
+function groupItemsByDate(items, getDate) {
+  var groups = { today: [], yesterday: [], week: [], older: [] };
+  var now = new Date();
+  var todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  var yesterdayStart = new Date(todayStart); yesterdayStart.setDate(yesterdayStart.getDate() - 1);
+  var weekStart = new Date(todayStart); weekStart.setDate(weekStart.getDate() - 7);
+  items.forEach(function(it) {
+    var dt = getDate(it);
+    var d = new Date(dt);
+    if (isNaN(d.getTime())) d = new Date();
+    if (d >= todayStart) groups.today.push(it);
+    else if (d >= yesterdayStart) groups.yesterday.push(it);
+    else if (d >= weekStart) groups.week.push(it);
+    else groups.older.push(it);
+  });
+  return [
+    { key: 'today', label: 'امروز', items: groups.today },
+    { key: 'yesterday', label: 'دیروز', items: groups.yesterday },
+    { key: 'week', label: 'این هفته', items: groups.week },
+    { key: 'older', label: 'قدیمی‌تر', items: groups.older }
+  ].filter(function(g) { return g.items.length > 0; });
+}
+
 function openNotif() {
   closeNotif();
   var db = loadDB();
   var pending = db.transfers.filter(function(t) { return t && typeof t.status === 'string' && t.status.indexOf('pending') === 0; }).sort(function(a, b) { return new Date(b.createdAt) - new Date(a.createdAt); });
   var activity = db.transfers.filter(function(t) { return t && (t.status === 'approved' || t.status === 'rejected'); }).sort(function(a, b) {
-    var ta = a.completedAt || (a.rejection && a.rejection.at) || a.createdAt;
-    var tb = b.completedAt || (b.rejection && b.rejection.at) || b.createdAt;
-    return new Date(tb) - new Date(ta);
+    return new Date(getActivityTime(b)) - new Date(getActivityTime(a));
   }).slice(0, 40);
 
   var bd = document.createElement('div'); bd.className = 'notif-bd';
   var panel = document.createElement('div'); panel.className = 'notif-panel';
   var badge = pending.length > 9 ? '9+' : String(pending.length);
   panel.innerHTML =
-    '<div class="notif-head"><div class="notif-title"><div class="notif-title-icon">' + IC.bell + (pending.length ? '<span class="badge-dot">' + badge + '</span>' : '') + '</div><div><div style="font-weight:800;font-size:15.5px">مرکز اعلان‌ها</div><div class="notif-sub" style="font-size:11.5px;color:var(--muted)"></div></div></div><button class="icon-btn notif-x">' + IC.close + '</button></div>' +
-    '<div class="notif-tabs"><button class="notif-tab ' + (pending.length ? 'active' : '') + '" data-tab="pending">' + IC.clock + ' در انتظار تأیید' + (pending.length ? '<span class="notif-count">' + pending.length + '</span>' : '') + '</button><button class="notif-tab ' + (pending.length ? '' : 'active') + '" data-tab="activity">' + IC.fire + ' آخرین تغییرات' + (activity.length ? '<span class="notif-count">' + activity.length + '</span>' : '') + '</button></div>' +
+    '<div class="notif-head">' +
+      '<div class="notif-head-icon">' + IC.bell + (pending.length ? '<span class="notif-head-badge">' + badge + '</span>' : '') + '</div>' +
+      '<div class="notif-head-titles">' +
+        '<div class="notif-head-title">اعلان‌ها</div>' +
+        '<div class="notif-head-sub"></div>' +
+      '</div>' +
+      '<button class="notif-close" title="بستن" aria-label="بستن">' + IC.close + '</button>' +
+    '</div>' +
+    '<div class="notif-tabs" role="tablist">' +
+      '<button class="notif-tab ' + (pending.length ? 'active' : '') + '" data-tab="pending" role="tab">' + IC.clock + 'در انتظار تأیید' + (pending.length ? '<span class="notif-tab-count">' + pending.length + '</span>' : '') + '</button>' +
+      '<button class="notif-tab ' + (pending.length ? '' : 'active') + '" data-tab="activity" role="tab">' + IC.fire + 'آخرین تغییرات' + (activity.length ? '<span class="notif-tab-count">' + activity.length + '</span>' : '') + '</button>' +
+    '</div>' +
     '<div class="notif-body"></div>';
 
   document.body.appendChild(bd); document.body.appendChild(panel);
   var body = panel.querySelector('.notif-body');
-  var sub = panel.querySelector('.notif-sub');
+  var sub = panel.querySelector('.notif-head-sub');
   var tab = pending.length ? 'pending' : 'activity';
 
   function renderTab() {
     $$('.notif-tab', panel).forEach(function(t) { t.classList.toggle('active', t.dataset.tab === tab); });
-    if (tab === 'pending') { sub.textContent = pending.length ? pending.length + ' درخواست در انتظار بررسی' : 'درخواستی در انتظار نیست'; body.innerHTML = renderPending(pending, db); }
-    else { sub.textContent = activity.length ? activity.length + ' تغییر اخیر' : 'هنوز تغییری ثبت نشده'; body.innerHTML = renderActivity(activity, db); }
-    body.scrollTop = 0; bindNotif(panel);
+    if (tab === 'pending') {
+      sub.innerHTML = pending.length ? IC.clock + ' <b>' + pending.length + '</b> درخواست در انتظار بررسی' : IC.check + ' درخواستی در انتظار نیست';
+      body.innerHTML = renderPending(pending, db);
+    } else {
+      sub.innerHTML = activity.length ? IC.fire + ' <b>' + activity.length + '</b> تغییر اخیر' : IC.inbox + ' هنوز تغییری ثبت نشده';
+      body.innerHTML = renderActivity(activity, db);
+    }
+    body.scrollTop = 0;
+    bindNotif(panel);
   }
   $$('.notif-tab', panel).forEach(function(t) { t.addEventListener('click', function() { tab = t.dataset.tab; renderTab(); }); });
-  var nx = panel.querySelector('.notif-x'); if (nx) nx.addEventListener('click', closeNotif);
+  var nx = panel.querySelector('.notif-close'); if (nx) nx.addEventListener('click', closeNotif);
   bd.addEventListener('click', closeNotif);
   renderTab(); attachRippleAll(panel);
 }
+
 function closeNotif() {
   $$('.notif-bd').forEach(function(bd) { bd.style.animation = 'fadeOut .2s forwards'; setTimeout(function() { if (bd.parentNode) bd.remove(); }, 200); });
   $$('.notif-panel').forEach(function(p) { p.style.animation = 'notifOut .3s forwards'; setTimeout(function() { if (p.parentNode) p.remove(); }, 280); });
 }
+
 function renderPending(pending, db) {
-  if (!pending.length) return '<div class="notif-empty">' + IC.check + '<b>همه‌چیز مرتب است</b><p>درخواستی در انتظار تأیید شما وجود ندارد</p></div>';
-  return pending.map(function(t) {
-    var p = getProd(db, t.productId); var st = stOf(t); var can = canApprove(App.user, t);
-    var stepMap = { pending_warehouse: 'انباردار', pending_accountant: 'حسابدار', pending_manager: 'مدیر' };
-    var stepLabel = 'مرحله ' + stepMap[t.status];
-    var isIn = t.type === 'inbound';
-    var route = '';
-    if (isIn) { var dst = getWh(db, t.destinationWarehouseId); route = '<div class="notif-card-route"><span class="wh-chip" style="background:rgba(14,165,233,.1);color:#0369a1">' + IC.factory + ' ' + esc(t.supplierName || 'تأمین‌کننده') + '</span>' + IC.arrowL + '<span class="wh-chip">' + esc((dst && dst.name) || '—') + '</span></div>'; }
-    else { var src = getWh(db, t.sourceWarehouseId); var dst2 = getWh(db, t.destinationWarehouseId); route = '<div class="notif-card-route"><span class="wh-chip">' + esc((src && src.name) || '—') + '</span>' + IC.arrowL + '<span class="wh-chip">' + esc((dst2 && dst2.name) || '—') + '</span></div>'; }
-    return '<div class="notif-card pending ' + t.status + (isIn ? ' inbound' : '') + '"><div class="notif-card-head"><div style="display:flex;gap:6px;flex-wrap:wrap"><span class="badge ' + st.tone + '"><span class="dot"></span>' + st.label + '</span>' + (isIn ? '<span class="badge inbound">' + IC.inbound + ' ورود</span>' : '') + '</div><span class="notif-time">' + relTime(t.createdAt) + '</span></div>' +
-      '<div class="notif-card-title">' + esc((p && p.name) || 'نامشخص') + ' <span class="notif-qty">' + t.quantity + ' ' + esc((p && p.unit) || '') + '</span></div>' + route +
-      '<div class="notif-card-meta"><span class="m">' + IC.user + '<b>' + esc(t.createdByName || '—') + '</b></span><span class="m">' + IC.clock + faDate(t.createdAt) + '</span></div>' +
-      (t.description ? '<div class="notif-card-desc">' + esc(t.description) + '</div>' : '') +
-      '<div class="notif-card-actions">' + (can ? '<button class="btn success sm" data-approve="' + t.id + '">' + IC.check + ' تأیید ' + stepLabel + '</button><button class="btn danger sm" data-reject="' + t.id + '">' + IC.x + ' رد</button>' : '<span class="muted small">' + IC.info + ' این مرحله مربوط به نقش شما نیست</span>') + '<button class="btn ghost xs" data-open="' + t.id + '" style="margin-right:auto">جزئیات ' + IC.chevL + '</button></div></div>';
+  if (!pending.length) {
+    return '<div class="notif-empty">' +
+      '<div class="notif-empty-art">' + IC.check + '</div>' +
+      '<b>همه‌چیز مرتب است</b>' +
+      '<p>درخواستی در انتظار تأیید شما وجود ندارد</p>' +
+    '</div>';
+  }
+  var groups = groupItemsByDate(pending, function(t) { return t.createdAt; });
+  return groups.map(function(g) {
+    return '<div class="notif-group">' +
+      '<div class="notif-group-label">' + g.label + '<span class="notif-group-count">' + g.items.length + '</span></div>' +
+      g.items.map(function(t) { return pendingCardHTML(t, db); }).join('') +
+    '</div>';
   }).join('');
 }
+
+function pendingCardHTML(t, db) {
+  var p = getProd(db, t.productId);
+  var st = stOf(t);
+  var can = canApprove(App.user, t);
+  var isIn = t.type === 'inbound';
+
+  var stageClass = t.status === 'pending_warehouse' ? 'stage-1' : t.status === 'pending_accountant' ? 'stage-2' : 'stage-3';
+  var stageLabel = t.status === 'pending_warehouse' ? 'مرحله ۱ · انباردار' : t.status === 'pending_accountant' ? 'مرحله ۲ · حسابدار' : 'مرحله ۳ · مدیر';
+
+  var routeHTML;
+  if (isIn) {
+    var dst = getWh(db, t.destinationWarehouseId);
+    routeHTML = '<div class="notif-route">' +
+      '<span class="notif-route-chip" style="background:rgba(14,165,233,.08);color:#0369a1;border-color:rgba(14,165,233,.2)">' + IC.factory + ' ' + esc(t.supplierName || 'تأمین‌کننده') + '</span>' +
+      '<span class="notif-route-arrow">' + IC.arrowL + '</span>' +
+      '<span class="notif-route-chip"><span class="notif-route-dot" style="background:' + (WH_COLOR[dst && dst.type] || '#007AFF') + '"></span>' + esc((dst && dst.name) || '—') + '</span>' +
+    '</div>';
+  } else {
+    var src = getWh(db, t.sourceWarehouseId);
+    var dst2 = getWh(db, t.destinationWarehouseId);
+    routeHTML = '<div class="notif-route">' +
+      '<span class="notif-route-chip"><span class="notif-route-dot" style="background:' + (WH_COLOR[src && src.type] || '#94a3b8') + '"></span>' + esc((src && src.name) || '—') + '</span>' +
+      '<span class="notif-route-arrow">' + IC.arrowL + '</span>' +
+      '<span class="notif-route-chip"><span class="notif-route-dot" style="background:' + (WH_COLOR[dst2 && dst2.type] || '#94a3b8') + '"></span>' + esc((dst2 && dst2.name) || '—') + '</span>' +
+    '</div>';
+  }
+
+  var stepNum = st.step;
+  var stepsHTML = '<div class="notif-steps">';
+  for (var i = 1; i <= 4; i++) {
+    stepsHTML += '<div class="notif-step ' + (i < stepNum ? 'done' : i === stepNum ? 'active' : '') + '"></div>';
+  }
+  stepsHTML += '</div>';
+
+  var actionsHTML = '<div class="notif-actions">';
+  if (can) {
+    actionsHTML += '<button class="notif-btn approve" data-approve="' + t.id + '">' + IC.check + ' تأیید</button>';
+    actionsHTML += '<button class="notif-btn reject" data-reject="' + t.id + '">' + IC.x + ' رد</button>';
+  } else {
+    actionsHTML += '<span class="notif-no-action">' + IC.info + ' این مرحله مربوط به نقش شما نیست</span>';
+  }
+  actionsHTML += '<button class="notif-btn ghost detail" data-open="' + t.id + '">جزئیات ' + IC.chevL + '</button>';
+  actionsHTML += '</div>';
+
+  return '<div class="notif-card pending ' + t.status + (isIn ? ' inbound' : '') + '">' +
+    '<div class="notif-card-head">' +
+      '<div class="notif-card-head-left">' +
+        '<span class="notif-stage-badge ' + stageClass + '"><span class="notif-stage-dot"></span>' + stageLabel + '</span>' +
+        (isIn ? '<span class="notif-type-badge">' + IC.inbound + ' ورود</span>' : '') +
+      '</div>' +
+      '<span class="notif-card-time">' + relTime(t.createdAt) + '</span>' +
+    '</div>' +
+    '<div class="notif-card-title">' +
+      '<b>' + esc((p && p.name) || 'نامشخص') + '</b>' +
+      '<span class="notif-qty-badge">' + t.quantity + ' <span class="notif-qty-unit">' + esc((p && p.unit) || '') + '</span></span>' +
+    '</div>' +
+    routeHTML +
+    stepsHTML +
+    '<div class="notif-meta-row">' +
+      '<span class="notif-meta-item">' + IC.user + '<b>' + esc(t.createdByName || '—') + '</b></span>' +
+      '<span class="notif-meta-item">' + IC.clock + faDate(t.createdAt) + '</span>' +
+    '</div>' +
+    (t.description ? '<div class="notif-desc">' + esc(t.description) + '</div>' : '') +
+    actionsHTML +
+  '</div>';
+}
+
 function renderActivity(activity, db) {
-  if (!activity.length) return '<div class="notif-empty">' + IC.inbox + '<b>تغییری ثبت نشده</b><p>پس از تأیید یا رد اولین درخواست، اینجا نمایش داده می‌شود</p></div>';
-  return activity.map(function(t) {
-    var p = getProd(db, t.productId); var ok = t.status === 'approved'; var isIn = t.type === 'inbound';
-    var actor = ok ? ((t.managerApproval && t.managerApproval.userName) || '—') : ((t.rejection && t.rejection.userName) || '—');
-    var when = ok ? t.completedAt : (t.rejection && t.rejection.at);
-    var txt = ok ? (isIn ? 'ثبت ورود نهایی' : 'تأیید نهایی') : 'رد شد';
-    return '<div class="notif-card activity ' + (ok ? 'ok' : 'no') + '" data-nid="' + t.id + '"><div class="notif-mark ' + (isIn && ok ? 'in' : (ok ? 'ok' : 'no')) + '">' + (isIn ? IC.inbound : (ok ? IC.check : IC.x)) + '</div><div class="notif-activity-body"><div class="notif-card-title" style="font-size:13px">' + esc((p && p.name) || '—') + ' <span class="notif-qty">' + t.quantity + '</span></div><div style="margin-top:6px"><span class="notif-change ' + (isIn ? 'in' : (ok ? 'ok' : 'no')) + '">' + txt + '</span></div><div class="notif-card-meta"><span class="m">' + IC.user + '<b>' + esc(actor) + '</b></span><span class="m">' + IC.clock + faDate(when) + '</span></div></div></div>';
+  if (!activity.length) {
+    return '<div class="notif-empty">' +
+      '<div class="notif-empty-art">' + IC.inbox + '</div>' +
+      '<b>تغییری ثبت نشده</b>' +
+      '<p>پس از تأیید یا رد اولین درخواست، اینجا نمایش داده می‌شود</p>' +
+    '</div>';
+  }
+  var groups = groupItemsByDate(activity, getActivityTime);
+  return groups.map(function(g) {
+    return '<div class="notif-group">' +
+      '<div class="notif-group-label">' + g.label + '<span class="notif-group-count">' + g.items.length + '</span></div>' +
+      g.items.map(function(t) { return activityCardHTML(t, db); }).join('') +
+    '</div>';
   }).join('');
 }
+
+function activityCardHTML(t, db) {
+  var p = getProd(db, t.productId);
+  var ok = t.status === 'approved';
+  var isIn = t.type === 'inbound';
+  var actor = ok ? ((t.managerApproval && t.managerApproval.userName) || '—') : ((t.rejection && t.rejection.userName) || '—');
+  var when = ok ? t.completedAt : (t.rejection && t.rejection.at);
+  var txt = ok ? (isIn ? 'ثبت ورود' : 'تأیید نهایی') : 'رد شد';
+  var dotClass = isIn && ok ? 'in' : (ok ? 'ok' : 'no');
+  var actionClass = isIn && ok ? 'in' : (ok ? 'ok' : 'no');
+  var icon = isIn ? IC.inbound : (ok ? IC.check : IC.x);
+
+  return '<div class="notif-card activity ' + (ok ? 'ok' : 'no') + '" data-nid="' + t.id + '">' +
+    '<div class="notif-timeline-wrap">' +
+      '<div class="notif-timeline-dot ' + dotClass + '">' + icon + '</div>' +
+      '<div class="notif-timeline-line"></div>' +
+    '</div>' +
+    '<div class="notif-activity-body">' +
+      '<div class="notif-activity-title">' +
+        '<b>' + esc((p && p.name) || '—') + '</b>' +
+        '<span class="notif-qty-badge">' + t.quantity + ' <span class="notif-qty-unit">' + esc((p && p.unit) || '') + '</span></span>' +
+      '</div>' +
+      '<div class="notif-activity-meta">' +
+        '<span class="notif-activity-action ' + actionClass + '">' + txt + '</span>' +
+        '<span class="notif-meta-item">' + IC.user + '<b>' + esc(actor) + '</b></span>' +
+        '<span class="notif-meta-item">' + IC.clock + relTime(when) + '</span>' +
+      '</div>' +
+    '</div>' +
+  '</div>';
+}
+
 function bindNotif(panel) {
   $$('[data-approve]', panel).forEach(function(b) { b.addEventListener('click', function(e) { e.stopPropagation(); doApprove(b.dataset.approve); }); });
   $$('[data-reject]', panel).forEach(function(b) { b.addEventListener('click', function(e) { e.stopPropagation(); doReject(b.dataset.reject); }); });
@@ -2185,7 +2415,6 @@ function renderPage() {
   attachRippleAll();
 }
 
-/* ============ DASHBOARD (بازطراحی‌شده) ============ */
 function pageDashboard(page) {
   var db = loadDB();
   function totalOf(t) {
@@ -2927,7 +3156,6 @@ function pageUsers(page) {
   attachRippleAll();
 }
 
-/* ===== EXPORT HELPERS ===== */
 function downloadBlob(blob, filename) {
   try {
     var url = URL.createObjectURL(blob);
