@@ -57,23 +57,45 @@ button{cursor:pointer}
 .alus-wm.xl{font-size:30px;letter-spacing:-1.5px}
 .alus-mark{display:inline-grid;place-items:center;background:var(--grad);color:#fff;box-shadow:inset 0 1px 0 rgba(255,255,255,.45),0 10px 22px -8px rgba(0,122,255,.7)}
 .alus-mark svg{stroke:currentColor}
-.splash{position:fixed;inset:0;z-index:9000;display:grid;place-items:center;overflow:hidden;background:linear-gradient(135deg,#007AFF 0%,#5856D6 55%,#AF52DE 120%);animation:splashFade 2.2s ease-in forwards}
-.splash::before{content:'';position:absolute;inset:0;background:radial-gradient(700px 500px at 50% 45%,rgba(255,255,255,.28),transparent 65%),radial-gradient(400px 400px at 90% 10%,rgba(255,255,255,.14),transparent 60%),radial-gradient(500px 500px at 10% 90%,rgba(255,255,255,.10),transparent 60%);pointer-events:none}
-.splash-inner{position:relative;display:flex;flex-direction:column;align-items:center;gap:20px;transform-origin:center center;animation:splashIn 2.2s cubic-bezier(.55,0,.35,1) forwards}
-.splash-ring{position:absolute;top:0;left:50%;transform:translateX(-50%);width:130px;height:130px;border-radius:50%;border:2px solid rgba(255,255,255,.35);pointer-events:none;animation:splashRing 2.2s ease-out forwards}
-.splash-ring.r2{animation-delay:.15s}
-.splash-logo{position:relative;width:130px;height:130px;border-radius:50%;display:grid;place-items:center;color:#fff;background:radial-gradient(circle at 35% 25%,rgba(255,255,255,.28),rgba(255,255,255,.08) 60%);border:2px solid rgba(255,255,255,.45);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);box-shadow:0 30px 60px -20px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.6)}
-.splash-logo svg{width:64px;height:64px;stroke-width:2.4;filter:drop-shadow(0 4px 12px rgba(0,0,0,.25))}
-.splash-wm{font-size:46px;font-weight:900;letter-spacing:-2.2px;color:#fff;line-height:1;text-shadow:0 6px 30px rgba(0,0,0,.25)}
-.splash-tag{font-size:12px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:rgba(255,255,255,.8);margin-top:-4px}
-.splash-dots{display:flex;gap:6px;margin-top:14px}
-.splash-dots span{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.55);animation:splashDot 1.4s ease-in-out infinite}
-.splash-dots span:nth-child(2){animation-delay:.15s}
-.splash-dots span:nth-child(3){animation-delay:.3s}
-@keyframes splashIn{0%{transform:scale(.82);opacity:0;filter:blur(6px)}18%{transform:scale(1);opacity:1;filter:blur(0)}60%{transform:scale(1.02);opacity:1;filter:blur(0)}100%{transform:scale(9);opacity:0;filter:blur(2px)}}
-@keyframes splashFade{0%,62%{opacity:1}100%{opacity:0}}
-@keyframes splashRing{0%{transform:translateX(-50%) scale(.5);opacity:0}25%{transform:translateX(-50%) scale(1);opacity:.7}55%{transform:translateX(-50%) scale(1.3);opacity:.25}100%{transform:translateX(-50%) scale(2.5);opacity:0}}
-@keyframes splashDot{0%,100%{opacity:.35;transform:scale(.85)}50%{opacity:1;transform:scale(1)}}
+
+/* ============================================================
+   NEW SPLASH SCREEN (ویژه)
+   ============================================================ */
+.splash{position:fixed;inset:0;z-index:9000;display:grid;place-items:center;overflow:hidden;background:linear-gradient(135deg,#007AFF 0%,#5856D6 45%,#AF52DE 100%);animation:splashFade 3s ease-in forwards}
+.splash::before{content:'';position:absolute;inset:0;background:radial-gradient(800px 600px at 20% 20%,rgba(255,255,255,.18),transparent 60%),radial-gradient(600px 500px at 80% 80%,rgba(255,255,255,.12),transparent 60%),radial-gradient(500px 400px at 50% 50%,rgba(0,0,0,.15),transparent 60%);pointer-events:none;animation:splashMeshShift 3s ease-in-out}
+.splash::after{content:'';position:absolute;inset:-32px;background-image:radial-gradient(circle,rgba(255,255,255,.5) 1px,transparent 1px);background-size:32px 32px;opacity:.13;animation:splashGridShift 8s linear infinite;pointer-events:none}
+.splash-inner{position:relative;display:flex;flex-direction:column;align-items:center;gap:20px;transform-origin:center center;animation:splashIn 3s cubic-bezier(.55,0,.35,1) forwards}
+.splash-logo-wrap{position:relative;width:150px;height:150px;display:grid;place-items:center}
+.splash-glow{position:absolute;inset:-24px;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.35),transparent 65%);animation:splashGlowPulse 1.8s ease-in-out infinite;pointer-events:none}
+.splash-ring{position:absolute;inset:0;border-radius:50%;border:2px solid rgba(255,255,255,.35);animation:splashRingExpand 2.4s ease-out forwards;pointer-events:none}
+.splash-ring.r2{animation-delay:.25s;border-color:rgba(255,255,255,.24)}
+.splash-ring.r3{animation-delay:.5s;border-color:rgba(255,255,255,.16)}
+.splash-logo{position:relative;width:130px;height:130px;border-radius:50%;display:grid;place-items:center;color:#fff;background:radial-gradient(circle at 35% 25%,rgba(255,255,255,.32),rgba(255,255,255,.08) 60%);border:2px solid rgba(255,255,255,.5);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);box-shadow:0 30px 60px -20px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.6);animation:splashLogoIn 1s cubic-bezier(.34,1.56,.64,1) forwards}
+.splash-logo svg{width:68px;height:68px;stroke-width:2.6;filter:drop-shadow(0 4px 12px rgba(0,0,0,.3));overflow:visible}
+.splash-logo .splash-path-1,.splash-logo .splash-path-2{stroke-dasharray:1;stroke-dashoffset:1;animation:splashDraw 1s cubic-bezier(.55,0,.35,1) forwards}
+.splash-logo .splash-path-2{animation-delay:.4s}
+.splash-wordmark{display:flex;gap:2px;font-size:52px;font-weight:900;letter-spacing:-2px;color:#fff;line-height:1;text-shadow:0 6px 30px rgba(0,0,0,.35);font-feature-settings:"ss01"}
+.splash-wordmark span{display:inline-block;opacity:0;transform:translateY(22px);animation:splashLetterIn .6s cubic-bezier(.34,1.56,.64,1) forwards}
+.splash-wordmark span:nth-child(1){animation-delay:.5s}
+.splash-wordmark span:nth-child(2){animation-delay:.66s}
+.splash-wordmark span:nth-child(3){animation-delay:.82s}
+.splash-wordmark span:nth-child(4){animation-delay:.98s}
+.splash-tagline{font-size:11px;font-weight:700;letter-spacing:4px;text-transform:uppercase;color:rgba(255,255,255,.85);margin-top:-8px;opacity:0;animation:splashTaglineIn .7s ease-out 1.15s forwards}
+.splash-progress-track{width:190px;height:4px;border-radius:100px;background:rgba(255,255,255,.22);overflow:hidden;margin-top:8px;opacity:0;animation:splashTaglineIn .5s ease-out 1.25s forwards}
+.splash-progress-bar{width:0%;height:100%;border-radius:100px;background:linear-gradient(90deg,rgba(255,255,255,.6),#fff);box-shadow:0 0 12px rgba(255,255,255,.7);animation:splashProgress 1.4s cubic-bezier(.4,0,.2,1) 1.3s forwards}
+.splash-percent{font-size:11px;font-weight:700;color:rgba(255,255,255,.7);font-variant-numeric:tabular-nums;letter-spacing:1px;margin-top:-6px;opacity:0;animation:splashTaglineIn .4s ease-out 1.3s forwards;min-width:50px;text-align:center}
+@keyframes splashFade{0%,80%{opacity:1}100%{opacity:0}}
+@keyframes splashIn{0%{transform:scale(.92)}12%{transform:scale(1)}78%{transform:scale(1);opacity:1}100%{transform:scale(1.08);opacity:0;filter:blur(4px)}}
+@keyframes splashMeshShift{0%{transform:scale(1) rotate(0)}100%{transform:scale(1.15) rotate(6deg)}}
+@keyframes splashGridShift{0%{transform:translate(0,0)}100%{transform:translate(32px,32px)}}
+@keyframes splashGlowPulse{0%,100%{transform:scale(1);opacity:.55}50%{transform:scale(1.18);opacity:1}}
+@keyframes splashLogoIn{0%{transform:scale(.3) rotate(-30deg);opacity:0}60%{transform:scale(1.06) rotate(3deg);opacity:1}100%{transform:scale(1) rotate(0);opacity:1}}
+@keyframes splashDraw{to{stroke-dashoffset:0}}
+@keyframes splashLetterIn{0%{opacity:0;transform:translateY(22px) rotate(-8deg);filter:blur(4px)}60%{opacity:1;filter:blur(0)}100%{opacity:1;transform:translateY(0) rotate(0);filter:blur(0)}}
+@keyframes splashTaglineIn{0%{opacity:0;transform:translateY(8px)}100%{opacity:1;transform:translateY(0)}}
+@keyframes splashProgress{0%{width:0%}100%{width:100%}}
+@keyframes splashRingExpand{0%{transform:scale(.6);opacity:0}25%{opacity:.8}100%{transform:scale(1.7);opacity:0}}
+
 @keyframes fadeIn{from{opacity:0}to{opacity:1}}
 @keyframes fadeOut{to{opacity:0}}
 @keyframes slideUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
@@ -157,10 +179,11 @@ button{cursor:pointer}
   .user-btn .avatar{width:34px;height:34px}
   .brand-text .wm{font-size:17px}
   .brand-text small{font-size:9.5px}
+  /* NEW SPLASH - mobile */
+  .splash-logo-wrap{width:130px;height:130px}
   .splash-logo{width:110px;height:110px}
   .splash-logo svg{width:54px;height:54px}
-  .splash-wm{font-size:38px}
-  .splash-ring{width:110px;height:110px}
+  .splash-wordmark{font-size:42px}
 }
 @media (min-width:901px){.user-btn .who-text{display:block}}
 .page{max-width:1560px;margin:0 auto;padding:26px 20px 60px}
@@ -332,11 +355,11 @@ button{cursor:pointer}
 .field label .req{color:var(--red);font-size:14px}
 .field input,.field select,.field textarea{width:100%;height:44px;padding:0 16px;background:var(--g1);border:1px solid var(--gb);border-radius:100px;font-size:13.5px;color:var(--text);transition:all .28s var(--ease)}
 .field textarea{height:auto;min-height:90px;padding:12px 18px;resize:vertical;font-family:inherit;line-height:1.7;border-radius:22px}
-.field select{appearance:none;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2.5'><polyline points='6 9 12 15 18 9'/></svg>");background-repeat:no-repeat;background-position:left 16px center;background-size:13px;padding-left:42px}
+.field select{appearance:none;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2.5'><polyline points='6 9 12 15 18 9'/></svg>");background-repeat:no-repeat;background-position:left 16px center;background-size:13px;padding-left:42px;cursor:pointer}
 .field input:focus,.field select:focus,.field textarea:focus{border-color:var(--blue);box-shadow:0 0 0 4px rgba(0,122,255,.24);background:var(--g2)}
 .field input:disabled,.field select:disabled{opacity:.6;cursor:not-allowed}
-.field .hint{font-size:11.5px;color:var(--muted);padding:0 6px;line-height:1.7;margin-top:-2px}
-.field .hint svg{width:11px;height:11px;vertical-align:-1px;margin-left:4px}
+.field .hint{font-size:11.5px;color:var(--muted);padding:0 6px;line-height:1.7;margin-top:-2px;display:flex;align-items:center;gap:5px}
+.field .hint svg{width:11px;height:11px;vertical-align:-1px;margin-left:4px;flex-shrink:0}
 .kit-box{background:linear-gradient(135deg,rgba(0,122,255,.06),rgba(175,82,222,.05));border:1px solid rgba(0,122,255,.22);border-radius:20px;padding:16px;position:relative;overflow:hidden}
 .kit-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px}
 .kit-head-title{display:flex;align-items:center;gap:10px;font-size:13px;font-weight:800;color:var(--text)}
@@ -481,23 +504,8 @@ button{cursor:pointer}
 .login-card .sub{color:var(--muted);font-size:13px;margin-bottom:28px}
 .login-form{display:flex;flex-direction:column;gap:16px}
 .login-form .field input{height:50px;font-size:14.5px}
+.login-form .field select{height:50px;font-size:14.5px;font-weight:600}
 @media (max-width:900px){.login{grid-template-columns:1fr}.login-left{display:none}.login-right{padding:24px}}
-.demo{margin-top:26px;padding:16px;background:var(--g1);border:1px solid var(--gb);border-radius:22px}
-.demo-title{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;margin-bottom:12px}
-.demo-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-@media (max-width:420px){.demo-grid{grid-template-columns:1fr}}
-.demo-card{display:flex;flex-direction:column;gap:7px;padding:12px 14px;background:var(--g2);border:1px solid var(--gb);border-radius:16px;cursor:pointer;text-align:right;transition:all .25s var(--ease)}
-.demo-card:hover{transform:translateY(-2px);border-color:var(--blue)}
-.demo-card .role-tag{display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:700;padding:2px 8px;border-radius:100px;background:var(--surface-2);color:var(--muted);align-self:flex-start}
-.demo-card .role-tag::before{content:'';width:5px;height:5px;border-radius:50%;background:currentColor}
-.demo-card.role-admin .role-tag{background:rgba(0,122,255,.12);color:var(--blue)}
-.demo-card.role-manager .role-tag{background:rgba(175,82,222,.12);color:#7c3aed}
-.demo-card.role-accountant .role-tag{background:rgba(90,200,250,.14);color:#0369a1}
-.demo-card.role-warehouse_officer .role-tag{background:rgba(255,149,0,.14);color:#b45309}
-.demo-card .cred{display:flex;align-items:center;gap:6px;font-size:11.5px}
-.demo-card .cred .k{color:var(--muted);font-size:10.5px}
-.demo-card .cred .v{font-family:monospace;color:var(--text);font-weight:700;background:var(--surface-2);padding:1px 7px;border-radius:6px;font-size:11px}
-.demo-hint{margin-top:10px;font-size:10.5px;color:var(--muted);text-align:center}
 .muted{color:var(--muted)}.small{font-size:12px}
 .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
 .chip{display:inline-flex;align-items:center;gap:6px;height:34px;padding:0 14px;border-radius:100px;background:var(--g1);border:1px solid var(--gb);font-size:12.5px;font-weight:500;color:var(--text-2);cursor:pointer;transition:all .28s var(--ease)}
@@ -614,7 +622,6 @@ button{cursor:pointer}
    RESPONSIVE ENHANCEMENTS
    ============================================================ */
 
-/* Very large desktop */
 @media (min-width:1400px){
   .page{padding:30px 24px 60px}
   .bento{gap:18px}
@@ -622,8 +629,6 @@ button{cursor:pointer}
   .hero h2{font-size:26px}
   .hero p{font-size:14px}
 }
-
-/* Compact search & user buttons on smaller desktop (1101-1200px) */
 @media (max-width:1100px) and (min-width:901px){
   .search-btn{min-width:160px;padding:0 12px}
   .user-btn{padding:3px;height:40px}
@@ -632,13 +637,9 @@ button{cursor:pointer}
   .nav-pill{padding:0 12px;gap:6px}
   .nav-pill .kbd{display:none}
 }
-
-/* Hide keyboard hints on smaller desktop (<1300px) */
 @media (max-width:1300px) and (min-width:1101px){
   .nav-pill .kbd{display:none}
 }
-
-/* Tablet landscape / large phone landscape (901-1100px) */
 @media (max-width:1100px) and (min-width:641px){
   .bento{gap:14px}
   .page{padding:22px 18px 60px}
@@ -665,8 +666,6 @@ button{cursor:pointer}
   .modal{padding:24px}
   .drawer{max-width:480px}
 }
-
-/* Phone & small tablet portrait (481-640px) */
 @media (max-width:640px){
   .page{padding:16px 12px 110px}
   .page-head{margin-bottom:16px;gap:10px}
@@ -832,12 +831,13 @@ button{cursor:pointer}
   .tab-btn span{font-size:9px}
   .tab-btn .tab-badge{top:1px;transform:translateX(10px);min-width:16px;height:16px;font-size:9px}
 
+  /* NEW SPLASH - phone */
+  .splash-logo-wrap{width:115px;height:115px}
   .splash-logo{width:100px;height:100px}
   .splash-logo svg{width:48px;height:48px}
-  .splash-wm{font-size:34px;letter-spacing:-1.6px}
-  .splash-tag{font-size:10.5px;letter-spacing:2.5px}
-  .splash-ring{width:100px;height:100px}
-  .splash-dots span{width:5px;height:5px}
+  .splash-wordmark{font-size:36px;letter-spacing:-1.5px}
+  .splash-tagline{font-size:10px;letter-spacing:3px}
+  .splash-progress-track{width:150px}
 
   .wiz-steps{margin-bottom:20px}
   .wiz-step .num{width:36px;height:36px;font-size:12px}
@@ -847,8 +847,6 @@ button{cursor:pointer}
   .search-input input{height:38px;font-size:12.5px}
   .chip{height:32px;padding:0 12px;font-size:12px}
 }
-
-/* Small phone (≤480px) */
 @media (max-width:480px){
   .page{padding:14px 10px 110px}
   .page-head h1{font-size:20px}
@@ -928,9 +926,13 @@ button{cursor:pointer}
   .sheet-item{padding:9px 10px;font-size:13px}
   .sheet-ic{width:32px;height:32px}
   .sheet-ic svg{width:14px;height:14px}
-}
 
-/* Tiny phone (≤380px) */
+  /* NEW SPLASH - small phone */
+  .splash-logo-wrap{width:100px;height:100px}
+  .splash-logo{width:88px;height:88px}
+  .splash-logo svg{width:44px;height:44px}
+  .splash-wordmark{font-size:30px;letter-spacing:-1px}
+}
 @media (max-width:380px){
   .page{padding:12px 8px 110px}
   .page-head h1{font-size:18px}
@@ -968,8 +970,6 @@ button{cursor:pointer}
   .tab-btn span{display:none}
   .tab-btn .tab-badge{transform:translateX(6px)}
 }
-
-/* Landscape phones with short screen */
 @media (max-height:480px) and (orientation:landscape) and (max-width:900px){
   .bottom-tabs{display:none}
   .page{padding-bottom:30px}
@@ -978,15 +978,11 @@ button{cursor:pointer}
   .hero{padding:16px}
   .hero-quick button{height:34px}
 }
-
-/* Ultra-wide */
 @media (min-width:1800px){
   .page{max-width:1720px}
   .nav-wrap{padding:14px 24px 0}
   .navbar{padding:0 16px 0 24px}
 }
-
-/* Touch device improvements */
 @media (hover:none){
   .btn:hover{transform:none}
   .t-item:hover{transform:none}
@@ -996,14 +992,10 @@ button{cursor:pointer}
   .btn:active{transform:scale(.96)}
   .icon-btn:active{transform:scale(.92)}
 }
-
-/* Reduced motion */
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}
   .splash{display:none!important}
 }
-
-/* Print */
 @media print{
   .nav-wrap,.bottom-tabs,.install-toast,.pdf-toolbar{display:none!important}
   body{background:#fff}
@@ -1108,18 +1100,50 @@ var BRAND_A = svg('<path d="M5 19L12 4L19 19"/><path d="M8.5 13.5h7"/>', 2.4);
 
 function showSplash() {
   try {
+    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     var existing = document.querySelector('.splash');
     if (existing) existing.remove();
     var wrap = document.createElement('div');
     wrap.className = 'splash';
-    wrap.innerHTML = '<div class="splash-inner"><div class="splash-ring"></div><div class="splash-ring r2"></div><div class="splash-logo">' + BRAND_A + '</div><div class="splash-wm">Alus</div><div class="splash-tag">Furniture</div><div class="splash-dots"><span></span><span></span><span></span></div></div>';
+    wrap.innerHTML =
+      '<div class="splash-inner">' +
+        '<div class="splash-logo-wrap">' +
+          '<div class="splash-glow"></div>' +
+          '<div class="splash-ring"></div>' +
+          '<div class="splash-ring r2"></div>' +
+          '<div class="splash-ring r3"></div>' +
+          '<div class="splash-logo">' +
+            '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">' +
+              '<path class="splash-path-1" d="M5 19L12 4L19 19" pathLength="1" stroke-dasharray="1" stroke-dashoffset="1"/>' +
+              '<path class="splash-path-2" d="M8.5 13.5h7" pathLength="1" stroke-dasharray="1" stroke-dashoffset="1"/>' +
+            '</svg>' +
+          '</div>' +
+        '</div>' +
+        '<div class="splash-wordmark"><span>A</span><span>l</span><span>u</span><span>s</span></div>' +
+        '<div class="splash-tagline">Furniture Management</div>' +
+        '<div class="splash-progress-track"><div class="splash-progress-bar"></div></div>' +
+        '<div class="splash-percent">0%</div>' +
+      '</div>';
     (document.body || document.documentElement).appendChild(wrap);
     try { document.body.style.overflow = 'hidden'; } catch(e) {}
     var removed = false;
     function cleanup() { if (removed) return; removed = true; if (wrap && wrap.parentNode) wrap.remove(); try { document.body.style.overflow = ''; } catch(e) {} }
-    setTimeout(cleanup, 2300);
+    setTimeout(cleanup, 3100);
     wrap.addEventListener('animationend', function(e) { if (e.animationName === 'splashFade') cleanup(); });
-    setTimeout(cleanup, 3500);
+    setTimeout(cleanup, 4000);
+    var pctEl = wrap.querySelector('.splash-percent');
+    if (pctEl) {
+      var start = null, dur = 1400, delay = 1300;
+      function tick(now) {
+        if (!start) start = now;
+        var t = Math.max(0, now - start - delay);
+        var p = Math.min(t / dur, 1);
+        var eased = 1 - Math.pow(1 - p, 2);
+        if (pctEl && pctEl.parentNode) pctEl.textContent = Math.round(eased * 100) + '%';
+        if (p < 1 && wrap.parentNode) requestAnimationFrame(tick);
+      }
+      requestAnimationFrame(tick);
+    }
   } catch(e) {}
 }
 
@@ -1241,6 +1265,13 @@ function migrateDB(d) {
   ensure('showroom_alus', 'نمایشگاه الوس', 7);
   ensure('sold', 'کالای فروش‌رفته', 8);
   ensure('customer', 'مشتری', 9);
+  // ==== NEW MIGRATION: passwords → 1111 for default users (if still old defaults) ====
+  var oldDefaults = { admin: 'admin', manager: 'manager', acc: 'acc', wh: 'wh' };
+  for (var u = 0; u < d.users.length; u++) {
+    if (oldDefaults[d.users[u].username] && d.users[u].password === oldDefaults[d.users[u].username]) {
+      d.users[u].password = '1111'; changed = true;
+    }
+  }
   return changed;
 }
 
@@ -1279,10 +1310,10 @@ function seed() {
   var sold = { id: uid(), name: 'کالای فروش‌رفته', type: 'sold', isActive: true };
   var customer = { id: uid(), name: 'مشتری', type: 'customer', isActive: true };
   var users = [
-    { id: uid(), name: 'راهبر سیستم', username: 'admin', password: 'admin', role: 'admin', isActive: true },
-    { id: uid(), name: 'مدیر', username: 'manager', password: 'manager', role: 'manager', isActive: true },
-    { id: uid(), name: 'حسابدار', username: 'acc', password: 'acc', role: 'accountant', isActive: true },
-    { id: uid(), name: 'انباردار', username: 'wh', password: 'wh', role: 'warehouse_officer', isActive: true }
+    { id: uid(), name: 'راهبر سیستم', username: 'admin', password: '1111', role: 'admin', isActive: true },
+    { id: uid(), name: 'مدیر', username: 'manager', password: '1111', role: 'manager', isActive: true },
+    { id: uid(), name: 'حسابدار', username: 'acc', password: '1111', role: 'accountant', isActive: true },
+    { id: uid(), name: 'انباردار', username: 'wh', password: '1111', role: 'warehouse_officer', isActive: true }
   ];
   var p1 = { id: uid(), name: 'مبل مدل A', code: 'MB-A', unit: 'دست', components: [
     { id: uid(), name: 'مبل سه نفره', qty: 1 }, { id: uid(), name: 'مبل یک نفره', qty: 2 }, { id: uid(), name: 'میز جلو مبلی', qty: 1 }
@@ -1949,26 +1980,36 @@ function renderLogin() {
   $$('.celebrate').forEach(function(el) { el.remove(); });
   app.innerHTML = '<div class="login"><div class="login-left"><div class="llogo"><div class="badge-i">' + BRAND_A + '</div><div><div class="alus-wm wm">Alus</div><div class="tagline">Furniture Management</div></div></div><div class="ltag"><h2>کنترل هوشمند موجودی<br>و جابه‌جایی مبلمان</h2><p>مدیریت دقیق انبارها، ورود از تأمین‌کننده و انتقال با سه مرحله تأیید — همه در یک پنل یکپارچه.</p><div class="lfeat"><div class="lfeat-item">' + IC.shield + '<span>سه مرحله تأیید برای هر انتقال</span></div><div class="lfeat-item">' + IC.grid + '<span>تعریف دست و سرویس با اقلام تشکیل‌دهنده</span></div><div class="lfeat-item">' + IC.chart + '<span>گزارش‌های حرفه‌ای با خروجی Excel و PDF</span></div></div></div><div style="opacity:.65;font-size:12px">© ۱۴۰۴ · Alus · نسخه ۱٫۰</div></div>' +
     '<div class="login-right"><div class="login-card"><h1>خوش آمدید 👋</h1><div class="sub">برای ادامه وارد حساب خود شوید</div>' +
-    '<form class="login-form" id="lf"><div class="field"><label>نام کاربری</label><input id="lu" required placeholder="admin" autocomplete="username" /></div><div class="field"><label>رمز عبور</label><input id="lp" type="password" required placeholder="••••••••" autocomplete="current-password" /></div><button class="btn primary block" type="submit" style="margin-top:6px;height:48px;font-size:14.5px">' + IC.check + ' ورود به سیستم</button></form>' +
-    '<div class="demo"><div class="demo-title">ورود سریع آزمایشی</div><div class="demo-grid">' +
-    '<button type="button" class="demo-card role-admin" data-u="admin" data-p="admin"><span class="role-tag">راهبر سیستم</span><div class="cred"><span class="k">کاربری</span><span class="v">admin</span></div><div class="cred"><span class="k">رمز</span><span class="v">admin</span></div></button>' +
-    '<button type="button" class="demo-card role-manager" data-u="manager" data-p="manager"><span class="role-tag">مدیر</span><div class="cred"><span class="k">کاربری</span><span class="v">manager</span></div><div class="cred"><span class="k">رمز</span><span class="v">manager</span></div></button>' +
-    '<button type="button" class="demo-card role-accountant" data-u="acc" data-p="acc"><span class="role-tag">حسابدار</span><div class="cred"><span class="k">کاربری</span><span class="v">acc</span></div><div class="cred"><span class="k">رمز</span><span class="v">acc</span></div></button>' +
-    '<button type="button" class="demo-card role-warehouse_officer" data-u="wh" data-p="wh"><span class="role-tag">انباردار</span><div class="cred"><span class="k">کاربری</span><span class="v">wh</span></div><div class="cred"><span class="k">رمز</span><span class="v">wh</span></div></button>' +
-    '</div><div class="demo-hint">' + IC.info + ' روی هر کارت بزن تا خودکار پر شود</div></div></div></div></div>';
+    '<form class="login-form" id="lf">' +
+    '<div class="field"><label>' + IC.users + ' انتخاب سریع کاربر</label><select id="lu-select"><option value="">— انتخاب کنید —</option><option value="admin">راهبر سیستم</option><option value="manager">مدیر</option><option value="acc">حسابدار</option><option value="wh">انباردار</option></select><div class="hint">' + IC.info + ' با انتخاب، نام کاربری و رمز به‌صورت خودکار پر می‌شود</div></div>' +
+    '<div class="field"><label>نام کاربری</label><input id="lu" required placeholder="admin" autocomplete="username" /></div>' +
+    '<div class="field"><label>رمز عبور</label><input id="lp" type="password" required placeholder="••••••••" autocomplete="current-password" /></div>' +
+    '<button class="btn primary block" type="submit" style="margin-top:6px;height:48px;font-size:14.5px">' + IC.check + ' ورود به سیستم</button></form>' +
+    '</div></div></div>';
   var busy = false;
-  $$('.demo-card').forEach(function(card) { card.addEventListener('click', function() { if (busy) return; $('#lu').value = card.dataset.u; $('#lp').value = card.dataset.p; $('#lu').focus(); }); });
+  var sel = $('#lu-select');
+  if (sel) {
+    sel.addEventListener('change', function() {
+      if (sel.value) {
+        $('#lu').value = sel.value;
+        $('#lp').value = '1111';
+      } else {
+        $('#lu').value = '';
+        $('#lp').value = '';
+      }
+    });
+  }
   $('#lf').addEventListener('submit', function(e) {
     e.preventDefault();
     if (busy) return; busy = true;
     var u = $('#lu').value.trim(); var p = $('#lp').value;
     var btn = $('#lf button[type="submit"]'); if (btn) btn.classList.add('loading');
-    $('#lu').disabled = true; $('#lp').disabled = true;
+    $('#lu').disabled = true; $('#lp').disabled = true; if (sel) sel.disabled = true;
     setTimeout(function() {
       var user = doLogin(u, p);
       if (!user) {
         busy = false; if (btn) btn.classList.remove('loading');
-        $('#lu').disabled = false; $('#lp').disabled = false;
+        $('#lu').disabled = false; $('#lp').disabled = false; if (sel) sel.disabled = false;
         var card = $('.login-card'); if (card) { card.style.animation = 'shake .5s'; setTimeout(function() { card.style.animation = ''; }, 500); }
         celebrate('ورود ناموفق', 'نام کاربری یا رمز اشتباه است', 'error', 1800); return;
       }
@@ -2137,7 +2178,9 @@ function transferItemHTML(db, t) {
   var stepsHTML = '';
   for (var i = 1; i <= 4; i++) {
     var cls = '';
-    if (t.status === 'rejected') { var rMap = { warehouse: 1, accountant: 2, manager: 3 }; var rS = t.rejection ? rMap[t.rejection.stage] : 0; if (i < rS) cls = 'done'; else if (i === rS) cls = 'rejected'; }
+    // BUGFIX: when approved, all 4 steps should be "done" not the last one "active"
+    if (t.status === 'approved') cls = 'done';
+    else if (t.status === 'rejected') { var rMap = { warehouse: 1, accountant: 2, manager: 3 }; var rS = t.rejection ? rMap[t.rejection.stage] : 0; if (i < rS) cls = 'done'; else if (i === rS) cls = 'rejected'; }
     else { if (i < st.step) cls = 'done'; else if (i === st.step) cls = 'active'; }
     stepsHTML += '<div class="t-step ' + cls + '"></div>';
   }
@@ -2229,6 +2272,8 @@ function pageStockInit(page) {
       renderKit();
     } else {
       currentProductId = null;
+      // BUGFIX: clear stale components when switching to a non-existing product
+      if (comps.length) { comps = []; renderKit(); }
       statusBox.innerHTML = '<div style="margin-top:8px;padding:12px 14px;background:rgba(0,122,255,.10);border:1px solid rgba(0,122,255,.22);border-radius:16px;font-size:12.5px;color:var(--blue);display:flex;align-items:center;gap:8px">' + IC.plus + ' کالای جدید ساخته می‌شود: <b>' + esc(val) + '</b></div>';
     }
   }
@@ -2370,7 +2415,7 @@ function openTransfer(id) {
   var tlHTML = steps.map(function(s, i) {
     var cls = '';
     if (i === 0 || i === 4) cls = s.done ? 'done' : '';
-    else { if (s.step) cls = 'done'; else if (i === rStep) cls = 'rejected'; else if (i === (st.step - 1)) cls = 'active'; }
+    else { if (s.step) cls = 'done'; else if (i === rStep) cls = 'rejected'; else if (i === st.step) cls = 'active'; }
     var meta = [];
     if (s.at) meta.push('<b>' + esc(s.user || '') + '</b> · ' + faDate(s.at));
     if (s.step) meta.push('<b>' + esc(s.step.userName) + '</b> · ' + faDate(s.step.at));
