@@ -32,6 +32,8 @@
   --border:rgba(15,23,42,.08);--border-2:rgba(15,23,42,.14);
   --text:#0a1220;--text-2:#334155;--muted:#64748b;
   --ease:cubic-bezier(.16,1,.3,1);--spring:cubic-bezier(.34,1.56,.64,1);
+  --card-shadow:0 1px 3px rgba(15,23,42,.04),0 4px 16px -8px rgba(15,23,42,.08);
+  --card-shadow-hover:0 2px 6px rgba(15,23,42,.06),0 12px 32px -12px rgba(15,23,42,.16);
 }
 [data-theme="dark"]{
   --g1:rgba(30,35,50,.55);--g2:rgba(30,35,50,.75);--g3:rgba(30,35,50,.9);
@@ -40,6 +42,8 @@
   --bg:#06070d;--surface:#0f1420;--surface-2:#161d2c;--surface-3:#1e2739;
   --border:rgba(255,255,255,.07);--border-2:rgba(255,255,255,.14);
   --text:#eef2f8;--text-2:#cbd5e1;--muted:#94a3b8;
+  --card-shadow:0 1px 3px rgba(0,0,0,.3),0 4px 16px -8px rgba(0,0,0,.5);
+  --card-shadow-hover:0 2px 6px rgba(0,0,0,.4),0 12px 32px -12px rgba(0,0,0,.7);
 }
 html,body{height:100%}
 body{font-family:'Vazirmatn',system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:14px;line-height:1.7;-webkit-font-smoothing:antialiased;overflow-x:hidden;overscroll-behavior-y:contain}
@@ -113,6 +117,32 @@ button{cursor:pointer}
 @keyframes sheetDown{to{transform:translateY(100%)}}
 @keyframes notifIn{from{opacity:0;transform:translateX(-100%)}to{opacity:1;transform:none}}
 @keyframes notifOut{to{opacity:0;transform:translateX(-100%)}}
+
+/* ============================================================
+   TOAST SYSTEM (جدید — برای عملیات کوچک)
+   ============================================================ */
+.toast-wrap{position:fixed;bottom:32px;left:50%;transform:translateX(-50%);z-index:2200;display:flex;flex-direction:column;gap:8px;align-items:center;pointer-events:none;max-width:calc(100vw - 32px)}
+@media (max-width:900px){.toast-wrap{bottom:calc(90px + env(safe-area-inset-bottom, 0px))}}
+.toast{display:flex;align-items:center;gap:11px;padding:11px 16px 11px 14px;background:var(--surface);border:1px solid var(--border-2);border-radius:16px;box-shadow:0 12px 32px -8px rgba(15,23,42,.28),0 4px 12px -4px rgba(15,23,42,.14);opacity:0;transform:translateY(14px) scale(.96);transition:all .32s cubic-bezier(.16,1,.3,1);pointer-events:auto;max-width:100%}
+[data-theme="dark"] .toast{box-shadow:0 12px 32px -8px rgba(0,0,0,.6),0 4px 12px -4px rgba(0,0,0,.4)}
+.toast.show{opacity:1;transform:translateY(0) scale(1)}
+.toast.hide{opacity:0;transform:translateY(14px) scale(.96);transition-duration:.22s}
+.toast-icon{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;flex-shrink:0;color:#fff}
+.toast-icon svg{width:15px;height:15px;stroke-width:3}
+.toast.success .toast-icon{background:var(--grad-success)}
+.toast.error .toast-icon{background:var(--grad-danger)}
+.toast.warn .toast-icon{background:var(--grad-warn)}
+.toast.info .toast-icon{background:var(--grad-info)}
+.toast-body{display:flex;flex-direction:column;gap:2px;min-width:0}
+.toast-body b{font-size:13px;font-weight:700;color:var(--text);line-height:1.35}
+.toast-body span{font-size:11.5px;color:var(--muted);line-height:1.4}
+.toast.success{border-color:rgba(52,199,89,.32)}
+.toast.error{border-color:rgba(255,59,48,.32)}
+.toast.warn{border-color:rgba(255,149,0,.32)}
+
+/* ============================================================
+   SOLID CARDS (به‌جای شیشه‌ای)
+   ============================================================ */
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:40px;padding:0 18px;border-radius:100px;font-size:13.5px;font-weight:600;background:var(--g2);color:var(--text);border:1px solid var(--gb);box-shadow:var(--ghl),0 4px 14px -6px rgba(15,23,42,.14);transition:all .28s var(--ease);position:relative;overflow:hidden;white-space:nowrap;cursor:pointer}
 .btn:hover{transform:translateY(-2px);box-shadow:var(--ghl),0 12px 28px -10px rgba(15,23,42,.24);background:var(--g3)}
 .btn:active{transform:translateY(0) scale(.97)}
@@ -125,8 +155,8 @@ button{cursor:pointer}
 .btn.success{background:var(--grad-success);color:#fff;border-color:transparent;box-shadow:inset 0 1px 0 rgba(255,255,255,.4),0 10px 24px -8px rgba(52,199,89,.65)}
 .btn.danger{background:var(--grad-danger);color:#fff;border-color:transparent;box-shadow:inset 0 1px 0 rgba(255,255,255,.4),0 10px 24px -8px rgba(255,59,48,.65)}
 .btn.warn{background:var(--grad-warn);color:#fff;border-color:transparent;box-shadow:inset 0 1px 0 rgba(255,255,255,.4),0 10px 24px -8px rgba(255,149,0,.65)}
-.btn.ghost{background:transparent;border:1px solid var(--border-2);box-shadow:none}
-.btn.ghost:hover{background:var(--g1)}
+.btn.ghost{background:var(--surface);border:1px solid var(--border-2);box-shadow:none}
+.btn.ghost:hover{background:var(--surface-2)}
 .btn.block{width:100%}
 .btn .rip{position:absolute;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.6),transparent 70%);transform:scale(0);pointer-events:none;animation:ripple .7s ease-out}
 .btn:not(.primary):not(.success):not(.danger):not(.warn) .rip{background:radial-gradient(circle,rgba(0,122,255,.35),transparent 70%)}
@@ -179,7 +209,6 @@ button{cursor:pointer}
   .user-btn .avatar{width:34px;height:34px}
   .brand-text .wm{font-size:17px}
   .brand-text small{font-size:9.5px}
-  /* NEW SPLASH - mobile */
   .splash-logo-wrap{width:130px;height:130px}
   .splash-logo{width:110px;height:110px}
   .splash-logo svg{width:54px;height:54px}
@@ -198,7 +227,10 @@ button{cursor:pointer}
 .w-12{grid-column:span 12}
 @media (max-width:1100px){.w-3{grid-column:span 6}.w-4,.w-5,.w-6,.w-7,.w-8{grid-column:span 12}}
 @media (max-width:640px){.bento>*{grid-column:span 12!important}}
-.widget{background:var(--g2);border:1px solid var(--gb);border-radius:22px;padding:18px;box-shadow:var(--ghl),var(--gs)}
+
+/* ============ SOLID WIDGET / STAT / TABLE ============ */
+.widget{background:var(--surface);border:1px solid var(--border);border-radius:22px;padding:18px;box-shadow:var(--card-shadow);transition:box-shadow .25s var(--ease)}
+.widget:hover{box-shadow:var(--card-shadow-hover)}
 .w-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:14px;flex-wrap:wrap}
 .w-title{font-size:13.5px;font-weight:700;display:flex;align-items:center;gap:9px}
 .w-title .ic{width:28px;height:28px;border-radius:9px;display:grid;place-items:center;color:#fff;background:var(--grad-2)}
@@ -215,24 +247,40 @@ button{cursor:pointer}
 .hero p{opacity:.92;font-size:13.5px;line-height:1.9;max-width:480px}
 .hero-stats{display:flex;gap:26px;margin-top:22px;flex-wrap:wrap}
 .hero-stat .k{font-size:11.5px;opacity:.8;margin-bottom:3px}
-.hero-stat .v{font-size:22px;font-weight:800}
+.hero-stat .v{font-size:22px;font-weight:800;font-variant-numeric:tabular-nums}
 .hero-stat .v small{font-size:11px;font-weight:500;opacity:.8;margin-right:3px}
 .hero-quick{display:flex;gap:8px;flex-wrap:wrap;margin-top:22px}
 .hero-quick button{display:inline-flex;align-items:center;gap:7px;height:40px;padding:0 16px;border-radius:100px;background:rgba(255,255,255,.2);color:#fff;font-size:12.5px;font-weight:600;border:1px solid rgba(255,255,255,.3);cursor:pointer;box-shadow:inset 0 1px 0 rgba(255,255,255,.5);transition:background .25s var(--ease)}
 .hero-quick button:hover{background:rgba(255,255,255,.3)}
 .hero-quick button svg{width:14px;height:14px}
-.stat{display:flex;flex-direction:column;padding:18px;background:var(--g2);border:1px solid var(--gb);border-radius:22px}
-.stat-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
-.stat-title{display:flex;align-items:center;gap:10px;font-size:12.5px;font-weight:600;color:var(--muted)}
-.stat-ic{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;color:#fff;background:var(--grad-2)}
+
+/* ============ STAT CARD (بازطراحی با sparkline) ============ */
+.stat{display:flex;flex-direction:column;padding:18px;background:var(--surface);border:1px solid var(--border);border-radius:22px;box-shadow:var(--card-shadow);transition:all .25s var(--ease);position:relative;overflow:hidden}
+.stat:hover{box-shadow:var(--card-shadow-hover);transform:translateY(-1px)}
+.stat-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;gap:8px}
+.stat-title{display:flex;align-items:center;gap:10px;font-size:12.5px;font-weight:600;color:var(--muted);min-width:0}
+.stat-title span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.stat-ic{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;color:#fff;background:var(--grad-2);flex-shrink:0}
 .stat-ic svg{width:17px;height:17px}
 .stat.success .stat-ic{background:var(--grad-success)}
 .stat.warn .stat-ic{background:var(--grad-warn)}
 .stat.info .stat-ic{background:var(--grad-info)}
-.stat-value{font-size:32px;font-weight:800;line-height:1;font-variant-numeric:tabular-nums}
+.stat-body{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;margin-bottom:8px}
+.stat-value{font-size:32px;font-weight:800;line-height:1;font-variant-numeric:tabular-nums;letter-spacing:-1px}
+.stat-spark{flex-shrink:0;width:80px;height:34px;display:flex;align-items:center;justify-content:flex-end}
+.stat-spark .sparkline{width:80px;height:34px;overflow:visible}
+.stat-foot{font-size:10.5px;color:var(--muted);display:flex;align-items:center;gap:5px;opacity:.85}
+.stat-foot svg{width:11px;height:11px}
+
+/* ============ WH SECTION TITLE ============ */
+.wh-section{display:flex;align-items:center;gap:10px;margin:6px 0 -4px;padding:0 4px;grid-column:span 12}
+.wh-section-title{font-size:11.5px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.8px}
+.wh-section-line{flex:1;height:1px;background:var(--border)}
+.wh-section-count{font-size:11px;font-weight:600;color:var(--muted);padding:1px 8px;border-radius:100px;background:var(--surface-2);border:1px solid var(--border)}
+
 .qa{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.qa-btn{display:flex;flex-direction:column;align-items:flex-start;gap:8px;padding:15px;border-radius:18px;background:var(--g1);border:1px solid var(--gb);text-align:right;cursor:pointer;transition:all .3s var(--ease)}
-.qa-btn:hover{transform:translateY(-3px)}
+.qa-btn{display:flex;flex-direction:column;align-items:flex-start;gap:8px;padding:15px;border-radius:18px;background:var(--surface-2);border:1px solid var(--border);text-align:right;cursor:pointer;transition:all .3s var(--ease)}
+.qa-btn:hover{transform:translateY(-2px);background:var(--surface);box-shadow:var(--card-shadow)}
 .qa-btn .ic{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;color:#fff;background:var(--grad-2)}
 .qa-btn .ic svg{width:18px;height:18px}
 .qa-btn.alt-1 .ic{background:var(--grad-success)}
@@ -240,17 +288,25 @@ button{cursor:pointer}
 .qa-btn.alt-3 .ic{background:var(--grad-info)}
 .qa-btn b{font-size:12.5px;font-weight:700}
 .qa-btn span{font-size:11px;color:var(--muted)}
+
+/* ============ PIPE with mini bars ============ */
 .pipe{display:flex;flex-direction:column;gap:8px}
-.pipe-step{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:16px;background:var(--g1);border:1px solid var(--gb)}
-.pipe-num{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;font-weight:800;font-size:12px;background:var(--surface);color:var(--muted);border:1px solid var(--border)}
+.pipe-step{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:16px;background:var(--surface-2);border:1px solid var(--border)}
+.pipe-num{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;font-weight:800;font-size:12px;background:var(--surface);color:var(--muted);border:1px solid var(--border);flex-shrink:0}
 .pipe-step.active .pipe-num{background:var(--grad);color:#fff;border-color:transparent}
 .pipe-step.done .pipe-num{background:var(--grad-success);color:#fff;border-color:transparent}
-.pipe-step .lbl{flex:1;font-size:12.5px;font-weight:600}
+.pipe-step .lbl{flex:1;font-size:12.5px;font-weight:600;min-width:0}
 .pipe-step .lbl small{display:block;font-weight:500;font-size:11px;color:var(--muted)}
-.pipe-count{font-size:13px;font-weight:800;padding:4px 11px;border-radius:100px;background:var(--surface);border:1px solid var(--border)}
+.pipe-bar{height:4px;border-radius:100px;background:var(--surface-3);overflow:hidden;margin-top:6px}
+.pipe-bar-fill{height:100%;border-radius:100px;background:var(--grad-2);transition:width .8s var(--ease)}
+.pipe-step.active .pipe-bar-fill{background:var(--grad-warn)}
+.pipe-step.done .pipe-bar-fill{background:var(--grad-success)}
+.pipe-count{font-size:13px;font-weight:800;padding:4px 11px;border-radius:100px;background:var(--surface);border:1px solid var(--border);flex-shrink:0;font-variant-numeric:tabular-nums}
+
+/* ============ FEED ============ */
 .feed{display:flex;flex-direction:column;gap:2px}
 .feed-item{display:flex;gap:12px;padding:11px;border-radius:14px;cursor:pointer;transition:background .2s var(--ease)}
-.feed-item:hover{background:var(--g1)}
+.feed-item:hover{background:var(--surface-2)}
 .feed-av{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;font-weight:700;font-size:12px;color:#fff;background:var(--grad-2);flex-shrink:0}
 .feed-av.success{background:var(--grad-success)}
 .feed-av.warn{background:var(--grad-warn)}
@@ -267,7 +323,7 @@ button{cursor:pointer}
 .team-info{flex:1;min-width:0}
 .team-info b{display:block;font-size:12.5px;font-weight:700}
 .team-info span{display:block;font-size:11px;color:var(--muted)}
-.role-badge{font-size:10.5px;font-weight:700;padding:4px 10px;border-radius:100px;background:var(--g1);color:var(--text-2);border:1px solid var(--gb)}
+.role-badge{font-size:10.5px;font-weight:700;padding:4px 10px;border-radius:100px;background:var(--surface-2);color:var(--text-2);border:1px solid var(--border)}
 .role-badge.manager{background:rgba(175,82,222,.14);color:#7c3aed;border-color:rgba(175,82,222,.24)}
 .role-badge.admin{background:rgba(0,122,255,.14);color:var(--blue);border-color:rgba(0,122,255,.24)}
 .role-badge.warehouse_officer{background:rgba(255,149,0,.14);color:#b45309;border-color:rgba(255,149,0,.24)}
@@ -290,9 +346,10 @@ button{cursor:pointer}
 [data-theme="dark"] .badge.pending_manager{color:#c4b5fd}
 [data-theme="dark"] .badge.approved{color:#34d399}
 [data-theme="dark"] .badge.rejected{color:#f87171}
+
 .t-list{display:flex;flex-direction:column;gap:10px}
-.t-item{background:var(--g1);border:1px solid var(--gb);border-radius:18px;padding:14px 16px;cursor:pointer;transition:all .3s var(--ease)}
-.t-item:hover{border-color:var(--border-2);box-shadow:0 14px 32px -14px rgba(0,122,255,.4);transform:translateY(-2px);background:var(--g2)}
+.t-item{background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:14px 16px;cursor:pointer;transition:all .3s var(--ease)}
+.t-item:hover{border-color:var(--border-2);box-shadow:var(--card-shadow-hover);transform:translateY(-2px)}
 .t-row1{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:8px}
 .t-code{font-family:monospace;font-size:12px;color:var(--muted);font-weight:600}
 .t-row2{display:flex;align-items:center;gap:14px;flex-wrap:wrap;font-size:12.5px;color:var(--muted)}
@@ -305,14 +362,14 @@ button{cursor:pointer}
 .t-step.done{background:var(--grad-success)}
 .t-step.active{background:var(--grad);animation:pulse 1.6s ease-in-out infinite}
 .t-step.rejected{background:var(--grad-danger)}
-.table-card{background:var(--g2);border:1px solid var(--gb);border-radius:22px;overflow:hidden}
+.table-card{background:var(--surface);border:1px solid var(--border);border-radius:22px;overflow:hidden;box-shadow:var(--card-shadow)}
 .table-toolbar{padding:14px 18px;display:flex;gap:10px;flex-wrap:wrap;align-items:center;border-bottom:1px solid var(--border)}
 .table-scroll{overflow-x:auto}
 .dt{width:100%;border-collapse:collapse;font-size:13px;min-width:800px}
 .dt thead th{padding:14px 18px;text-align:right;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;white-space:nowrap;border-bottom:1px solid var(--border);background:var(--surface-2)}
 .dt tbody td{padding:14px 18px;border-bottom:1px solid var(--border);color:var(--text-2);white-space:nowrap;vertical-align:middle}
 .dt tbody tr:last-child td{border-bottom:none}
-.dt tbody tr:hover{background:var(--g1)}
+.dt tbody tr:hover{background:var(--surface-2)}
 .cell-product{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 .cell-product b{color:var(--text);font-weight:700;font-size:13.5px}
 .code-chip{display:inline-block;padding:2px 8px;border-radius:8px;background:var(--surface-3);font-family:monospace;font-size:10.5px;color:var(--muted);font-weight:700}
@@ -342,7 +399,7 @@ button{cursor:pointer}
 .status-pill.off{background:rgba(255,59,48,.14);color:#b91c1c}
 [data-theme="dark"] .status-pill.on{color:#34d399}
 [data-theme="dark"] .status-pill.off{color:#f87171}
-.role-select{height:34px;padding:0 30px 0 12px;border-radius:100px;background:var(--g1);border:1px solid var(--gb);font-size:12px;font-weight:600;color:var(--text-2);appearance:none;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2.5'><polyline points='6 9 12 15 18 9'/></svg>");background-repeat:no-repeat;background-position:left 10px center;background-size:11px;cursor:pointer}
+.role-select{height:34px;padding:0 30px 0 12px;border-radius:100px;background:var(--surface);border:1px solid var(--border-2);font-size:12px;font-weight:600;color:var(--text-2);appearance:none;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2.5'><polyline points='6 9 12 15 18 9'/></svg>");background-repeat:no-repeat;background-position:left 10px center;background-size:11px;cursor:pointer}
 .role-select:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(0,122,255,.14)}
 .table-empty{padding:60px 20px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:12px;color:var(--muted)}
 .table-empty svg{width:56px;height:56px;opacity:.3}
@@ -353,13 +410,19 @@ button{cursor:pointer}
 .field{display:flex;flex-direction:column;gap:7px}
 .field label{font-size:12.5px;font-weight:600;color:var(--text-2);display:flex;align-items:center;gap:6px}
 .field label .req{color:var(--red);font-size:14px}
-.field input,.field select,.field textarea{width:100%;height:44px;padding:0 16px;background:var(--g1);border:1px solid var(--gb);border-radius:100px;font-size:13.5px;color:var(--text);transition:all .28s var(--ease)}
+.field input,.field select,.field textarea{width:100%;height:44px;padding:0 16px;background:var(--surface);border:1px solid var(--border-2);border-radius:100px;font-size:13.5px;color:var(--text);transition:all .28s var(--ease)}
 .field textarea{height:auto;min-height:90px;padding:12px 18px;resize:vertical;font-family:inherit;line-height:1.7;border-radius:22px}
 .field select{appearance:none;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2.5'><polyline points='6 9 12 15 18 9'/></svg>");background-repeat:no-repeat;background-position:left 16px center;background-size:13px;padding-left:42px;cursor:pointer}
-.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--blue);box-shadow:0 0 0 4px rgba(0,122,255,.24);background:var(--g2)}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--blue);box-shadow:0 0 0 4px rgba(0,122,255,.14);background:var(--surface)}
 .field input:disabled,.field select:disabled{opacity:.6;cursor:not-allowed}
 .field .hint{font-size:11.5px;color:var(--muted);padding:0 6px;line-height:1.7;margin-top:-2px;display:flex;align-items:center;gap:5px}
 .field .hint svg{width:11px;height:11px;vertical-align:-1px;margin-left:4px;flex-shrink:0}
+.pw-wrap{position:relative}
+.pw-wrap input{padding-left:48px}
+.pw-toggle{position:absolute;left:6px;top:50%;transform:translateY(-50%);width:36px;height:36px;border-radius:50%;display:grid;place-items:center;color:var(--muted);cursor:pointer;transition:all .2s var(--ease)}
+.pw-toggle:hover{background:var(--surface-2);color:var(--text-2)}
+.pw-toggle svg{width:16px;height:16px}
+
 .kit-box{background:linear-gradient(135deg,rgba(0,122,255,.06),rgba(175,82,222,.05));border:1px solid rgba(0,122,255,.22);border-radius:20px;padding:16px;position:relative;overflow:hidden}
 .kit-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px}
 .kit-head-title{display:flex;align-items:center;gap:10px;font-size:13px;font-weight:800;color:var(--text)}
@@ -369,27 +432,27 @@ button{cursor:pointer}
 .kit-unit-name{display:inline-block;padding:1px 8px;border-radius:8px;background:rgba(0,122,255,.14);color:var(--blue);font-weight:800;font-size:11px}
 .kit-list{display:flex;flex-direction:column;gap:8px}
 .kit-row{display:grid;grid-template-columns:1fr 90px 38px;gap:8px;align-items:center;animation:slideUp .3s var(--ease)}
-.kit-row input{height:40px;padding:0 14px;border-radius:100px;background:var(--g3);border:1px solid var(--gb);font-size:13px;color:var(--text);transition:all .25s var(--ease)}
-.kit-row input:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(0,122,255,.18)}
+.kit-row input{height:40px;padding:0 14px;border-radius:100px;background:var(--surface);border:1px solid var(--border-2);font-size:13px;color:var(--text);transition:all .25s var(--ease)}
+.kit-row input:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(0,122,255,.14)}
 .kit-row .kit-qty{text-align:center;font-weight:700;font-variant-numeric:tabular-nums}
 .kit-del{width:38px;height:38px;border-radius:50%;background:rgba(255,59,48,.12);color:var(--red);display:grid;place-items:center;cursor:pointer;border:1px solid rgba(255,59,48,.2);transition:all .22s var(--ease);flex-shrink:0}
 .kit-del:hover{background:rgba(255,59,48,.2);transform:scale(1.06)}
 .kit-del svg{width:14px;height:14px}
-.kit-empty{padding:22px 16px;text-align:center;color:var(--muted);font-size:12.5px;background:var(--g1);border:1px dashed var(--border-2);border-radius:14px;line-height:1.9}
+.kit-empty{padding:22px 16px;text-align:center;color:var(--muted);font-size:12.5px;background:var(--surface);border:1px dashed var(--border-2);border-radius:14px;line-height:1.9}
 .kit-empty b{display:block;color:var(--text-2);font-weight:700;font-size:13px;margin-bottom:4px}
 .kit-hint{font-size:11.5px;color:var(--muted);padding:0 4px;line-height:1.9;margin-top:8px}
-.kit-total{margin-top:10px;padding:10px 14px;background:var(--g3);border:1px dashed var(--border-2);border-radius:14px;font-size:12.5px;color:var(--text-2);display:flex;align-items:center;gap:8px}
+.kit-total{margin-top:10px;padding:10px 14px;background:var(--surface);border:1px dashed var(--border-2);border-radius:14px;font-size:12.5px;color:var(--text-2);display:flex;align-items:center;gap:8px}
 .kit-total b{color:var(--blue);font-weight:800;font-size:15px;font-variant-numeric:tabular-nums}
 .kit-total svg{width:14px;height:14px;color:var(--blue)}
 @media (max-width:520px){.kit-row{grid-template-columns:1fr 72px 34px;gap:6px}.kit-row input{height:38px;padding:0 12px;font-size:12.5px}.kit-del{width:34px;height:34px}}
-.kit-pop{position:fixed;z-index:1100;background:var(--g3);backdrop-filter:blur(24px) saturate(1.9);border:1px solid var(--gb);border-radius:18px;box-shadow:0 24px 50px -14px rgba(0,0,0,.35);padding:14px;min-width:230px;max-width:300px;animation:popIn .25s var(--spring)}
+.kit-pop{position:fixed;z-index:1100;background:var(--surface);border:1px solid var(--border-2);border-radius:18px;box-shadow:0 24px 50px -14px rgba(0,0,0,.35);padding:14px;min-width:230px;max-width:300px;animation:popIn .25s var(--spring)}
 .kit-pop .kit-pop-title{font-size:11.5px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid var(--border)}
 .kit-pop .kit-pop-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:6px 0;font-size:12.5px}
 .kit-pop .kit-pop-row b{color:var(--text);font-weight:600}
 .kit-pop .kit-pop-qty{padding:1px 8px;border-radius:100px;background:rgba(0,122,255,.12);color:var(--blue);font-weight:800;font-size:11.5px}
 .wiz-steps{display:flex;gap:0;margin-bottom:26px;position:relative}
 .wiz-step{flex:1;display:flex;flex-direction:column;align-items:center;gap:8px;position:relative;z-index:1}
-.wiz-step .num{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;background:var(--g1);color:var(--muted);font-weight:700;font-size:13px;border:1px solid var(--gb);transition:all .4s var(--ease)}
+.wiz-step .num{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;background:var(--surface);color:var(--muted);font-weight:700;font-size:13px;border:1px solid var(--border-2);transition:all .4s var(--ease)}
 .wiz-step .lbl{font-size:11.5px;color:var(--muted);font-weight:600;text-align:center}
 .wiz-step.active .num{background:var(--grad);color:#fff;border-color:transparent;transform:scale(1.1)}
 .wiz-step.active .lbl{color:var(--blue)}
@@ -404,12 +467,12 @@ button{cursor:pointer}
 .drawer-body{padding:22px;overflow-y:auto;flex:1}
 .drawer-foot{padding:16px 22px;border-top:1px solid var(--border);display:flex;gap:10px;flex-wrap:wrap;background:var(--g1)}
 .modal-bd{position:fixed;inset:0;z-index:300;background:rgba(10,15,25,.45);backdrop-filter:blur(10px);display:grid;place-items:center;padding:16px;animation:fadeIn .22s var(--ease)}
-.modal{width:100%;max-width:500px;max-height:88vh;overflow:auto;background:var(--g3);border:1px solid var(--gb);border-radius:28px;padding:26px;box-shadow:0 40px 90px -25px rgba(0,0,0,.5);animation:popIn .4s var(--spring)}
+.modal{width:100%;max-width:500px;max-height:88vh;overflow:auto;background:var(--g3);border:1px solid var(--gb);border-radius:28px;padding:26px;box-shadow:0 40px 90px -25px rgba(0,0,0,.5);animation:popIn .4s var(--spring);backdrop-filter:blur(20px) saturate(1.9)}
 .modal h3{font-size:17px;font-weight:800;margin-bottom:6px}
 .modal .desc{color:var(--muted);font-size:12.5px;margin-bottom:18px}
 .modal-actions{display:flex;gap:10px;margin-top:20px;justify-content:flex-start;flex-wrap:wrap}
 .cmd-bd{position:fixed;inset:0;z-index:400;background:rgba(10,15,25,.5);backdrop-filter:blur(12px);display:grid;place-items:start center;padding:80px 16px 16px;animation:fadeIn .18s var(--ease)}
-.cmd{width:100%;max-width:580px;background:var(--g3);border:1px solid var(--gb);border-radius:28px;overflow:hidden;box-shadow:0 40px 90px -25px rgba(0,0,0,.5);animation:popIn .35s var(--spring)}
+.cmd{width:100%;max-width:580px;background:var(--g3);border:1px solid var(--gb);border-radius:28px;overflow:hidden;box-shadow:0 40px 90px -25px rgba(0,0,0,.5);animation:popIn .35s var(--spring);backdrop-filter:blur(20px) saturate(1.9)}
 .cmd input{width:100%;height:58px;padding:0 22px;font-size:15px;font-weight:500;border-bottom:1px solid var(--border)}
 .cmd-list{max-height:380px;overflow-y:auto;padding:8px}
 .cmd-item{display:flex;align-items:center;gap:12px;padding:11px 14px;border-radius:100px;font-size:13.5px;cursor:pointer}
@@ -436,7 +499,7 @@ button{cursor:pointer}
 .notif-tab[data-tab="activity"] .notif-count{background:var(--surface-3);color:var(--text-2)}
 .notif-tab.active[data-tab="pending"] .notif-count{background:var(--grad-warn)}
 .notif-body{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:12px}
-.notif-card{background:var(--g2);border:1px solid var(--gb);border-radius:18px;padding:14px 16px}
+.notif-card{background:var(--surface);border:1px solid var(--border-2);border-radius:18px;padding:14px 16px}
 .notif-card.pending{border-right:3px solid var(--orange)}
 .notif-card.pending.pending_accountant{border-right-color:var(--teal)}
 .notif-card.pending.pending_manager{border-right-color:var(--purple)}
@@ -471,6 +534,8 @@ button{cursor:pointer}
 .notif-empty svg{width:56px;height:56px;opacity:.3;color:var(--muted)}
 .notif-empty b{font-size:14.5px;font-weight:700;color:var(--text)}
 .notif-empty p{font-size:12.5px;color:var(--muted);max-width:280px;line-height:1.9}
+
+/* ============ CELEBRATE (فقط برای عملیات مهم) ============ */
 .celebrate{position:fixed;inset:0;z-index:1500;display:grid;place-items:center;background:rgba(10,15,25,.5);backdrop-filter:blur(20px);animation:fadeIn .25s var(--ease);overflow:hidden}
 .celebrate.exit{animation:celebrateOut .5s var(--ease) forwards}
 .celebrate-card{position:relative;display:flex;flex-direction:column;align-items:center;gap:22px;padding:40px 50px;text-align:center}
@@ -484,6 +549,7 @@ button{cursor:pointer}
 .celebrate-desc{font-size:15px;color:rgba(255,255,255,.85);line-height:1.9}
 .celebrate-hint{margin-top:8px;font-size:12px;color:rgba(255,255,255,.55)}
 .confetti{position:absolute;top:-20px;width:10px;height:14px;border-radius:3px;pointer-events:none;animation:confetti linear forwards}
+
 .login{min-height:100vh;display:grid;grid-template-columns:1.05fr 1fr}
 .login-left{background:var(--grad);color:#fff;padding:56px;display:flex;flex-direction:column;justify-content:space-between;position:relative;overflow:hidden}
 .login-left::before{content:'';position:absolute;inset:0;background:radial-gradient(600px 400px at 90% 10%,rgba(255,255,255,.2),transparent 60%),radial-gradient(500px 400px at 10% 90%,rgba(255,255,255,.14),transparent 60%)}
@@ -508,17 +574,17 @@ button{cursor:pointer}
 @media (max-width:900px){.login{grid-template-columns:1fr}.login-left{display:none}.login-right{padding:24px}}
 .muted{color:var(--muted)}.small{font-size:12px}
 .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
-.chip{display:inline-flex;align-items:center;gap:6px;height:34px;padding:0 14px;border-radius:100px;background:var(--g1);border:1px solid var(--gb);font-size:12.5px;font-weight:500;color:var(--text-2);cursor:pointer;transition:all .28s var(--ease)}
-.chip:hover{border-color:var(--border-2);background:var(--g2)}
+.chip{display:inline-flex;align-items:center;gap:6px;height:34px;padding:0 14px;border-radius:100px;background:var(--surface);border:1px solid var(--border-2);font-size:12.5px;font-weight:500;color:var(--text-2);cursor:pointer;transition:all .28s var(--ease)}
+.chip:hover{border-color:var(--border-2);background:var(--surface-2)}
 .chip.active{background:var(--grad);color:#fff;border-color:transparent}
 .chip .count{font-size:10.5px;padding:1px 7px;border-radius:100px;background:rgba(0,0,0,.08)}
 .chip.active .count{background:rgba(255,255,255,.3)}
 .search-input{position:relative;flex:1;min-width:200px;max-width:340px}
-.search-input input{width:100%;height:40px;padding:0 40px 0 14px;background:var(--g1);border:1px solid var(--gb);border-radius:100px;font-size:13px;color:var(--text)}
+.search-input input{width:100%;height:40px;padding:0 40px 0 14px;background:var(--surface);border:1px solid var(--border-2);border-radius:100px;font-size:13px;color:var(--text)}
 .search-input input:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(0,122,255,.14)}
 .search-input svg{position:absolute;right:14px;top:50%;transform:translateY(-50%);width:15px;height:15px;color:var(--muted);pointer-events:none}
 .dl{display:grid;gap:1px;background:var(--border);border-radius:14px;overflow:hidden}
-.dl-item{background:var(--g2);padding:13px 15px;display:flex;flex-direction:column;gap:4px}
+.dl-item{background:var(--surface);padding:13px 15px;display:flex;flex-direction:column;gap:4px}
 .dl-item .k{font-size:11.5px;color:var(--muted);font-weight:600}
 .dl-item .v{font-size:13.5px;font-weight:700;word-break:break-word}
 .tl{list-style:none;position:relative;padding-right:32px}
@@ -533,10 +599,15 @@ button{cursor:pointer}
 .tl-title{font-weight:700;font-size:13.5px;margin-bottom:3px}
 .tl-meta{font-size:12px;color:var(--muted);line-height:1.75}
 .tl-meta b{color:var(--text-2);font-weight:600}
-.empty{padding:48px 20px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:12px}
-.empty svg{width:64px;height:64px;opacity:.3}
-.empty b{font-size:15px;font-weight:700}
-.empty p{font-size:12.5px;color:var(--muted);line-height:1.9;max-width:320px}
+
+/* ============ EMPTY STATE (بازطراحی) ============ */
+.empty{padding:44px 20px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:14px}
+.empty-art{position:relative;width:96px;height:96px;margin-bottom:2px}
+.empty-circle{width:96px;height:96px;border-radius:50%;background:linear-gradient(135deg,rgba(0,122,255,.10),rgba(175,82,222,.06));display:grid;place-items:center;color:var(--blue);border:1px solid rgba(0,122,255,.14)}
+.empty-circle svg{width:40px;height:40px;opacity:.65;stroke-width:1.6}
+.empty b{font-size:15px;font-weight:700;color:var(--text)}
+.empty p{font-size:12.5px;color:var(--muted);line-height:1.9;max-width:320px;margin-top:-4px}
+.empty .btn{margin-top:6px}
 .bottom-tabs{display:none;position:fixed;bottom:calc(14px + env(safe-area-inset-bottom, 0px));left:50%;transform:translateX(-50%);z-index:80;background:var(--g2);backdrop-filter:blur(30px) saturate(1.9);-webkit-backdrop-filter:blur(30px) saturate(1.9);border:1px solid var(--gb);border-radius:100px;box-shadow:var(--ghl),0 20px 50px -12px rgba(15,23,42,.35);padding:5px;gap:2px;max-width:calc(100vw - 24px);align-items:center}
 @media (max-width:900px){.bottom-tabs{display:flex}}
 .tab-btn{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-width:58px;padding:7px 9px;border-radius:100px;color:var(--text-2);cursor:pointer;transition:all .28s var(--ease);background:transparent;border:0;flex:1}
@@ -583,18 +654,18 @@ button{cursor:pointer}
 .install-toast button svg{width:14px;height:14px}
 .install-toast .x{background:transparent;color:var(--muted);width:30px;height:30px;padding:0;justify-content:center;border-radius:50%}
 .rep-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:18px}
-.rep-tab{display:inline-flex;align-items:center;gap:8px;height:40px;padding:0 16px;border-radius:100px;font-size:13px;font-weight:600;color:var(--text-2);background:var(--g1);border:1px solid var(--gb);cursor:pointer;transition:all .28s var(--ease);white-space:nowrap}
-.rep-tab:hover{background:var(--g2)}
+.rep-tab{display:inline-flex;align-items:center;gap:8px;height:40px;padding:0 16px;border-radius:100px;font-size:13px;font-weight:600;color:var(--text-2);background:var(--surface);border:1px solid var(--border-2);cursor:pointer;transition:all .28s var(--ease);white-space:nowrap}
+.rep-tab:hover{background:var(--surface-2)}
 .rep-tab.active{background:var(--grad);color:#fff;border-color:transparent;box-shadow:inset 0 1px 0 rgba(255,255,255,.45),0 8px 20px -8px rgba(0,122,255,.65)}
 .rep-tab svg{width:15px;height:15px}
 .rep-filters{display:flex;gap:10px;flex-wrap:wrap;align-items:center;padding:14px 18px;border-bottom:1px solid var(--border);background:var(--surface-2)}
 .rep-filters .field{flex-direction:row;align-items:center;gap:8px;min-width:auto}
 .rep-filters .field label{font-size:11.5px;white-space:nowrap}
-.rep-filters select,.rep-filters input{height:36px;padding:0 32px 0 12px;border-radius:100px;background:var(--g3);border:1px solid var(--gb);font-size:12.5px;font-weight:600;appearance:none;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2.5'><polyline points='6 9 12 15 18 9'/></svg>");background-repeat:no-repeat;background-position:left 10px center;background-size:11px;min-width:120px}
+.rep-filters select,.rep-filters input{height:36px;padding:0 32px 0 12px;border-radius:100px;background:var(--surface);border:1px solid var(--border-2);font-size:12.5px;font-weight:600;appearance:none;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2.5'><polyline points='6 9 12 15 18 9'/></svg>");background-repeat:no-repeat;background-position:left 10px center;background-size:11px;min-width:120px}
 .rep-filters input[type="date"]{padding:0 12px;background-image:none;font-family:monospace;direction:ltr;text-align:left}
 .rep-actions{display:flex;gap:6px;margin-right:auto}
 .rep-stat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;padding:16px 18px;background:var(--surface-2);border-bottom:1px solid var(--border)}
-.rep-stat{background:var(--g3);border:1px solid var(--gb);border-radius:16px;padding:14px}
+.rep-stat{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:14px}
 .rep-stat .k{font-size:11px;color:var(--muted);font-weight:700;margin-bottom:6px;display:flex;align-items:center;gap:6px}
 .rep-stat .k .wh-dot{width:8px;height:8px}
 .rep-stat .v{font-size:22px;font-weight:800;color:var(--text);font-variant-numeric:tabular-nums}
@@ -618,10 +689,7 @@ button{cursor:pointer}
   .pdf-toolbar .btn svg{width:15px;height:15px}
 }
 
-/* ============================================================
-   RESPONSIVE ENHANCEMENTS
-   ============================================================ */
-
+/* ============ RESPONSIVE ============ */
 @media (min-width:1400px){
   .page{padding:30px 24px 60px}
   .bento{gap:18px}
@@ -652,6 +720,8 @@ button{cursor:pointer}
   .widget{padding:16px;border-radius:20px}
   .stat{padding:16px;border-radius:20px}
   .stat-value{font-size:28px}
+  .stat-spark{width:70px}
+  .stat-spark .sparkline{width:70px;height:30px}
   .qa{gap:8px}
   .qa-btn{padding:14px;border-radius:16px}
   .qa-btn .ic{width:34px;height:34px}
@@ -673,7 +743,6 @@ button{cursor:pointer}
   .page-head .sub{font-size:12px}
   .page-actions{width:100%}
   .page-actions .btn{flex:1}
-
   .hero{padding:18px;border-radius:20px}
   .hero h2{font-size:18px;line-height:1.35}
   .hero p{font-size:12.5px;line-height:1.8}
@@ -683,65 +752,56 @@ button{cursor:pointer}
   .hero-quick{gap:6px;margin-top:16px}
   .hero-quick button{height:36px;padding:0 12px;font-size:11.5px;gap:5px}
   .hero-quick button svg{width:13px;height:13px}
-
   .widget{padding:14px;border-radius:18px}
   .w-head{margin-bottom:12px;gap:8px}
   .w-title{font-size:12.5px;gap:7px}
   .w-title .ic{width:26px;height:26px;border-radius:8px}
   .w-title .ic svg{width:13px;height:13px}
   .w-sub{font-size:11px}
-
   .stat{padding:14px;border-radius:16px}
   .stat-head{margin-bottom:10px}
   .stat-ic{width:32px;height:32px}
   .stat-ic svg{width:15px;height:15px}
   .stat-title{font-size:11.5px;gap:7px}
   .stat-value{font-size:24px}
-
+  .stat-spark{width:64px}
+  .stat-spark .sparkline{width:64px;height:26px}
   .qa{gap:8px}
   .qa-btn{padding:12px;gap:6px;border-radius:14px}
   .qa-btn .ic{width:30px;height:30px}
   .qa-btn .ic svg{width:14px;height:14px}
   .qa-btn b{font-size:11.5px}
   .qa-btn span{font-size:10.5px}
-
   .pipe{gap:6px}
   .pipe-step{padding:10px 12px;gap:10px;border-radius:14px}
   .pipe-num{width:26px;height:26px;font-size:11px}
   .pipe-step .lbl{font-size:11.5px}
   .pipe-step .lbl small{font-size:10px}
   .pipe-count{font-size:12px;padding:3px 9px}
-
   .feed-item{padding:10px;gap:10px;border-radius:12px}
   .feed-av{width:34px;height:34px;font-size:11px}
   .feed-title{font-size:12.5px}
   .feed-meta{font-size:11px}
-
   .team-row{padding:8px;gap:10px}
   .team-info b{font-size:12px}
   .team-info span{font-size:10.5px}
   .role-badge{font-size:10px;padding:3px 8px}
-
   .badge{font-size:11px;padding:4px 9px}
   .t-item{padding:12px 14px;border-radius:16px}
   .t-row1{gap:8px;margin-bottom:6px}
   .t-row2{gap:10px;font-size:12px}
   .t-code{font-size:11px}
   .t-qty{font-size:11.5px;padding:2px 9px}
-
   .btn{padding:0 14px;font-size:12.5px;height:38px}
   .btn.sm{height:34px;padding:0 12px;font-size:12px}
   .btn.xs{height:28px;padding:0 10px;font-size:11px}
   .btn.block{height:42px}
-
   .icon-btn{width:38px;height:38px}
-
   .form-grid{gap:12px}
   .field label{font-size:12px}
   .field input,.field select,.field textarea{height:42px;font-size:13px;padding:0 14px}
   .field textarea{min-height:80px;padding:10px 14px}
   .field select{padding-left:38px;background-position:left 14px center}
-
   .table-card{border-radius:18px}
   .table-toolbar{padding:12px 12px;gap:8px}
   .search-input{min-width:100%;max-width:100%}
@@ -749,7 +809,6 @@ button{cursor:pointer}
   .dt thead th{padding:10px 12px;font-size:10.5px}
   .dt tbody td{padding:10px 12px}
   .row-num{width:26px;height:26px;font-size:11px}
-
   .rep-tabs{gap:4px;margin-bottom:12px}
   .rep-tab{height:36px;padding:0 12px;font-size:12px;gap:6px}
   .rep-tab svg{width:14px;height:14px}
@@ -763,20 +822,17 @@ button{cursor:pointer}
   .rep-stat .k{font-size:10.5px}
   .rep-stat .v{font-size:18px}
   .legend{padding:8px 12px;font-size:11px;gap:10px}
-
   .modal{padding:18px;border-radius:22px;max-width:calc(100% - 20px)}
   .modal h3{font-size:15.5px}
   .modal .desc{font-size:12px}
   .modal-actions{flex-direction:column-reverse;gap:8px}
   .modal-actions .btn{width:100%}
-
   .drawer{max-width:100%}
   .drawer-head{padding:18px}
   .drawer-head h3{font-size:14px}
   .drawer-body{padding:18px}
   .drawer-foot{padding:14px 18px;gap:8px}
   .drawer-foot .btn{flex:1}
-
   .notif-head{padding:16px 18px 12px}
   .notif-title-icon{width:40px;height:40px;border-radius:12px}
   .notif-tabs{padding:10px 12px}
@@ -786,12 +842,10 @@ button{cursor:pointer}
   .notif-card-title{font-size:13px}
   .notif-card-actions{gap:6px}
   .notif-card-actions .btn{flex:1;justify-content:center}
-
   .cmd-bd{padding:60px 12px 12px}
   .cmd input{height:52px;font-size:14px;padding:0 18px}
   .cmd-item{padding:10px 12px;font-size:13px;border-radius:14px}
   .cmd-item .kbd{display:none}
-
   .sheet{padding:10px 12px calc(20px + env(safe-area-inset-bottom, 0px))}
   .sheet-user{padding:14px;gap:12px;border-radius:18px}
   .sheet-user .avatar{width:48px;height:48px;font-size:16px}
@@ -799,7 +853,6 @@ button{cursor:pointer}
   .sheet-item{padding:10px;gap:12px;font-size:13.5px;border-radius:14px}
   .sheet-ic{width:36px;height:36px}
   .sheet-ic svg{width:16px;height:16px}
-
   .kit-box{padding:12px;border-radius:16px}
   .kit-head{gap:8px;margin-bottom:12px}
   .kit-head-title{font-size:12.5px;gap:8px}
@@ -812,11 +865,9 @@ button{cursor:pointer}
   .kit-del svg{width:13px;height:13px}
   .kit-hint{font-size:11px;line-height:1.7}
   .kit-total{font-size:11.5px;padding:8px 12px}
-
   .dl-item{padding:11px 13px}
   .dl-item .k{font-size:11px}
   .dl-item .v{font-size:12.5px}
-
   .tl{padding-right:26px}
   .tl::before{right:10px}
   .tl-node{right:-26px;width:22px;height:22px}
@@ -824,35 +875,35 @@ button{cursor:pointer}
   .tl-title{font-size:12.5px}
   .tl-meta{font-size:11.5px;line-height:1.7}
   .tl li{padding-bottom:20px}
-
   .bottom-tabs{bottom:calc(10px + env(safe-area-inset-bottom, 0px));padding:4px}
   .tab-btn{min-width:52px;padding:6px 6px;gap:2px}
   .tab-btn svg{width:20px;height:20px}
   .tab-btn span{font-size:9px}
   .tab-btn .tab-badge{top:1px;transform:translateX(10px);min-width:16px;height:16px;font-size:9px}
-
-  /* NEW SPLASH - phone */
   .splash-logo-wrap{width:115px;height:115px}
   .splash-logo{width:100px;height:100px}
   .splash-logo svg{width:48px;height:48px}
   .splash-wordmark{font-size:36px;letter-spacing:-1.5px}
   .splash-tagline{font-size:10px;letter-spacing:3px}
   .splash-progress-track{width:150px}
-
   .wiz-steps{margin-bottom:20px}
   .wiz-step .num{width:36px;height:36px;font-size:12px}
   .wiz-step .lbl{font-size:10.5px}
   .wiz-line{top:18px}
-
   .search-input input{height:38px;font-size:12.5px}
   .chip{height:32px;padding:0 12px;font-size:12px}
+  .empty{padding:32px 16px}
+  .empty-art{width:80px;height:80px}
+  .empty-circle{width:80px;height:80px}
+  .empty-circle svg{width:34px;height:34px}
+  .wh-section{margin:4px 0 -2px}
+  .wh-section-title{font-size:10.5px}
 }
 @media (max-width:480px){
   .page{padding:14px 10px 110px}
   .page-head h1{font-size:20px}
   .page-head .sub{font-size:11.5px}
   .page-actions{gap:6px}
-
   .hero{padding:16px;border-radius:18px}
   .hero h2{font-size:17px}
   .hero p{font-size:12px}
@@ -860,57 +911,49 @@ button{cursor:pointer}
   .hero-stat .v{font-size:16px}
   .hero-quick{gap:5px;margin-top:14px}
   .hero-quick button{height:34px;padding:0 11px;font-size:11px}
-
   .widget{padding:12px;border-radius:16px}
   .w-title{font-size:12px}
   .w-title .ic{width:24px;height:24px}
   .w-title .ic svg{width:12px;height:12px}
-
   .stat{padding:12px;border-radius:14px}
   .stat-value{font-size:22px}
   .stat-ic{width:30px;height:30px}
   .stat-ic svg{width:14px;height:14px}
-
+  .stat-spark{width:56px}
+  .stat-spark .sparkline{width:56px;height:24px}
   .qa-btn{padding:10px;gap:5px;border-radius:12px}
   .qa-btn .ic{width:28px;height:28px}
   .qa-btn .ic svg{width:13px;height:13px}
   .qa-btn b{font-size:11px}
   .qa-btn span{font-size:10px}
-
   .btn{padding:0 12px;font-size:12px;height:36px;gap:6px}
   .btn svg{width:14px;height:14px}
   .btn.sm{height:32px;padding:0 10px;font-size:11.5px}
   .btn.xs{height:26px;padding:0 9px;font-size:10.5px}
   .btn.block{height:40px}
-
   .icon-btn{width:36px;height:36px}
   .icon-btn svg{width:16px;height:16px}
   .avatar{width:32px;height:32px;font-size:11px}
-
   .navbar{height:54px}
   .nav-wrap{padding:8px 10px 0}
   .brand-logo{width:38px;height:38px}
   .brand-logo svg{width:20px;height:20px}
   .brand-text .wm{font-size:15px}
   .brand-text small{font-size:9px}
-
   .dt{min-width:520px}
   .dt thead th,.dt tbody td{padding:8px 10px}
   .row-num{width:24px;height:24px;font-size:10.5px}
   .code-chip,.unit-chip,.kit-chip{font-size:10px;padding:2px 6px}
   .qty-hl{font-size:12px;padding:3px 8px;min-width:38px}
-
   .rep-stat-grid{grid-template-columns:1fr 1fr;gap:8px;padding:10px}
   .rep-stat{padding:10px}
   .rep-stat .v{font-size:16px}
   .rep-stat .k{font-size:10px}
   .rep-tab{height:34px;padding:0 11px;font-size:11.5px}
-
   .bottom-tabs{padding:3px;gap:0;bottom:calc(8px + env(safe-area-inset-bottom, 0px))}
   .tab-btn{min-width:46px;padding:5px 4px}
   .tab-btn svg{width:18px;height:18px}
   .tab-btn span{font-size:8.5px}
-
   .modal{padding:16px;border-radius:20px;max-height:90vh}
   .modal h3{font-size:15px}
   .drawer-head{padding:16px}
@@ -920,51 +963,47 @@ button{cursor:pointer}
   .notif-body{padding:10px}
   .notif-tabs{padding:8px 10px;gap:2px}
   .notif-tab{font-size:11.5px;padding:0 8px;gap:5px}
-
   .sheet-user .avatar{width:44px;height:44px;font-size:14px}
   .sheet-user .info b{font-size:14.5px}
   .sheet-item{padding:9px 10px;font-size:13px}
   .sheet-ic{width:32px;height:32px}
   .sheet-ic svg{width:14px;height:14px}
-
-  /* NEW SPLASH - small phone */
   .splash-logo-wrap{width:100px;height:100px}
   .splash-logo{width:88px;height:88px}
   .splash-logo svg{width:44px;height:44px}
   .splash-wordmark{font-size:30px;letter-spacing:-1px}
+  .toast-wrap{bottom:calc(80px + env(safe-area-inset-bottom, 0px))}
+  .toast{padding:10px 12px 10px 11px;gap:9px;border-radius:14px}
+  .toast-icon{width:26px;height:26px}
+  .toast-icon svg{width:13px;height:13px}
+  .toast-body b{font-size:12.5px}
+  .toast-body span{font-size:11px}
 }
 @media (max-width:380px){
   .page{padding:12px 8px 110px}
   .page-head h1{font-size:18px}
-
   .hero{padding:14px}
   .hero h2{font-size:16px}
   .hero-quick{flex-direction:column;width:100%}
   .hero-quick button{width:100%;justify-content:center}
-
   .qa{grid-template-columns:1fr}
   .qa-btn{flex-direction:row;align-items:center;padding:12px}
   .qa-btn .ic{width:32px;height:32px}
   .qa-btn b{font-size:12px}
   .qa-btn span{display:none}
-
   .wiz-step .num{width:32px;height:32px;font-size:11px}
   .wiz-step .lbl{font-size:10px}
   .wiz-line{top:16px}
-
   .rep-stat-grid{grid-template-columns:1fr}
-
   .navbar{height:50px;padding:0 6px 0 10px}
   .nav-wrap{padding:6px 8px 0}
   .brand-logo{width:34px;height:34px}
   .brand-logo svg{width:18px;height:18px}
   .brand-text .wm{font-size:14px}
   .brand-text small{display:none}
-
   .icon-btn{width:34px;height:34px}
   .icon-btn svg{width:15px;height:15px}
   .avatar{width:30px;height:30px;font-size:10px}
-
   .tab-btn{min-width:42px;padding:4px 3px}
   .tab-btn svg{width:17px;height:17px}
   .tab-btn span{display:none}
@@ -987,6 +1026,7 @@ button{cursor:pointer}
   .btn:hover{transform:none}
   .t-item:hover{transform:none}
   .qa-btn:hover{transform:none}
+  .stat:hover{transform:none}
   .feed-item:hover{background:transparent}
   .dt tbody tr:hover{background:transparent}
   .btn:active{transform:scale(.96)}
@@ -997,13 +1037,14 @@ button{cursor:pointer}
   .splash{display:none!important}
 }
 @media print{
-  .nav-wrap,.bottom-tabs,.install-toast,.pdf-toolbar{display:none!important}
+  .nav-wrap,.bottom-tabs,.install-toast,.pdf-toolbar,.toast-wrap{display:none!important}
   body{background:#fff}
 }
 </style>
 </head>
 <body>
 <div id="app"></div>
+<div class="toast-wrap" id="toast-wrap"></div>
 <div id="err" style="position:fixed;top:0;left:0;right:0;z-index:99999;background:#dc2626;color:#fff;padding:12px 20px;font-family:monospace;font-size:12px;direction:ltr;text-align:left;white-space:pre-wrap;display:none"></div>
 <script>
 (function(){
@@ -1094,10 +1135,35 @@ var IC = {
   file: svg('<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>'),
   print: svg('<polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/>'),
   refresh: svg('<polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>'),
-  settings: svg('<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>')
+  settings: svg('<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>'),
+  eye: svg('<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>'),
+  eyeOff: svg('<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>')
 };
 var BRAND_A = svg('<path d="M5 19L12 4L19 19"/><path d="M8.5 13.5h7"/>', 2.4);
 
+/* ============ TOAST ============ */
+function toast(title, desc, type) {
+  type = type || 'success';
+  var wrap = document.getElementById('toast-wrap');
+  if (!wrap) return;
+  var icon = type === 'success' ? IC.check : type === 'error' ? IC.x : type === 'warn' ? IC.alert : IC.info;
+  var el = document.createElement('div');
+  el.className = 'toast ' + type;
+  el.innerHTML = '<div class="toast-icon">' + icon + '</div><div class="toast-body"><b>' + esc(title) + '</b>' + (desc ? '<span>' + esc(desc) + '</span>' : '') + '</div>';
+  wrap.appendChild(el);
+  requestAnimationFrame(function() { el.classList.add('show'); });
+  var t1 = setTimeout(function() {
+    el.classList.remove('show'); el.classList.add('hide');
+    setTimeout(function() { if (el.parentNode) el.remove(); }, 260);
+  }, 2900);
+  el.addEventListener('click', function() {
+    clearTimeout(t1);
+    el.classList.remove('show'); el.classList.add('hide');
+    setTimeout(function() { if (el.parentNode) el.remove(); }, 260);
+  });
+}
+
+/* ============ SPLASH ============ */
 function showSplash() {
   try {
     if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
@@ -1147,6 +1213,7 @@ function showSplash() {
   } catch(e) {}
 }
 
+/* ============ PWA ============ */
 var PWA = (function(){
   function drawIcon(size, maskable) {
     var c = document.createElement('canvas'); c.width = c.height = size;
@@ -1265,7 +1332,6 @@ function migrateDB(d) {
   ensure('showroom_alus', 'نمایشگاه الوس', 7);
   ensure('sold', 'کالای فروش‌رفته', 8);
   ensure('customer', 'مشتری', 9);
-  // ==== NEW MIGRATION: passwords → 1111 for default users (if still old defaults) ====
   var oldDefaults = { admin: 'admin', manager: 'manager', acc: 'acc', wh: 'wh' };
   for (var u = 0; u < d.users.length; u++) {
     if (oldDefaults[d.users[u].username] && d.users[u].password === oldDefaults[d.users[u].username]) {
@@ -1422,12 +1488,6 @@ var WH_COLOR = {
   showroom_khalij: '#AF52DE', showroom_alus: '#9333EA',
   sold: '#FF3B30', customer: '#94a3b8'
 };
-var WH_TYPE_LABEL = {
-  central: 'انبار مرکزی', paint_in: 'رنگ‌کاری داخلی', paint_out: 'رنگ‌کاری بیرون',
-  upholstery: 'رویه‌کوبی', store: 'فروشگاه',
-  showroom_khalij: 'نمایشگاه خلیج فارس', showroom_alus: 'نمایشگاه الوس',
-  sold: 'کالای فروش‌رفته', customer: 'مشتری'
-};
 
 function canCreate(u) { return u && ['warehouse_officer', 'admin', 'manager'].indexOf(u.role) >= 0; }
 function canManageUsers(u) { return u && (u.role === 'admin' || u.role === 'manager'); }
@@ -1516,6 +1576,43 @@ function findProductByName(db, name) {
   if (!n) return null;
   for (var i = 0; i < db.products.length; i++) if ((db.products[i].name || '').trim().toLowerCase() === n) return db.products[i];
   return null;
+}
+
+/* ============ SPARKLINE ============ */
+function sparklineData(db, whType, days) {
+  days = days || 7;
+  var ids = db.warehouses.filter(function(w) { return w.type === whType; }).map(function(w) { return w.id; });
+  var result = [];
+  for (var i = days - 1; i >= 0; i--) {
+    var d = new Date(); d.setDate(d.getDate() - i); d.setHours(0,0,0,0);
+    var next = new Date(d); next.setDate(next.getDate() + 1);
+    var qty = 0;
+    db.transfers.forEach(function(t) {
+      if (t.status !== 'approved') return;
+      var at = new Date(t.completedAt || t.createdAt);
+      if (at < d || at >= next) return;
+      if (t.type === 'inbound' && ids.indexOf(t.destinationWarehouseId) >= 0) qty += t.quantity;
+      else if (ids.indexOf(t.sourceWarehouseId) >= 0 || ids.indexOf(t.destinationWarehouseId) >= 0) qty += t.quantity;
+    });
+    result.push(qty);
+  }
+  return result;
+}
+function sparklineSVG(values, color, w, h) {
+  w = w || 80; h = h || 34;
+  if (!values.length) return '';
+  var max = Math.max.apply(null, values.concat([1]));
+  var step = w / (values.length - 1 || 1);
+  var pts = values.map(function(v, i) {
+    var x = i * step;
+    var y = h - (v / max) * (h - 6) - 3;
+    return x.toFixed(1) + ',' + y.toFixed(1);
+  }).join(' ');
+  var area = '0,' + h + ' ' + pts + ' ' + w + ',' + h;
+  return '<svg class="sparkline" viewBox="0 0 ' + w + ' ' + h + '" preserveAspectRatio="none">' +
+    '<polygon points="' + area + '" fill="' + color + '" opacity=".09"/>' +
+    '<polyline points="' + pts + '" fill="none" stroke="' + color + '" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>' +
+  '</svg>';
 }
 
 function showKitPop(anchor, product) {
@@ -1715,7 +1812,7 @@ function doApprove(id) {
             var t = null;
             for (var i = 0; i < db.transfers.length; i++) if (db.transfers[i].id === id) { t = db.transfers[i]; break; }
             if (!t) { c.remove(); return; }
-            if (!canApprove(App.user, t)) { c.remove(); celebrate('دسترسی ندارید', '', 'error', 1800); return; }
+            if (!canApprove(App.user, t)) { c.remove(); toast('دسترسی ندارید', '', 'error'); return; }
             var step = { userId: App.user.id, userName: App.user.name, at: new Date().toISOString(), note: note };
             var finalized = false;
             if (t.type === 'inbound') {
@@ -1735,7 +1832,7 @@ function doApprove(id) {
               else if (t.status === 'pending_manager') {
                 t.managerApproval = step;
                 var srcStock = findStock(db, t.productId, t.sourceWarehouseId);
-                if (!srcStock || srcStock.quantity < t.quantity) { c.remove(); celebrate('موجودی کافی نیست', '', 'error', 2000); return; }
+                if (!srcStock || srcStock.quantity < t.quantity) { c.remove(); toast('موجودی کافی نیست', '', 'error'); return; }
                 srcStock.quantity -= t.quantity;
                 srcStock.reservedQty = Math.max(0, (srcStock.reservedQty || 0) - t.quantity);
                 srcStock.updatedAt = new Date().toISOString();
@@ -1753,11 +1850,11 @@ function doApprove(id) {
             try { c.remove(); } catch(e) {}
             closeNotif();
             if (finalized) celebrate(t.type === 'inbound' ? 'ورود کالا ثبت شد' : 'انتقال قطعی شد', '', 'success', 2000);
-            else celebrate('تأیید شد', 'به مرحله بعد منتقل شد', 'success', 1600);
+            else toast('تأیید شد', 'به مرحله بعد منتقل شد', 'success');
             requestAnimationFrame(function() { requestAnimationFrame(function() { render(); }); });
           } catch(err) {
             try { c.remove(); } catch(e) {}
-            celebrate('خطا', err.message || 'عملیات ناموفق', 'error', 2200);
+            toast('خطا', err.message || 'عملیات ناموفق', 'error');
           }
         }, 400);
       } }
@@ -1773,7 +1870,7 @@ function doReject(id) {
       { label: 'انصراف', cls: 'ghost', onClick: function(c) { c.remove(); } },
       { label: IC.x + ' ثبت رد', cls: 'danger', onClick: function(c) {
         var reasonBox = c.querySelector('#rj-reason'); var reason = reasonBox ? reasonBox.value.trim() : '';
-        if (!reason) { celebrate('دلیل الزامی است', '', 'warn', 1600); return; }
+        if (!reason) { toast('دلیل الزامی است', '', 'warn'); return; }
         var btn = c.querySelector('button.danger'); if (btn) btn.classList.add('loading');
         setTimeout(function() {
           try {
@@ -1781,7 +1878,7 @@ function doReject(id) {
             var t = null;
             for (var i = 0; i < db.transfers.length; i++) if (db.transfers[i].id === id) { t = db.transfers[i]; break; }
             if (!t) { c.remove(); return; }
-            if (!canApprove(App.user, t)) { c.remove(); celebrate('دسترسی ندارید', '', 'error', 1800); return; }
+            if (!canApprove(App.user, t)) { c.remove(); toast('دسترسی ندارید', '', 'error'); return; }
             var stageMap = { pending_warehouse: 'warehouse', pending_accountant: 'accountant', pending_manager: 'manager' };
             var stage = stageMap[t.status];
             if (t.type !== 'inbound') {
@@ -1796,7 +1893,7 @@ function doReject(id) {
             requestAnimationFrame(function() { requestAnimationFrame(function() { render(); }); });
           } catch(err) {
             try { c.remove(); } catch(e) {}
-            celebrate('خطا', err.message || 'عملیات ناموفق', 'error', 2200);
+            toast('خطا', err.message || 'عملیات ناموفق', 'error');
           }
         }, 400);
       } }
@@ -1809,7 +1906,7 @@ function toggleTheme() {
   document.documentElement.setAttribute('data-theme', App.theme);
   savePrefs();
   var b = $('#theme-btn'); if (b) b.innerHTML = App.theme === 'light' ? IC.moon : IC.sun;
-  celebrate(App.theme === 'light' ? 'حالت روشن' : 'حالت تاریک', '', 'success', 1400);
+  toast(App.theme === 'light' ? 'حالت روشن' : 'حالت تاریک', '', 'success');
 }
 function doLogin(u, p) {
   var us = loadDB().users;
@@ -1983,7 +2080,7 @@ function renderLogin() {
     '<form class="login-form" id="lf">' +
     '<div class="field"><label>' + IC.users + ' انتخاب سریع کاربر</label><select id="lu-select"><option value="">— انتخاب کنید —</option><option value="admin">راهبر سیستم</option><option value="manager">مدیر</option><option value="acc">حسابدار</option><option value="wh">انباردار</option></select><div class="hint">' + IC.info + ' با انتخاب، نام کاربری و رمز به‌صورت خودکار پر می‌شود</div></div>' +
     '<div class="field"><label>نام کاربری</label><input id="lu" required placeholder="admin" autocomplete="username" /></div>' +
-    '<div class="field"><label>رمز عبور</label><input id="lp" type="password" required placeholder="••••••••" autocomplete="current-password" /></div>' +
+    '<div class="field"><label>رمز عبور</label><div class="pw-wrap"><input id="lp" type="password" required placeholder="••••••••" autocomplete="current-password" /><button type="button" class="pw-toggle" id="pw-tog" title="نمایش رمز">' + IC.eye + '</button></div></div>' +
     '<button class="btn primary block" type="submit" style="margin-top:6px;height:48px;font-size:14.5px">' + IC.check + ' ورود به سیستم</button></form>' +
     '</div></div></div>';
   var busy = false;
@@ -1999,6 +2096,13 @@ function renderLogin() {
       }
     });
   }
+  var pwTog = $('#pw-tog');
+  if (pwTog) pwTog.addEventListener('click', function() {
+    var pw = $('#lp');
+    if (!pw) return;
+    if (pw.type === 'password') { pw.type = 'text'; pwTog.innerHTML = IC.eyeOff; pwTog.title = 'پنهان کردن رمز'; }
+    else { pw.type = 'password'; pwTog.innerHTML = IC.eye; pwTog.title = 'نمایش رمز'; }
+  });
   $('#lf').addEventListener('submit', function(e) {
     e.preventDefault();
     if (busy) return; busy = true;
@@ -2011,7 +2115,7 @@ function renderLogin() {
         busy = false; if (btn) btn.classList.remove('loading');
         $('#lu').disabled = false; $('#lp').disabled = false; if (sel) sel.disabled = false;
         var card = $('.login-card'); if (card) { card.style.animation = 'shake .5s'; setTimeout(function() { card.style.animation = ''; }, 500); }
-        celebrate('ورود ناموفق', 'نام کاربری یا رمز اشتباه است', 'error', 1800); return;
+        toast('ورود ناموفق', 'نام کاربری یا رمز اشتباه است', 'error'); return;
       }
       celebrate('خوش آمدید ' + user.name, '', 'success', 1600);
       render();
@@ -2081,6 +2185,7 @@ function renderPage() {
   attachRippleAll();
 }
 
+/* ============ DASHBOARD (بازطراحی‌شده) ============ */
 function pageDashboard(page) {
   var db = loadDB();
   function totalOf(t) {
@@ -2088,16 +2193,43 @@ function pageDashboard(page) {
     if (!ids.length) return 0;
     return db.stocks.filter(function(s) { return ids.indexOf(s.warehouseId) >= 0; }).reduce(function(a, s) { return a + s.quantity; }, 0);
   }
+  function totalAvail(t) {
+    var ids = db.warehouses.filter(function(w) { return w.type === t; }).map(function(w) { return w.id; });
+    if (!ids.length) return 0;
+    return db.stocks.filter(function(s) { return ids.indexOf(s.warehouseId) >= 0; }).reduce(function(a, s) { return a + (s.quantity - (s.reservedQty || 0)); }, 0);
+  }
   var pending = db.transfers.filter(function(t) { return t.status.indexOf('pending') === 0; }).length;
   var totalItems = ['central', 'paint_in', 'paint_out', 'upholstery', 'store', 'showroom_khalij', 'showroom_alus', 'sold'].reduce(function(a, t) { return a + totalOf(t); }, 0);
+  var approvedWeek = (function() {
+    var t0 = new Date(); t0.setDate(t0.getDate() - 7); t0.setHours(0,0,0,0);
+    return db.transfers.filter(function(t) { return t.status === 'approved' && new Date(t.completedAt || t.createdAt) >= t0; }).length;
+  })();
   var hour = new Date().getHours();
   var greet = hour < 12 ? 'صبح بخیر' : hour < 17 ? 'ظهر بخیر' : hour < 20 ? 'عصر بخیر' : 'شب بخیر';
   var feed = db.transfers.slice(0, 6);
 
+  var pendingW = db.transfers.filter(function(t) { return t.status === 'pending_warehouse'; }).length;
+  var pendingA = db.transfers.filter(function(t) { return t.status === 'pending_accountant'; }).length;
+  var pendingM = db.transfers.filter(function(t) { return t.status === 'pending_manager'; }).length;
+  var approvedN = db.transfers.filter(function(t) { return t.status === 'approved'; }).length;
+  var maxPipe = Math.max(pendingW, pendingA, pendingM, approvedN, 1);
+
+  function statCard(type, label, icon, accent) {
+    var v = totalOf(type);
+    var av = totalAvail(type);
+    var sp = sparklineData(db, type, 7);
+    var color = WH_COLOR[type] || '#007AFF';
+    return '<div class="stat w-3">' +
+      '<div class="stat-head"><div class="stat-title"><div class="stat-ic" style="background:' + accent + '">' + icon + '</div><span>' + esc(label) + '</span></div></div>' +
+      '<div class="stat-body"><div class="stat-value" data-count="' + v + '">0</div><div class="stat-spark">' + sparklineSVG(sp, color, 80, 34) + '</div></div>' +
+      '<div class="stat-foot">' + IC.trend + ' قابل استفاده: ' + av.toLocaleString('fa-IR') + ' · ۷ روز اخیر</div>' +
+    '</div>';
+  }
+
   page.innerHTML =
     '<div class="bento">' +
       '<div class="hero w-8"><h2>' + greet + ' ' + esc((App.user.name || '').split(' ')[0]) + '</h2><p>' + (pending ? 'شما ' + pending + ' درخواست در انتظار تأیید دارید.' : 'همه‌چیز مرتب است.') + '</p>' +
-        '<div class="hero-stats"><div class="hero-stat"><div class="k">کل اقلام</div><div class="v">' + totalItems.toLocaleString('fa-IR') + ' <small>عدد</small></div></div><div class="hero-stat"><div class="k">در انتظار</div><div class="v">' + pending.toLocaleString('fa-IR') + ' <small>درخواست</small></div></div></div>' +
+        '<div class="hero-stats"><div class="hero-stat"><div class="k">کل اقلام</div><div class="v"><span data-count="' + totalItems + '">0</span> <small>عدد</small></div></div><div class="hero-stat"><div class="k">در انتظار</div><div class="v"><span data-count="' + pending + '">0</span> <small>درخواست</small></div></div><div class="hero-stat"><div class="k">تأییدشده (۷ روز)</div><div class="v"><span data-count="' + approvedWeek + '">0</span> <small>سند</small></div></div></div>' +
         (canCreate(App.user) ? '<div class="hero-quick"><button data-action="newTransfer">' + IC.plus + ' درخواست جدید</button><button data-action="newInbound">' + IC.factory + ' ثبت ورود</button><button data-action="directCustomer">' + IC.truck + ' ارسال به مشتری</button></div>' : '') +
       '</div>' +
 
@@ -2108,21 +2240,25 @@ function pageDashboard(page) {
         '<button class="qa-btn alt-3" data-action="reports"><div class="ic">' + IC.chart + '</div><b>گزارش‌ها</b><span>خروجی Excel/PDF</span></button>' +
       '</div></div>' +
 
-      '<div class="stat w-3"><div class="stat-head"><div class="stat-title"><div class="stat-ic">' + IC.package + '</div>انبار مرکزی</div></div><div class="stat-value" data-count="' + totalOf('central') + '">0</div></div>' +
-      '<div class="stat warn w-3"><div class="stat-head"><div class="stat-title"><div class="stat-ic">' + IC.palette + '</div>رنگ‌کاری داخلی</div></div><div class="stat-value" data-count="' + totalOf('paint_in') + '">0</div></div>' +
-      '<div class="stat warn w-3"><div class="stat-head"><div class="stat-title"><div class="stat-ic">' + IC.palette + '</div>رنگ‌کاری بیرون</div></div><div class="stat-value" data-count="' + totalOf('paint_out') + '">0</div></div>' +
-      '<div class="stat info w-3"><div class="stat-head"><div class="stat-title"><div class="stat-ic">' + IC.hammer + '</div>رویه‌کوبی</div></div><div class="stat-value" data-count="' + totalOf('upholstery') + '">0</div></div>' +
+      '<div class="wh-section"><span class="wh-section-title">انبارها</span><span class="wh-section-line"></span><span class="wh-section-count">۴ انبار</span></div>' +
 
-      '<div class="stat success w-3"><div class="stat-head"><div class="stat-title"><div class="stat-ic">' + IC.store + '</div>فروشگاه</div></div><div class="stat-value" data-count="' + totalOf('store') + '">0</div></div>' +
-      '<div class="stat w-3"><div class="stat-head"><div class="stat-title"><div class="stat-ic" style="background:linear-gradient(135deg,#AF52DE,#7c3aed)">' + IC.store + '</div>نمایشگاه خلیج فارس</div></div><div class="stat-value" data-count="' + totalOf('showroom_khalij') + '">0</div></div>' +
-      '<div class="stat w-3"><div class="stat-head"><div class="stat-title"><div class="stat-ic" style="background:linear-gradient(135deg,#9333EA,#6b21a8)">' + IC.store + '</div>نمایشگاه الوس</div></div><div class="stat-value" data-count="' + totalOf('showroom_alus') + '">0</div></div>' +
-      '<div class="stat w-3"><div class="stat-head"><div class="stat-title"><div class="stat-ic" style="background:linear-gradient(135deg,#FF3B30,#D70015)">' + IC.receipt + '</div>کالای فروش‌رفته</div></div><div class="stat-value" data-count="' + totalOf('sold') + '">0</div></div>' +
+      statCard('central', 'انبار مرکزی', IC.package, 'linear-gradient(135deg,#007AFF,#5856D6)') +
+      statCard('paint_in', 'رنگ‌کاری داخلی', IC.palette, 'linear-gradient(135deg,#FF9500,#E67E00)') +
+      statCard('paint_out', 'رنگ‌کاری بیرون', IC.palette, 'linear-gradient(135deg,#EA580C,#C2410C)') +
+      statCard('upholstery', 'رویه‌کوبی', IC.hammer, 'linear-gradient(135deg,#5AC8FA,#0EA5E9)') +
 
-      '<div class="widget w-6"><div class="w-head"><div><div class="w-title"><div class="ic info">' + IC.shield + '</div>خط تأیید</div></div></div><div class="pipe">' +
-        '<div class="pipe-step active"><div class="pipe-num">۱</div><div class="lbl">تأیید انباردار<small>انباردار</small></div><div class="pipe-count">' + db.transfers.filter(function(t) { return t.status === 'pending_warehouse'; }).length + '</div></div>' +
-        '<div class="pipe-step"><div class="pipe-num">۲</div><div class="lbl">تأیید حسابدار<small>حسابداری</small></div><div class="pipe-count">' + db.transfers.filter(function(t) { return t.status === 'pending_accountant'; }).length + '</div></div>' +
-        '<div class="pipe-step"><div class="pipe-num">۳</div><div class="lbl">تأیید مدیر<small>مدیر</small></div><div class="pipe-count">' + db.transfers.filter(function(t) { return t.status === 'pending_manager'; }).length + '</div></div>' +
-        '<div class="pipe-step done"><div class="pipe-num">✓</div><div class="lbl">تکمیل‌شده<small>نهایی</small></div><div class="pipe-count">' + db.transfers.filter(function(t) { return t.status === 'approved'; }).length + '</div></div>' +
+      '<div class="wh-section"><span class="wh-section-title">نمایشگاه و فروش</span><span class="wh-section-line"></span><span class="wh-section-count">۴ مکان</span></div>' +
+
+      statCard('store', 'فروشگاه', IC.store, 'linear-gradient(135deg,#34C759,#00A14B)') +
+      statCard('showroom_khalij', 'نمایشگاه خلیج فارس', IC.store, 'linear-gradient(135deg,#AF52DE,#7c3aed)') +
+      statCard('showroom_alus', 'نمایشگاه الوس', IC.store, 'linear-gradient(135deg,#9333EA,#6b21a8)') +
+      statCard('sold', 'کالای فروش‌رفته', IC.receipt, 'linear-gradient(135deg,#FF3B30,#D70015)') +
+
+      '<div class="widget w-6"><div class="w-head"><div><div class="w-title"><div class="ic info">' + IC.shield + '</div>خط تأیید</div><div class="w-sub">' + pending + ' در انتظار · ' + approvedN + ' تکمیل‌شده</div></div></div><div class="pipe">' +
+        '<div class="pipe-step active"><div class="pipe-num">۱</div><div class="lbl">تأیید انباردار<small>انباردار</small><div class="pipe-bar"><div class="pipe-bar-fill" style="width:' + Math.round(pendingW / maxPipe * 100) + '%"></div></div></div><div class="pipe-count">' + pendingW + '</div></div>' +
+        '<div class="pipe-step ' + (pendingA > 0 ? 'active' : '') + '"><div class="pipe-num">۲</div><div class="lbl">تأیید حسابدار<small>حسابداری</small><div class="pipe-bar"><div class="pipe-bar-fill" style="width:' + Math.round(pendingA / maxPipe * 100) + '%"></div></div></div><div class="pipe-count">' + pendingA + '</div></div>' +
+        '<div class="pipe-step ' + (pendingM > 0 ? 'active' : '') + '"><div class="pipe-num">۳</div><div class="lbl">تأیید مدیر<small>مدیر</small><div class="pipe-bar"><div class="pipe-bar-fill" style="width:' + Math.round(pendingM / maxPipe * 100) + '%"></div></div></div><div class="pipe-count">' + pendingM + '</div></div>' +
+        '<div class="pipe-step done"><div class="pipe-num">✓</div><div class="lbl">تکمیل‌شده<small>نهایی</small><div class="pipe-bar"><div class="pipe-bar-fill" style="width:' + Math.round(approvedN / maxPipe * 100) + '%"></div></div></div><div class="pipe-count">' + approvedN + '</div></div>' +
       '</div></div>' +
 
       '<div class="widget w-6"><div class="w-head"><div><div class="w-title"><div class="ic">' + IC.fire + '</div>آخرین فعالیت‌ها</div></div><button class="btn xs ghost" data-action="transfers">مشاهده</button></div><div class="feed">' +
@@ -2169,7 +2305,14 @@ function countUp(el, target, dur) {
   }
   requestAnimationFrame(tick);
 }
-function emptyState(title) { return '<div class="empty">' + IC.inbox + '<b>' + esc(title) + '</b></div>'; }
+function emptyState(title, desc, actionHTML) {
+  return '<div class="empty">' +
+    '<div class="empty-art"><div class="empty-circle">' + IC.inbox + '</div></div>' +
+    '<b>' + esc(title) + '</b>' +
+    (desc ? '<p>' + esc(desc) + '</p>' : '') +
+    (actionHTML || '') +
+  '</div>';
+}
 function transferItemHTML(db, t) {
   var st = stOf(t); var isIn = t.type === 'inbound';
   var p = getProd(db, t.productId);
@@ -2178,7 +2321,6 @@ function transferItemHTML(db, t) {
   var stepsHTML = '';
   for (var i = 1; i <= 4; i++) {
     var cls = '';
-    // BUGFIX: when approved, all 4 steps should be "done" not the last one "active"
     if (t.status === 'approved') cls = 'done';
     else if (t.status === 'rejected') { var rMap = { warehouse: 1, accountant: 2, manager: 3 }; var rS = t.rejection ? rMap[t.rejection.stage] : 0; if (i < rS) cls = 'done'; else if (i === rS) cls = 'rejected'; }
     else { if (i < st.step) cls = 'done'; else if (i === st.step) cls = 'active'; }
@@ -2203,7 +2345,7 @@ function pageStock(page) {
       return true;
     }).map(function(s) { return { s: s, p: getProd(db, s.productId), w: getWh(db, s.warehouseId) }; }).filter(function(r) { return r.p && r.w && r.w.type !== 'customer'; });
     var tbl = $('#s-table');
-    if (!rows.length) { tbl.innerHTML = '<div class="table-empty">' + IC.inbox + '<b>موردی یافت نشد</b></div>'; return; }
+    if (!rows.length) { tbl.innerHTML = emptyState('موردی یافت نشد', 'فیلترها را تغییر دهید یا کالای جدیدی اضافه کنید'); return; }
     tbl.innerHTML = '<table class="dt"><thead><tr><th>کالا</th><th>انبار</th><th style="text-align:left">موجودی</th><th style="text-align:left">رزرو</th><th style="text-align:left">قابل استفاده</th><th class="col-sm-hide">به‌روزرسانی</th></tr></thead><tbody>' +
       rows.map(function(r) {
         var hasComp = r.p.components && r.p.components.length;
@@ -2272,7 +2414,6 @@ function pageStockInit(page) {
       renderKit();
     } else {
       currentProductId = null;
-      // BUGFIX: clear stale components when switching to a non-existing product
       if (comps.length) { comps = []; renderKit(); }
       statusBox.innerHTML = '<div style="margin-top:8px;padding:12px 14px;background:rgba(0,122,255,.10);border:1px solid rgba(0,122,255,.22);border-radius:16px;font-size:12.5px;color:var(--blue);display:flex;align-items:center;gap:8px">' + IC.plus + ' کالای جدید ساخته می‌شود: <b>' + esc(val) + '</b></div>';
     }
@@ -2302,11 +2443,11 @@ function pageStockInit(page) {
   $('#if').addEventListener('submit', function(e) {
     e.preventDefault();
     var name = pInput.value.trim(); var unit = unitSel.value; var wid = wSel.value; var qty = parseInt(qtyInput.value, 10);
-    if (!name || !wid || isNaN(qty) || qty < 0) { celebrate('اطلاعات ناقص', 'نام کالا، انبار و تعداد را وارد کنید', 'error', 1800); return; }
-    if (name.length < 2) { celebrate('نام کوتاه است', '', 'warn', 1600); return; }
+    if (!name || !wid || isNaN(qty) || qty < 0) { toast('اطلاعات ناقص', 'نام کالا، انبار و تعداد را وارد کنید', 'error'); return; }
+    if (name.length < 2) { toast('نام کوتاه است', '', 'warn'); return; }
     if (isKitUnit(unit)) {
       var cleanComps = comps.map(function(c) { return { id: c.id || uid(), name: (c.name || '').trim(), qty: Math.max(1, parseInt(c.qty, 10) || 1) }; }).filter(function(c) { return c.name.length > 0; });
-      if (!cleanComps.length) { celebrate('اقلام خالی است', 'برای واحد ' + unit + '، حداقل یک قلم وارد کنید', 'warn', 2000); return; }
+      if (!cleanComps.length) { toast('اقلام خالی است', 'برای واحد ' + unit + '، حداقل یک قلم وارد کنید', 'warn'); return; }
       comps = cleanComps;
     }
     var btn = $('#if-submit'); if (btn) btn.classList.add('loading');
@@ -2318,15 +2459,15 @@ function pageStockInit(page) {
         if (!product) { product = { id: uid(), name: name, code: '', unit: unit, components: isKitUnit(unit) ? comps.slice() : [], createdAt: new Date().toISOString() }; fresh.products.push(product); created = true; }
         else { product.unit = unit; product.components = isKitUnit(unit) ? comps.slice() : []; }
         var s = findStock(fresh, product.id, wid); var rq = s ? (s.reservedQty || 0) : 0;
-        if (qty < rq) { if (btn) btn.classList.remove('loading'); celebrate('کمتر از رزرو', 'حداقل مقدار باید ' + rq + ' باشد', 'error', 2000); return; }
+        if (qty < rq) { if (btn) btn.classList.remove('loading'); toast('کمتر از رزرو', 'حداقل مقدار باید ' + rq + ' باشد', 'error'); return; }
         if (s) { s.quantity = qty; s.updatedAt = new Date().toISOString(); }
         else { fresh.stocks.push({ id: uid(), productId: product.id, warehouseId: wid, quantity: qty, reservedQty: 0, updatedAt: new Date().toISOString() }); }
         saveDB(fresh);
         var suffix = isKitUnit(unit) && product.components.length ? ' — ' + qty + ' ' + unit + ' (' + product.components.length + ' قلم)' : ' — ' + qty + ' ' + unit;
-        if (created) celebrate('کالا و موجودی ثبت شد', '«' + product.name + '»' + suffix, 'success', 2200);
-        else celebrate('موجودی به‌روزرسانی شد', product.name + suffix, 'success', 2000);
+        if (created) toast('کالا و موجودی ثبت شد', '«' + product.name + '»' + suffix, 'success');
+        else toast('موجودی به‌روزرسانی شد', product.name + suffix, 'success');
         go('stock');
-      } catch(err) { if (btn) btn.classList.remove('loading'); celebrate('خطا', err.message || 'عملیات ناموفق', 'error', 2200); }
+      } catch(err) { if (btn) btn.classList.remove('loading'); toast('خطا', err.message || 'عملیات ناموفق', 'error'); }
     }, 350);
   });
 
@@ -2355,7 +2496,7 @@ function pageTransfers(page) {
     if (filter !== 'all') l = l.filter(function(t) { return t.status === filter; });
     if (q) { var s = q.toLowerCase(); l = l.filter(function(t) { var p = getProd(db, t.productId); return t.code.toLowerCase().indexOf(s) >= 0 || ((p && p.name) || '').toLowerCase().indexOf(s) >= 0; }); }
     var el = $('#t-list');
-    if (!l.length) { el.innerHTML = emptyState('موردی یافت نشد'); return; }
+    if (!l.length) { el.innerHTML = emptyState('موردی یافت نشد', 'فیلتر را تغییر دهید یا درخواست جدید ثبت کنید'); return; }
     el.innerHTML = '<div class="t-list">' + l.map(function(t) { return transferItemHTML(db, t); }).join('') + '</div>';
     $$('[data-tid]', el).forEach(function(x) { x.addEventListener('click', function() { openTransfer(x.dataset.tid); }); });
   }
@@ -2384,7 +2525,7 @@ function pageInbounds(page) {
     var l = list.slice();
     if (filter !== 'all') l = l.filter(function(t) { return t.status === filter; });
     var el = $('#i-list');
-    if (!l.length) { el.innerHTML = emptyState('موردی یافت نشد'); return; }
+    if (!l.length) { el.innerHTML = emptyState('موردی یافت نشد', 'ورود جدیدی ثبت کنید'); return; }
     el.innerHTML = '<div class="t-list">' + l.map(function(t) { return transferItemHTML(db, t); }).join('') + '</div>';
     $$('[data-tid]', el).forEach(function(x) { x.addEventListener('click', function() { openTransfer(x.dataset.tid); }); });
   }
@@ -2397,7 +2538,7 @@ function openTransfer(id) {
   var db = loadDB();
   var t = null;
   for (var i = 0; i < db.transfers.length; i++) if (db.transfers[i].id === id) { t = db.transfers[i]; break; }
-  if (!t) { celebrate('یافت نشد', '', 'error', 1600); return; }
+  if (!t) { toast('یافت نشد', '', 'error'); return; }
   var st = stOf(t); var isIn = t.type === 'inbound';
   var p = getProd(db, t.productId);
   var src = getWh(db, t.sourceWarehouseId);
@@ -2426,7 +2567,7 @@ function openTransfer(id) {
 
   var kitBlock = '';
   if (p && p.components && p.components.length && isKitUnit(p.unit)) {
-    kitBlock = '<div style="margin-top:16px"><div style="font-weight:700;margin-bottom:10px">اقلام یک ' + esc(p.unit) + ' کامل</div><div class="kit-list">' + p.components.map(function(c) { return '<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 14px;background:var(--g1);border:1px solid var(--gb);border-radius:14px;font-size:13px"><b>' + esc(c.name) + '</b><span class="notif-qty">×' + c.qty + '</span></div>'; }).join('') + '</div></div>';
+    kitBlock = '<div style="margin-top:16px"><div style="font-weight:700;margin-bottom:10px">اقلام یک ' + esc(p.unit) + ' کامل</div><div class="kit-list">' + p.components.map(function(c) { return '<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 14px;background:var(--surface-2);border:1px solid var(--border);border-radius:14px;font-size:13px"><b>' + esc(c.name) + '</b><span class="notif-qty">×' + c.qty + '</span></div>'; }).join('') + '</div></div>';
   }
 
   var body = '<div class="dl" style="grid-template-columns:repeat(2,1fr);display:grid;gap:1px;margin-bottom:16px">' +
@@ -2454,7 +2595,7 @@ function pageNewTransfer(page) {
   var db = loadDB();
   var sources = db.warehouses.filter(function(w) { return allowedSourceTypes().indexOf(w.type) >= 0; });
   if (!sources.length) {
-    page.innerHTML = '<div class="page-head"><div><h1>درخواست جابه‌جایی</h1></div></div><div class="widget"><div class="empty">' + IC.alert + '<b>انباری برای مبدأ یافت نشد</b><p>ابتدا یک انبار تنظیم کنید</p></div></div>';
+    page.innerHTML = '<div class="page-head"><div><h1>درخواست جابه‌جایی</h1></div></div><div class="widget">' + emptyState('انباری برای مبدأ یافت نشد', 'ابتدا یک انبار تنظیم کنید') + '</div>';
     return;
   }
   var state = { step: 1, src: '', dst: '', pid: '', qty: 0, desc: '', customerName: '', customerPhone: '' };
@@ -2502,7 +2643,7 @@ function pageNewTransfer(page) {
       var srcW2 = getWh(db, state.src); var dstW = getWh(db, state.dst); var p2 = getProd(db, state.pid);
       var kitMini = '';
       if (p2 && p2.components && p2.components.length && isKitUnit(p2.unit)) {
-        kitMini = '<div style="margin-top:12px;padding:12px 14px;background:var(--g1);border-radius:16px;font-size:12px;color:var(--text-2)">' + IC.grid + ' اقلام یک ' + esc(p2.unit) + ': ' + p2.components.map(function(c) { return esc(c.name) + ' ×' + c.qty; }).join(' + ') + '</div>';
+        kitMini = '<div style="margin-top:12px;padding:12px 14px;background:var(--surface-2);border-radius:16px;font-size:12px;color:var(--text-2)">' + IC.grid + ' اقلام یک ' + esc(p2.unit) + ': ' + p2.components.map(function(c) { return esc(c.name) + ' ×' + c.qty; }).join(' + ') + '</div>';
       }
       var customerBlock = '';
       if (dstW && dstW.type === 'sold') {
@@ -2529,13 +2670,13 @@ function pageNewTransfer(page) {
   $('#wiz-back').addEventListener('click', function() { if (state.step > 1) { state.step--; draw(); } });
   $('#wiz-next').addEventListener('click', function() {
     if (state.step === 1) {
-      if (!state.src || !state.dst) { celebrate('اطلاعات ناقص', 'مبدأ و مقصد را انتخاب کنید', 'warn', 1600); return; }
+      if (!state.src || !state.dst) { toast('اطلاعات ناقص', 'مبدأ و مقصد را انتخاب کنید', 'warn'); return; }
       state.step = 2; draw();
     } else if (state.step === 2) {
-      if (!state.pid || !state.qty || state.qty <= 0) { celebrate('اطلاعات ناقص', 'کالا و تعداد را وارد کنید', 'warn', 1600); return; }
+      if (!state.pid || !state.qty || state.qty <= 0) { toast('اطلاعات ناقص', 'کالا و تعداد را وارد کنید', 'warn'); return; }
       var stock = findStock(db, state.pid, state.src);
       var avail = stock ? stock.quantity - (stock.reservedQty || 0) : 0;
-      if (state.qty > avail) { celebrate('موجودی کافی نیست', 'قابل استفاده: ' + avail, 'error', 1900); return; }
+      if (state.qty > avail) { toast('موجودی کافی نیست', 'قابل استفاده: ' + avail, 'error'); return; }
       state.step = 3; draw();
     } else {
       var btn = $('#wiz-next'); btn.classList.add('loading');
@@ -2543,9 +2684,9 @@ function pageNewTransfer(page) {
         try {
           var fresh = loadDB();
           var srcStock = findStock(fresh, state.pid, state.src);
-          if (!srcStock) { btn.classList.remove('loading'); celebrate('کالا یافت نشد', '', 'error', 1600); return; }
+          if (!srcStock) { btn.classList.remove('loading'); toast('کالا یافت نشد', '', 'error'); return; }
           var avail2 = srcStock.quantity - (srcStock.reservedQty || 0);
-          if (state.qty > avail2) { btn.classList.remove('loading'); celebrate('موجودی کافی نیست', '', 'error', 1800); return; }
+          if (state.qty > avail2) { btn.classList.remove('loading'); toast('موجودی کافی نیست', '', 'error'); return; }
           srcStock.reservedQty = (srcStock.reservedQty || 0) + state.qty;
           srcStock.updatedAt = new Date().toISOString();
           var dstW = getWh(fresh, state.dst);
@@ -2561,9 +2702,9 @@ function pageNewTransfer(page) {
           };
           fresh.transfers.unshift(t);
           saveDB(fresh);
-          celebrate('ثبت شد', 'در انتظار تأیید انباردار', 'success', 1900);
+          toast('ثبت شد', 'در انتظار تأیید انباردار', 'success');
           go('transfers');
-        } catch(err) { btn.classList.remove('loading'); celebrate('خطا', err.message || '', 'error', 2000); }
+        } catch(err) { btn.classList.remove('loading'); toast('خطا', err.message || '', 'error'); }
       }, 400);
     }
   });
@@ -2574,7 +2715,7 @@ function pageNewInbound(page) {
   var db = loadDB();
   var central = whByType(db, 'central');
   if (!central) {
-    page.innerHTML = '<div class="page-head"><div><h1>ثبت ورود کالا</h1></div><div class="page-actions"><button class="btn ghost" id="back-btn">' + IC.chevR + ' بازگشت</button></div></div><div class="widget"><div class="empty">' + IC.alert + '<b>انبار مرکزی یافت نشد</b></div></div>';
+    page.innerHTML = '<div class="page-head"><div><h1>ثبت ورود کالا</h1></div><div class="page-actions"><button class="btn ghost" id="back-btn">' + IC.chevR + ' بازگشت</button></div></div><div class="widget">' + emptyState('انبار مرکزی یافت نشد', 'ابتدا تنظیمات انبار را بررسی کنید') + '</div>';
     var b0 = $('#back-btn'); if (b0) b0.addEventListener('click', function() { go('inbounds'); });
     return;
   }
@@ -2606,11 +2747,11 @@ function pageNewInbound(page) {
     var quantity = parseInt($('#ib-qty').value, 10);
     var invoiceNumber = $('#ib-invoice').value.trim();
     var description = $('#ib-desc').value.trim();
-    if (!supplierName || !productId || !quantity || quantity <= 0) { celebrate('اطلاعات ناقص', '', 'warn', 1800); return; }
+    if (!supplierName || !productId || !quantity || quantity <= 0) { toast('اطلاعات ناقص', '', 'warn'); return; }
     try {
       var fresh = loadDB();
       var centralW = whByType(fresh, 'central');
-      if (!centralW) { celebrate('انبار مرکزی یافت نشد', '', 'error', 1800); return; }
+      if (!centralW) { toast('انبار مرکزی یافت نشد', '', 'error'); return; }
       var t = {
         id: uid(), code: icode(fresh), type: 'inbound',
         supplierName: supplierName, invoiceNumber: invoiceNumber,
@@ -2622,10 +2763,10 @@ function pageNewInbound(page) {
       };
       fresh.transfers.unshift(t);
       saveDB(fresh);
-      celebrate('ثبت شد', 'در انتظار تأیید انباردار', 'success', 1900);
+      toast('ثبت شد', 'در انتظار تأیید انباردار', 'success');
       go('inbounds');
       setTimeout(function() { openTransfer(t.id); }, 300);
-    } catch(err) { celebrate('خطا', err.message || '', 'error', 2000); }
+    } catch(err) { toast('خطا', err.message || '', 'error'); }
   });
   attachRippleAll();
 }
@@ -2634,7 +2775,7 @@ function pageDirectCustomer(page) {
   var db = loadDB();
   var uph = whByType(db, 'upholstery');
   if (!uph) {
-    page.innerHTML = '<div class="page-head"><div><h1>ارسال مستقیم به مشتری</h1></div></div><div class="widget"><div class="empty">' + IC.alert + '<b>انبار رویه‌کوبی یافت نشد</b></div></div>';
+    page.innerHTML = '<div class="page-head"><div><h1>ارسال مستقیم به مشتری</h1></div></div><div class="widget">' + emptyState('انبار رویه‌کوبی یافت نشد', 'ابتدا تنظیمات انبار را بررسی کنید') + '</div>';
     return;
   }
   page.innerHTML = '<div class="page-head"><div><h1>ارسال مستقیم به مشتری</h1></div></div>' +
@@ -2661,15 +2802,15 @@ function pageDirectCustomer(page) {
   $('#dcf').addEventListener('submit', function(e) {
     e.preventDefault();
     var pid = $('#dp').value; var qty = +$('#dq').value; var name = $('#dn').value.trim(); var phone = $('#dph').value.trim(); var desc = $('#dd').value.trim();
-    if (!pid || !qty || qty <= 0 || !name) { celebrate('اطلاعات ناقص', '', 'warn', 1600); return; }
+    if (!pid || !qty || qty <= 0 || !name) { toast('اطلاعات ناقص', '', 'warn'); return; }
     try {
       var fresh = loadDB();
       var customer = whByType(fresh, 'customer');
       var uphW = whByType(fresh, 'upholstery');
-      if (!customer || !uphW) { celebrate('انبار موردنیاز یافت نشد', '', 'error', 1800); return; }
+      if (!customer || !uphW) { toast('انبار موردنیاز یافت نشد', '', 'error'); return; }
       var s = findStock(fresh, pid, uphW.id);
       var avail = s ? s.quantity - (s.reservedQty || 0) : 0;
-      if (!s || qty > avail) { celebrate('موجودی کافی نیست', 'قابل استفاده: ' + avail, 'error', 1900); return; }
+      if (!s || qty > avail) { toast('موجودی کافی نیست', 'قابل استفاده: ' + avail, 'error'); return; }
       s.reservedQty = (s.reservedQty || 0) + qty; s.updatedAt = new Date().toISOString();
       var t = {
         id: uid(), code: tcode(fresh), type: 'direct-customer',
@@ -2681,9 +2822,9 @@ function pageDirectCustomer(page) {
         createdAt: new Date().toISOString()
       };
       fresh.transfers.unshift(t); saveDB(fresh);
-      celebrate('ثبت شد', 'در انتظار تأیید انباردار', 'success', 1900);
+      toast('ثبت شد', 'در انتظار تأیید انباردار', 'success');
       go('transfers');
-    } catch(err) { celebrate('خطا', err.message || '', 'error', 2000); }
+    } catch(err) { toast('خطا', err.message || '', 'error'); }
   });
   attachRippleAll();
 }
@@ -2705,26 +2846,26 @@ function pageProducts(page) {
             var kitChip = (compCount && isKitUnit(p.unit)) ? '<span class="kit-chip" data-pid="' + p.id + '">' + IC.grid + ' ' + compCount + ' قلم</span>' : '<span class="muted small">—</span>';
             return '<tr><td><span class="row-num">' + (i + 1) + '</span></td><td><b style="color:var(--text)">' + esc(p.name) + '</b></td><td>' + (p.code ? '<span class="code-chip">' + esc(p.code) + '</span>' : '—') + '</td><td><span class="unit-chip">' + esc(p.unit || '—') + '</span></td><td class="col-sm-hide">' + kitChip + '</td><td class="date-cell col-sm-hide">' + faDate(p.createdAt) + '</td><td class="actions-cell"><button class="btn xs danger" data-del="' + p.id + '">' + IC.trash + '</button></td></tr>';
           }).join('') + '</tbody></table>'
-        : '<div class="table-empty">' + IC.inbox + '<b>کالایی ثبت نشده</b></div>') +
+        : emptyState('کالایی ثبت نشده', 'اولین کالا را اضافه کنید')) +
     '</div></div>';
   $('#pf').addEventListener('submit', function(e) {
     e.preventDefault();
     var name = $('#pn').value.trim(); var code = $('#pc').value.trim(); var unit = $('#pu').value || 'دست';
     if (!name) return;
     var fresh = loadDB();
-    if (findProductByName(fresh, name)) { celebrate('تکراری', 'این کالا قبلاً ثبت شده', 'warn', 1800); return; }
+    if (findProductByName(fresh, name)) { toast('تکراری', 'این کالا قبلاً ثبت شده', 'warn'); return; }
     fresh.products.push({ id: uid(), name: name, code: code, unit: unit, components: [], createdAt: new Date().toISOString() });
-    saveDB(fresh); celebrate('افزوده شد', '', 'success', 1700); render();
+    saveDB(fresh); toast('افزوده شد', name, 'success'); render();
   });
   $$('[data-del]').forEach(function(b) {
     b.addEventListener('click', function() {
       var id = b.dataset.del;
       var fresh = loadDB();
       var used = fresh.stocks.some(function(s) { return s.productId === id && s.quantity > 0; }) || fresh.transfers.some(function(t) { return t.productId === id; });
-      if (used) { celebrate('قابل حذف نیست', 'این کالا در موجودی یا انتقال‌ها استفاده شده', 'error', 2000); return; }
+      if (used) { toast('قابل حذف نیست', 'این کالا در موجودی یا انتقال‌ها استفاده شده', 'error'); return; }
       fresh.products = fresh.products.filter(function(p) { return p.id !== id; });
       fresh.stocks = fresh.stocks.filter(function(s) { return s.productId !== id; });
-      saveDB(fresh); celebrate('حذف شد', '', 'success', 1600); render();
+      saveDB(fresh); toast('حذف شد', '', 'success'); render();
     });
   });
   attachRippleAll();
@@ -2758,29 +2899,29 @@ function pageUsers(page) {
       e.preventDefault();
       var name = $('#un').value.trim(); var username = $('#uu').value.trim(); var password = $('#up').value; var role = $('#ur').value;
       if (!name || !username || !password) return;
-      if (!canAssignRole(role)) { celebrate('دسترسی ندارید', 'این نقش قابل تخصیص نیست', 'error', 1800); return; }
+      if (!canAssignRole(role)) { toast('دسترسی ندارید', 'این نقش قابل تخصیص نیست', 'error'); return; }
       var fresh = loadDB();
-      if (fresh.users.some(function(u) { return u.username === username; })) { celebrate('تکراری', 'این نام کاربری قبلاً استفاده شده', 'error', 1900); return; }
+      if (fresh.users.some(function(u) { return u.username === username; })) { toast('تکراری', 'این نام کاربری قبلاً استفاده شده', 'error'); return; }
       fresh.users.push({ id: uid(), name: name, username: username, password: password, role: role, isActive: true });
-      saveDB(fresh); celebrate('افزوده شد', '«' + name + '» — ' + ROLES[role], 'success', 1800); render();
+      saveDB(fresh); toast('افزوده شد', '«' + name + '» — ' + ROLES[role], 'success'); render();
     });
   }
   $$('[data-tog]').forEach(function(b) {
     b.addEventListener('click', function() {
       var fresh = loadDB(); var u = fresh.users.filter(function(x) { return x.id === b.dataset.tog; })[0];
       if (!u) return;
-      if (!canEditUser(u)) { celebrate('دسترسی ندارید', '', 'error', 1600); render(); return; }
-      u.isActive = !u.isActive; saveDB(fresh); celebrate(u.isActive ? 'فعال شد' : 'غیرفعال شد', u.name, 'success', 1500); render();
+      if (!canEditUser(u)) { toast('دسترسی ندارید', '', 'error'); render(); return; }
+      u.isActive = !u.isActive; saveDB(fresh); toast(u.isActive ? 'فعال شد' : 'غیرفعال شد', u.name, 'success'); render();
     });
   });
   $$('[data-role]').forEach(function(sel) {
     sel.addEventListener('change', function() {
       var fresh = loadDB(); var u = fresh.users.filter(function(x) { return x.id === sel.dataset.role; })[0];
       if (!u) return;
-      if (!canEditUser(u)) { celebrate('دسترسی ندارید', '', 'error', 1600); render(); return; }
+      if (!canEditUser(u)) { toast('دسترسی ندارید', '', 'error'); render(); return; }
       var newRole = sel.value;
-      if (!canAssignRole(newRole)) { celebrate('دسترسی ندارید', 'این نقش قابل تخصیص نیست', 'error', 1800); render(); return; }
-      u.role = newRole; saveDB(fresh); celebrate('دسترسی تغییر کرد', u.name + ' → ' + ROLES[u.role], 'success', 1700); render();
+      if (!canAssignRole(newRole)) { toast('دسترسی ندارید', 'این نقش قابل تخصیص نیست', 'error'); render(); return; }
+      u.role = newRole; saveDB(fresh); toast('دسترسی تغییر کرد', u.name + ' → ' + ROLES[u.role], 'success'); render();
     });
   });
   attachRippleAll();
@@ -2794,7 +2935,7 @@ function downloadBlob(blob, filename) {
     a.href = url; a.download = filename;
     document.body.appendChild(a); a.click();
     setTimeout(function() { URL.revokeObjectURL(url); if (a.parentNode) a.remove(); }, 500);
-  } catch(e) { celebrate('خطا در دانلود', e.message || '', 'error', 2000); }
+  } catch(e) { toast('خطا در دانلود', e.message || '', 'error'); }
 }
 function exportCSV(filename, headers, rows) {
   function escCSV(v) {
@@ -2859,20 +3000,20 @@ function exportPDF(title, subtitle, headers, rows) {
       } catch(e) {
         try {
           var w = window.open('', '_blank');
-          if (!w) { celebrate('پاپ‌آپ مسدود است', 'از «تب جدید» استفاده کنید', 'warn', 2200); return; }
+          if (!w) { toast('پاپ‌آپ مسدود است', 'از «تب جدید» استفاده کنید', 'warn'); return; }
           w.document.open(); w.document.write(printableHtml); w.document.close();
-        } catch(err) { celebrate('خطا در چاپ', err.message || 'از «تب جدید» استفاده کنید', 'error', 2200); }
+        } catch(err) { toast('خطا در چاپ', err.message || 'از «تب جدید» استفاده کنید', 'error'); }
       }
     });
     m.querySelector('#pdf-newwin').addEventListener('click', function() {
       try {
         var w = window.open('', '_blank');
-        if (!w) { celebrate('پاپ‌آپ مسدود شده', 'لطفاً اجازه پاپ‌آپ بدهید', 'warn', 2200); return; }
+        if (!w) { toast('پاپ‌آپ مسدود شده', 'لطفاً اجازه پاپ‌آپ بدهید', 'warn'); return; }
         w.document.open(); w.document.write(printableHtml); w.document.close();
-      } catch(e) { celebrate('خطا', e.message || '', 'error', 2000); }
+      } catch(e) { toast('خطا', e.message || '', 'error'); }
     });
     attachRippleAll(m);
-  } catch(e) { celebrate('خطا در تولید PDF', e.message || '', 'error', 2200); }
+  } catch(e) { toast('خطا در تولید PDF', e.message || '', 'error'); }
 }
 
 function pageReports(page) {
@@ -2931,7 +3072,7 @@ function pageReports(page) {
       (showFilter ? '<div class="field"><label>انبار:</label><select id="rep-wh"><option value="">همه</option>' + warehouses.map(function(w) { return '<option value="' + w.id + '" ' + (whFilter === w.id ? 'selected' : '') + '>' + esc(w.name) + '</option>'; }).join('') + '</select></div>' : '') +
       '<div class="rep-actions"><button class="btn success xs" data-exp="excel">' + IC.download + ' Excel</button><button class="btn ghost xs" data-exp="csv">' + IC.file + ' CSV</button><button class="btn danger xs" data-exp="pdf">' + IC.print + ' PDF</button></div></div>';
     var tableHTML = '<div class="table-scroll">';
-    if (!rows.length) tableHTML += '<div class="table-empty">' + IC.inbox + '<b>موردی برای نمایش نیست</b></div>';
+    if (!rows.length) tableHTML += emptyState('موردی برای نمایش نیست', 'گزارشی برای این فیلتر وجود ندارد');
     else {
       tableHTML += '<table class="dt"><thead><tr><th>کالا</th><th>کد</th><th>واحد</th><th>انبار</th><th style="text-align:left">موجودی</th><th style="text-align:left">رزرو</th><th style="text-align:left">قابل استفاده</th><th class="col-sm-hide">آخرین به‌روزرسانی</th></tr></thead><tbody>';
       rows.forEach(function(r) {
@@ -2959,7 +3100,7 @@ function pageReports(page) {
       '<div class="field"><label>وضعیت:</label><select id="rep-status"><option value="">همه</option><option value="pending_warehouse">در انتظار انبار</option><option value="pending_accountant">در انتظار حسابدار</option><option value="pending_manager">در انتظار مدیر</option><option value="approved">تأییدشده</option><option value="rejected">ردشده</option></select></div>' +
       '<div class="rep-actions"><button class="btn success xs" data-exp="excel">' + IC.download + ' Excel</button><button class="btn ghost xs" data-exp="csv">' + IC.file + ' CSV</button><button class="btn danger xs" data-exp="pdf">' + IC.print + ' PDF</button></div></div>';
     var tableHTML = '<div class="table-scroll">';
-    if (!rows.length) tableHTML += '<div class="table-empty">' + IC.inbox + '<b>موردی یافت نشد</b></div>';
+    if (!rows.length) tableHTML += emptyState('موردی یافت نشد', 'در این بازه گزارشی وجود ندارد');
     else {
       tableHTML += '<table class="dt"><thead><tr><th>کد</th><th>تاریخ</th><th>نوع</th><th>مبدأ</th><th>مقصد</th><th>کالا</th><th style="text-align:left">تعداد</th><th>وضعیت</th><th class="col-sm-hide">ایجادکننده</th></tr></thead><tbody>';
       rows.forEach(function(r) {
@@ -2975,7 +3116,7 @@ function pageReports(page) {
   function renderAdjustmentsReport(db) {
     var list = (db.adjustments || []).slice().sort(function(a, b) { return new Date(b.at) - new Date(a.at); });
     var tableHTML = '<div class="table-scroll">';
-    if (!list.length) tableHTML += '<div class="table-empty">' + IC.refresh + '<b>تعدیل موجودی ثبت نشده</b></div>';
+    if (!list.length) tableHTML += emptyState('تعدیل موجودی ثبت نشده', 'صفر کردن موجودی، تاریخچه تعدیل می‌سازد');
     else {
       tableHTML += '<table class="dt"><thead><tr><th>#</th><th>تاریخ</th><th>کاربر</th><th>نوع</th><th class="col-sm-hide">اقلام صفرشده</th><th>یادداشت</th><th></th></tr></thead><tbody>';
       list.forEach(function(a, i) {
@@ -3113,11 +3254,11 @@ function pageSettings(page) {
                   try { localStorage.removeItem(K_SES); } catch(e) {}
                   c.remove(); celebrate('بازیابی موفق', 'لطفاً مجدداً وارد شوید', 'success', 2200);
                   setTimeout(function() { App.user = null; render(); }, 700);
-                } catch(err) { c.remove(); celebrate('خطا', err.message || '', 'error', 2200); }
+                } catch(err) { c.remove(); toast('خطا', err.message || '', 'error'); }
               } }
             ]
           });
-        } catch(err) { celebrate('فایل نامعتبر', err.message || '', 'error', 2200); }
+        } catch(err) { toast('فایل نامعتبر', err.message || '', 'error'); }
         ifile.value = '';
       };
       rd.readAsText(f);
@@ -3134,7 +3275,7 @@ function openZeroOutModal() {
     title: 'تأیید صفر کردن موجودی', desc: 'این عملیات با ثبت snapshot تاریخی انجام می‌شود.',
     body:
       '<div class="field"><label>یادداشت (اختیاری)</label><input id="zo-note" placeholder="مثلاً: بستن سال ۱۴۰۳" /></div>' +
-      '<div style="margin-top:14px;padding:14px;background:var(--g1);border-radius:16px;font-size:12.5px;line-height:1.9">' +
+      '<div style="margin-top:14px;padding:14px;background:var(--surface-2);border-radius:16px;font-size:12.5px;line-height:1.9">' +
         '<div style="display:flex;justify-content:space-between;margin-bottom:6px"><span>ردیف‌های تحت تأثیر:</span><b>' + nonZero.length.toLocaleString('fa-IR') + ' ردیف</b></div>' +
         '<div style="display:flex;justify-content:space-between;margin-bottom:6px"><span>جمع موجودی فعلی:</span><b>' + totalQ.toLocaleString('fa-IR') + ' عدد</b></div>' +
         '<div style="display:flex;justify-content:space-between"><span>اسناد انتقال که حفظ می‌شوند:</span><b>' + db.transfers.length.toLocaleString('fa-IR') + ' سند</b></div>' +
@@ -3149,7 +3290,7 @@ function openZeroOutModal() {
           try {
             var fresh = loadDB();
             var snap = fresh.stocks.filter(function(s) { return s.quantity > 0 || (s.reservedQty || 0) > 0; }).map(function(s) { return { productId: s.productId, warehouseId: s.warehouseId, quantity: s.quantity, reservedQty: s.reservedQty || 0 }; });
-            if (!snap.length) { c.remove(); celebrate('موجودی صفر است', 'چیزی برای صفر کردن نیست', 'info', 1800); return; }
+            if (!snap.length) { c.remove(); toast('موجودی صفر است', 'چیزی برای صفر کردن نیست', 'info'); return; }
             fresh.adjustments = fresh.adjustments || [];
             fresh.adjustments.push({ id: uid(), at: new Date().toISOString(), by: App.user.id, byName: App.user.name, type: 'period_close', note: note, itemsCount: snap.length, snapshot: snap });
             fresh.stocks.forEach(function(s) { s.quantity = 0; s.reservedQty = 0; s.updatedAt = new Date().toISOString(); });
@@ -3157,7 +3298,7 @@ function openZeroOutModal() {
             c.remove();
             celebrate('موجودی صفر شد', snap.length + ' ردیف · snapshot ثبت شد', 'success', 2400);
             requestAnimationFrame(function() { requestAnimationFrame(function() { render(); }); });
-          } catch(err) { try { c.remove(); } catch(e) {} celebrate('خطا', err.message || '', 'error', 2200); }
+          } catch(err) { try { c.remove(); } catch(e) {} toast('خطا', err.message || '', 'error'); }
         }, 400);
       } }
     ]
