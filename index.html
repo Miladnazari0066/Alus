@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Alus · پنل مدیریت</title>
+<meta name="application-name" content="Alus">
+<meta name="theme-color" content="#007AFF">
+<meta name="color-scheme" content="light dark">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Alus">
+<meta name="description" content="Alus — مدیریت هوشمند موجودی و جابه‌جایی مبلمان">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" crossorigin="anonymous">
+<link rel="stylesheet" href="src/styles.css">
+</head>
+<body>
+<div id="app"></div>
+<div class="toast-wrap" id="toast-wrap"></div>
+<div id="err" style="position:fixed;top:0;left:0;right:0;z-index:99999;background:#dc2626;color:#fff;padding:12px 20px;font-family:monospace;font-size:12px;direction:ltr;text-align:left;white-space:pre-wrap;display:none"></div>
+
+<script>
+(function () {
+  function isCrossOriginNoise(msg, src) {
+    if (!msg) return true;
+    var m = String(msg);
+    if (m === 'Script error.' || m.indexOf('Script error') === 0) return true;
+    if (m === 'ResizeObserver loop limit exceeded') return true;
+    if (m === 'ResizeObserver loop completed with undelivered notifications.') return true;
+    try {
+      if (src) {
+        var u = new URL(src, location.href);
+        if (u.origin !== location.origin) return true;
+      }
+    } catch (e) {}
+    return false;
+  }
+  function show(msg, line, col) {
+    var e = document.getElementById('err');
+    if (!e) return;
+    e.style.display = 'block';
+    e.textContent = 'ERROR: ' + msg + (line ? ' @ ' + line + ':' + col : '');
+    clearTimeout(e._t);
+    e._t = setTimeout(function () { e.style.display = 'none'; }, 8000);
+  }
+  window.onerror = function (msg, src, line, col, err) {
+    if (isCrossOriginNoise(msg, src)) return false;
+    if (!line && !col && err && !err.stack) return false;
+    show(msg, line, col);
+    return false;
+  };
+  window.addEventListener('unhandledrejection', function (ev) {
+    var r = ev.reason;
+    if (!r) return;
+    if (isCrossOriginNoise(r.message || String(r))) return;
+    var txt = (r && (r.message || r.toString())) || 'Unhandled rejection';
+    if (txt.indexOf('Script error') >= 0) return;
+    show(txt, 0, 0);
+  });
+  window.addEventListener('error', function (ev) {
+    if (ev.target && ev.target !== window &&
+        (ev.target.tagName === 'SCRIPT' || ev.target.tagName === 'LINK' || ev.target.tagName === 'IMG')) {
+      ev.preventDefault();
+    }
+  }, true);
+})();
+</script>
+
+<script src="src/01-icons.js"></script>
+<script src="src/02-utils.js"></script>
+<script src="src/03-constants.js"></script>
+<script src="src/04-storage.js"></script>
+<script src="src/05-helpers.js"></script>
+<script src="src/06-permissions.js"></script>
+<script src="src/07-state.js"></script>
+
+<!-- نوبت ۲: UI primitives (toast, modal, drawer, ...) -->
+<!-- نوبت ۳: notifications, actions, nav, render -->
+<!-- نوبت ۴-۵: pages -->
+<!-- نوبت ۶: reports, settings, shortcuts -->
+
+<script src="src/99-boot.js"></script>
+</body>
+</html>
