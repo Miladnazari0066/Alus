@@ -1,5 +1,15 @@
 'use strict';
 
+if (!window._expDropdownListenerAdded) {
+  document.addEventListener('click', function (e) {
+    var dd = document.getElementById('exp-dd');
+    if (dd && !dd.contains(e.target)) {
+      dd.classList.remove('open');
+    }
+  });
+  window._expDropdownListenerAdded = true;
+}
+
 function pageReports(page) {
   var tab = 'inventory';
   var filterWh = '';
@@ -260,10 +270,6 @@ function pageReports(page) {
         expDD.classList.toggle('open');
       });
     }
-    document.addEventListener('click', function () {
-      var dd = document.getElementById('exp-dd');
-      if (dd) dd.classList.remove('open');
-    });
 
     $$('[data-sort]').forEach(function (th) {
       th.addEventListener('click', function () {
