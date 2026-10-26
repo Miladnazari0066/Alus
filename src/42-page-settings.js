@@ -31,12 +31,25 @@ function pageSettings(page) {
           '<div style="padding:12px 14px;background:rgba(255,59,48,.1);border:1px solid rgba(255,59,48,.24);border-radius:14px;font-size:12.5px;color:#b91c1c">' + IC.x + ' مسدود شده — از تنظیمات مرورگر فعال کنید</div>' :
           '<div class="row" style="justify-content:flex-end"><button type="button" class="btn primary" id="req-notif">' + IC.bellRing + ' فعال‌سازی</button></div>') +
       '</div>' +
+      
+      '<div class="widget w-12">' +
+        '<div class="w-head"><div><div class="w-title danger"><div class="ic danger">' + IC.zap + '</div>ابزارهای تست (محیط آزمایشی)</div></div></div>' +
+        '<p style="font-size:12.5px;line-height:1.9;margin-bottom:14px">در اینجا می‌توانید ۱۰۰ کالای تصادفی برای تست ساختار برنامه تولید کنید. برای پاک کردن آن‌ها، باید دکمه قرمز را به مدت ۳ ثانیه نگه دارید.</p>' +
+        '<div class="row" style="justify-content:flex-end;gap:8px">' +
+          '<button type="button" class="btn success" id="gen-100-btn">' + IC.plus + ' تولید ۱۰۰ کالای تستی</button>' +
+          '<button type="button" class="btn danger hold-btn" id="del-random-btn">' +
+            '<span class="hold-progress"></span>' +
+            '<span class="hold-text">' + IC.trash + ' پاک کردن کالاهای تستی (نگه دارید)</span>' +
+          '</button>' +
+        '</div>' +
+      '</div>' +
+
       '<div class="widget w-6">' +
         '<div class="w-head"><div><div class="w-title danger"><div class="ic danger">' + IC.alert + '</div>صفر کردن موجودی</div></div></div>' +
         '<p style="font-size:12.5px;line-height:1.9;margin-bottom:14px"><b>' + nonZero.length + ' ردیف</b> صفر می‌شود — تاریخچه حفظ می‌شود.</p>' +
         '<div class="row" style="justify-content:flex-end"><button type="button" class="btn danger" id="zero-btn">' + IC.refresh + ' صفر کردن</button></div>' +
       '</div>' +
-      '<div class="widget w-12">' +
+      '<div class="widget w-6">' +
         '<div class="w-head"><div><div class="w-title"><div class="ic">' + IC.download + '</div>پشتیبان‌گیری</div></div></div>' +
         '<div class="row" style="justify-content:flex-end;gap:8px">' +
           '<button type="button" class="btn ghost" id="imp-btn">' + IC.upload + ' بازیابی</button>' +
@@ -53,13 +66,16 @@ function pageSettings(page) {
       setTimeout(render, 500);
     });
   }
+  
   $('#zero-btn').addEventListener('click', openZeroOutModal);
+  
   $('#exp-btn').addEventListener('click', function () {
     var fresh = loadDB();
     var blob = new Blob([JSON.stringify(fresh, null, 2)], { type: 'application/json' });
     downloadBlob(blob, 'alus-backup-' + ymd() + '.json');
     celebrate('پشتیبان', 'فایل دانلود شد', 'success', 1800);
   });
+  
   $('#imp-btn').addEventListener('click', function () { $('#imp-file').click(); });
   $('#imp-file').addEventListener('change', function () {
     var f = this.files && this.files[0];
@@ -96,6 +112,129 @@ function pageSettings(page) {
     };
     rd.readAsText(f);
   });
+
+  $('#gen-100-btn').addEventListener('click', function () {
+    var btn = this;
+    btn.classList.add('loading');
+    
+    setTimeout(function() {
+      try {
+        var fresh = loadDB();
+        var central = whByType(fresh, 'central');
+        var store = whByType(fresh, 'store');
+        var units = ['دست', 'سرویس', 'عدد', 'متر', 'بسته'];
+        
+        for (var i = 1; i <= 100; i++) {
+          var randomNum = Math.floor(Math.random() * 10000);
+          var pId = uid();
+          var pName = 'محصول تست ' + i;
+          
+          fresh.products.push({
+            id: pId,
+            name: pName,
+            code: 'TEST-' + randomNum,
+            unit: units[Math.floor(Math.random() * units.length)],
+            image: '',
+            components: [],
+            isTestData: true,
+            createdAt: new Date().toISOString()
+          });
+          
+          if (central) {
+            fresh.stocks.push({
+              id: uid(),
+              productId: pId,
+              warehouseId: central.id,
+              quantity: Math.floor(Math.random() * 100),
+              reservedQty: 0,
+              minQuantity: 5,
+              updatedAt: new Date().toISOString()
+            });
+          }
+          if (store) {
+            fresh.stocks.push({
+              id: uid(),
+              productId: pId,
+              warehouseId: store.id,
+              quantity: Math.floor(Math.random() * 20),
+              reservedQty: 0,
+              minQuantity: 5,
+              updatedAt: new Date().toISOString()
+            });
+          }
+        }
+        
+        saveDB(fresh);
+        btn.classList.remove('loading');
+        toast('انجام شد', '۱۰۰ کالای تستی تولید شد', 'success');
+        render();
+      } catch (err) {
+        btn.classList.remove('loading');
+        toast('خطا', err.message || '', 'error');
+      }
+    }, 300);
+  });
+
+  var delBtn = $('#del-random-btn');
+  var holdTimer = null;
+  var holdInterval = null;
+  var holdDuration = 3000;
+  var holdProgress = 0;
+  var progressBar = delBtn.querySelector('.hold-progress');
+
+  function startHold(e) {
+    e.preventDefault();
+    holdProgress = 0;
+    progressBar.style.width = '0%';
+    
+    holdInterval = setInterval(function() {
+      holdProgress += 50;
+      var pct = (holdProgress / holdDuration) * 100;
+      if (pct > 100) pct = 100;
+      progressBar.style.width = pct + '%';
+    }, 50);
+    
+    holdTimer = setTimeout(function() {
+      clearInterval(holdInterval);
+      progressBar.style.width = '0%';
+      
+      try {
+        var fresh = loadDB();
+        var testProductIds = fresh.products
+          .filter(function (p) { return p.isTestData === true; })
+          .map(function (p) { return p.id; });
+          
+        if (testProductIds.length === 0) {
+          toast('موردی یافت نشد', 'هیچ کالای تستی برای حذف وجود ندارد', 'info');
+          return;
+        }
+        
+        fresh.products = fresh.products.filter(function (p) { return p.isTestData !== true; });
+        fresh.stocks = fresh.stocks.filter(function (s) { return testProductIds.indexOf(s.productId) < 0; });
+        fresh.transfers = fresh.transfers.filter(function (t) { return testProductIds.indexOf(t.productId) < 0; });
+        
+        saveDB(fresh);
+        toast('پاکسازی شد', testProductIds.length + ' کالای تستی حذف شد', 'success');
+        render();
+      } catch (err) {
+        toast('خطا در حذف', err.message || '', 'error');
+      }
+    }, holdDuration);
+  }
+
+  function cancelHold() {
+    if (holdTimer) clearTimeout(holdTimer);
+    if (holdInterval) clearInterval(holdInterval);
+    progressBar.style.width = '0%';
+  }
+
+  delBtn.addEventListener('mousedown', startHold);
+  delBtn.addEventListener('touchstart', startHold, { passive: false });
+  
+  delBtn.addEventListener('mouseup', cancelHold);
+  delBtn.addEventListener('mouseleave', cancelHold);
+  delBtn.addEventListener('touchend', cancelHold);
+  delBtn.addEventListener('touchcancel', cancelHold);
 }
 
 function openZeroOutModal() {
