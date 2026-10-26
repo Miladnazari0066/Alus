@@ -19,8 +19,6 @@ function go(name, params) {
   App.route = { name: name, params: params || {} };
   saveRoute();
   window.scrollTo(0, 0);
-  
-  // تغییر: حذف اسکلتون و تاخیر، رندر فوری
   render();
 }
 window.go = go;
@@ -285,7 +283,6 @@ function renderPage() {
 
 var app = document.getElementById('app');
 
-/* Cross-tab sync */
 window.addEventListener('storage', function (e) {
   if (e.key === K_DB) {
     App.user = currentUser();
