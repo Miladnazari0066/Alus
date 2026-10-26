@@ -15,7 +15,6 @@ function initSupabase() {
   }
 }
 
-// ارسال به کلاد با تاخیر ۲ ثانیه‌ای (برای جلوگیری از درخواست‌های تکراری)
 function syncToCloud(db) {
   if (!supabaseClient) return;
   clearTimeout(syncTimeout);
@@ -23,12 +22,10 @@ function syncToCloud(db) {
     supabaseClient.from('alus_sync').upsert({ id: 'main_db', data: db, updated_at: new Date() })
       .then(function (res) {
         if (res.error) console.error('[Supabase Sync Error]', res.error);
-        else console.log('[Supabase] Data saved to cloud.');
       });
   }, 2000);
 }
 
-// دریافت از کلاد هنگام لود اولیه
 function pullFromCloud() {
   if (!supabaseClient) return Promise.resolve(null);
   return supabaseClient.from('alus_sync').select('data').eq('id', 'main_db').single()
@@ -37,7 +34,6 @@ function pullFromCloud() {
       return null;
     })
     .catch(function (err) {
-      console.error('[Supabase Pull Error]', err);
       return null;
     });
 }
