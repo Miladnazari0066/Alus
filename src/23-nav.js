@@ -19,13 +19,9 @@ function go(name, params) {
   App.route = { name: name, params: params || {} };
   saveRoute();
   window.scrollTo(0, 0);
-  var page = $('#page');
-  if (page) {
-    showSkeleton(page);
-    setTimeout(function () { render(); }, 180);
-  } else {
-    render();
-  }
+  
+  // تغییر: حذف اسکلتون و تاخیر، رندر فوری
+  render();
 }
 window.go = go;
 
