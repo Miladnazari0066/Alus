@@ -2344,3 +2344,48 @@ tr.row-low:hover td { background: rgba(255,149,0,.08); }
   .nav-wrap, .bottom-tabs, .install-toast, .pdf-toolbar, .toast-wrap, .bulk-bar { display: none !important; }
   body { background: #fff; }
 }
+/* ============================================================
+   FIX LOGIN FOR MOBILE
+   ============================================================ */
+@media (max-width: 900px) {
+  .login {
+    display: flex;
+    flex-direction: column;
+    grid-template-columns: 1fr;
+    min-height: 100vh;
+  }
+  
+  .login-left {
+    padding: 30px 20px;
+    min-height: auto;
+    border-radius: 0 0 30px 30px;
+  }
+  
+  .login-left .ltag h2 {
+    font-size: 24px;
+    margin-bottom: 8px;
+  }
+  
+  .login-left .ltag p {
+    font-size: 13px;
+    line-height: 1.8;
+  }
+  
+  /* بخش قابلیت‌ها (سه مرحله تایید و...) در موبایل مخفی می‌شود تا صفحه شلوغ نشود */
+  .login-left .lfeat {
+    display: none; 
+  }
+  
+  .login-left > div:last-child {
+    display: none; /* مخفی کردن کپی‌رایت در موبایل */
+  }
+
+  .login-right {
+    padding: 30px 16px;
+    align-items: flex-start; /* فرم به بالای صفحه می‌چسبد */
+  }
+  
+  .login-card {
+    max-width: 100%;
+  }
+}
