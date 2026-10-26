@@ -2,6 +2,10 @@
 
 var PWA = (function () {
 
+  /**
+   * Draws a PWA icon (192/512, normal or maskable) on a canvas.
+   * Returns a data URL string, or null if canvas is unavailable.
+   */
   function drawIcon(size, maskable) {
     var c = document.createElement('canvas');
     c.width = c.height = size;
@@ -59,10 +63,31 @@ var PWA = (function () {
     try { return c.toDataURL('image/png'); } catch (e) { return null; }
   }
 
+  /**
+   * Computes the deployment base URL from the current page location.
+   * On GitHub Pages (e.g. https://user.github.io/Alus/) returns ".../Alus/";
+   * on localhost returns "http://localhost:port/".
+   */
+  function getBaseUrl() {
+    try {
+      var origin = location.origin;
+      var path = location.pathname;
+      // Strip the last segment ("index.html" or empty) and keep the trailing slash
+      var basePath = path.substring(0, path.lastIndexOf('/') + 1);
+      if (!basePath) basePath = '/';
+      return origin + basePath;
+    } catch (e) {
+      return location.href;
+    }
+  }
+
   function installManifest() {
     var i192  = drawIcon(192, false), i512  = drawIcon(512, false);
     var i192m = drawIcon(192, true),  i512m = drawIcon(512, true);
-    if (!i192 || !i512 || !i192m || !i512m) return;
+    if (!i192 || !i512 || !i192m || !i512m) {
+      console.warn('[pwa] icon canvas unavailable, skipping manifest');
+      return;
+    }
 
     var fav = document.createElement('link');
     fav.rel = 'icon';
@@ -75,12 +100,16 @@ var PWA = (function () {
     apple.href = i192;
     document.head.appendChild(apple);
 
+    // Absolute URLs — required because the manifest is served from a blob: URL,
+    // so relative paths would be resolved against "blob:" (invalid).
+    var base = getBaseUrl();
+
     var manifest = {
       name: 'Alus — پنل مدیریت',
       short_name: 'Alus',
       description: 'مدیریت هوشمند موجودی و جابه‌جایی مبلمان',
-      start_url: '.',
-      scope: '.',
+      start_url: base,
+      scope: base,
       display: 'standalone',
       display_override: ['standalone', 'minimal-ui'],
       orientation: 'any',
@@ -96,12 +125,14 @@ var PWA = (function () {
         { src: i512m, sizes: '512x512', type: 'image/png', purpose: 'maskable' }
       ]
     };
+
     var url;
     try {
       url = URL.createObjectURL(new Blob([JSON.stringify(manifest)], { type: 'application/manifest+json' }));
     } catch (e) {
       url = 'data:application/manifest+json;charset=utf-8,' + encodeURIComponent(JSON.stringify(manifest));
     }
+
     var link = document.createElement('link');
     link.rel = 'manifest';
     link.href = url;
