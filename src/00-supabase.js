@@ -1,12 +1,13 @@
 'use strict';
 
-var SUPABASE_URL = 'https://ythblbdfjlxmeqwkikhoi.supabase.co';
-var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl0aGJsYmRmamx4bWVxd2tpaG9pIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTMwNjE0NzIsImV4cCI6MjEwODYzNzQ3Mn0.IRoMTEZXFwT0YfffQuUyMLWIgmsD7m2c_a0rQ-ifF2w';
+// 👇👇 این دو خط را با Project URL و anon key پروژه جدیدت جایگزین کن 👇👇
+var SUPABASE_URL = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRoY2ZseHNqbG5lbm1hcmRycWt6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTMwOTI3NzgsImV4cCI6MjEwODY2ODc3OH0.SpJPTFzds6-5htJ6PdtRywDUlqUsIHBbvJzPRM8tr0U';
+var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRoY2ZseHNqbG5lbm1hcmRycWt6Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc5MzA5Mjc3OCwiZXhwIjoyMTA4NjY4Nzc4fQ.XChyHfZkbMMMsLwMPGBHGQCVkyg83D7oorbcpyYPTDg';
+// 👆👆 ======================================================= 👆👆
 
 var supabaseClient = null;
 var syncTimeout = null;
 
-// ساخت کلاینت با استفاده از فایل لوکال
 function initSupabase() {
   if (window.supabase) {
     try {
@@ -29,6 +30,9 @@ function syncToCloud(db) {
     supabaseClient.from('alus_sync').upsert({ id: 'main_db', data: db, updated_at: new Date() })
       .then(function (res) {
         if (res.error) console.error('[Supabase Sync Error]', res.error);
+      })
+      .catch(function (err) {
+        console.warn('[Supabase Sync Network Error]', err.message);
       });
   }, 2000);
 }
@@ -41,6 +45,7 @@ function pullFromCloud() {
       return null;
     })
     .catch(function (err) {
+      console.warn('[Supabase Pull Network Error]', err.message);
       return null;
     });
 }
