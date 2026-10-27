@@ -34,7 +34,7 @@ function pageSettings(page) {
       // ۱. وضعیت سیستم و سرورها
       '<div class="acc-item open" id="acc-status">' +
         '<div class="acc-header" onclick="this.parentElement.classList.toggle(\'open\')">' +
-          '<div class="acc-icon info">' + IC.cloud + '</div>' +
+          '<div class="acc-icon info">' + IC.layers + '</div>' +
           '<div class="acc-titles"><div class="acc-title">وضعیت سرورها و حجم مصرفی</div><div class="acc-sub">وضعیت اتصال دیتابیس و استوریج عکس‌ها</div></div>' +
           '<div class="acc-chevron">' + IC.chevD + '</div>' +
         '</div>' +
@@ -63,7 +63,7 @@ function pageSettings(page) {
       // ۲. اعلان‌ها
       '<div class="acc-item" id="acc-notif">' +
         '<div class="acc-header" onclick="this.parentElement.classList.toggle(\'open\')">' +
-          '<div class="acc-icon warn">' + IC.bellRing + '</div>' +
+          '<div class="acc-icon warn">' + IC.bell + '</div>' +
           '<div class="acc-titles"><div class="acc-title">اعلان مرورگر</div><div class="acc-sub">دریافت هشدارها روی دستگاه</div></div>' +
           '<div class="acc-chevron">' + IC.chevD + '</div>' +
         '</div>' +
@@ -73,7 +73,7 @@ function pageSettings(page) {
             '<div style="padding:12px 14px;background:rgba(52,199,89,.1);border:1px solid rgba(52,199,89,.24);border-radius:14px;font-size:12.5px;color:#047857;display:inline-block">' + IC.check + ' فعال است</div>' :
             notifPerm === 'denied' ?
             '<div style="padding:12px 14px;background:rgba(255,59,48,.1);border:1px solid rgba(255,59,48,.24);border-radius:14px;font-size:12.5px;color:#b91c1c;display:inline-block">' + IC.x + ' مسدود شده — از تنظیمات مرورگر فعال کنید</div>' :
-            '<button type="button" class="btn primary" id="req-notif">' + IC.bellRing + ' فعال‌سازی اعلان‌ها</button>') +
+            '<button type="button" class="btn primary" id="req-notif">' + IC.bell + ' فعال‌سازی اعلان‌ها</button>') +
         '</div></div>' +
       '</div>' +
 
@@ -97,7 +97,7 @@ function pageSettings(page) {
       // ۴. مدیریت موجودی (صفر کردن)
       '<div class="acc-item" id="acc-zero">' +
         '<div class="acc-header" onclick="this.parentElement.classList.toggle(\'open\')">' +
-          '<div class="acc-icon danger">' + IC.alert + '</div>' +
+          '<div class="acc-icon danger">' + IC.refresh + '</div>' +
           '<div class="acc-titles"><div class="acc-title">صفر کردن موجودی</div><div class="acc-sub">بستن دوره مالی و صفر کردن انبارها</div></div>' +
           '<div class="acc-chevron">' + IC.chevD + '</div>' +
         '</div>' +
@@ -125,7 +125,7 @@ function pageSettings(page) {
       // ۶. ابزارهای تست و بازنشانی
       '<div class="acc-item" id="acc-tools" style="border-color:rgba(255,59,48,.3)">' +
         '<div class="acc-header" onclick="this.parentElement.classList.toggle(\'open\')">' +
-          '<div class="acc-icon danger" style="background:#111">' + IC.zap + '</div>' +
+          '<div class="acc-icon danger" style="background:linear-gradient(135deg, #FF3B30, #D70015)">' + IC.settings + '</div>' +
           '<div class="acc-titles"><div class="acc-title" style="color:#b91c1c">ابزارهای تست و بازنشانی</div><div class="acc-sub">عملیات پیشرفته (مخصوص توسعه‌دهنده)</div></div>' +
           '<div class="acc-chevron">' + IC.chevD + '</div>' +
         '</div>' +
