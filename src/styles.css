@@ -2446,3 +2446,93 @@ tr.row-low:hover td { background: rgba(255,149,0,.08); }
   .nav-wrap, .bottom-tabs, .install-toast, .pdf-toolbar, .toast-wrap, .bulk-bar { display: none !important; }
   body { background: #fff; }
 }
+/* ============================================================
+   ACCORDION SETTINGS
+   ============================================================ */
+.acc-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-width: 900px;
+  margin: 0 auto;
+}
+.acc-item {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  overflow: hidden;
+  transition: all 0.3s var(--ease);
+}
+.acc-item:hover {
+  border-color: var(--border-2);
+  box-shadow: var(--card-shadow);
+}
+.acc-header {
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  cursor: pointer;
+  user-select: none;
+  background: var(--surface);
+}
+.acc-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  color: #fff;
+  flex-shrink: 0;
+}
+.acc-icon.info { background: var(--grad-info); }
+.acc-icon.warn { background: var(--grad-warn); }
+.acc-icon.danger { background: var(--grad-danger); }
+.acc-icon.success { background: var(--grad-success); }
+.acc-icon.primary { background: var(--grad-2); }
+
+.acc-titles {
+  flex: 1;
+  min-width: 0;
+}
+.acc-title {
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--text);
+  letter-spacing: -0.2px;
+}
+.acc-sub {
+  font-size: 11.5px;
+  color: var(--muted);
+  margin-top: 2px;
+  font-weight: 500;
+}
+.acc-chevron {
+  width: 24px;
+  height: 24px;
+  display: grid;
+  place-items: center;
+  color: var(--muted);
+  transition: transform 0.35s var(--spring);
+}
+.acc-chevron svg {
+  width: 18px;
+  height: 18px;
+}
+.acc-item.open .acc-chevron {
+  transform: rotate(180deg);
+}
+.acc-body {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  background: var(--surface-2);
+  border-top: 1px dashed transparent;
+}
+.acc-item.open .acc-body {
+  max-height: 2000px;
+  border-top-color: var(--border);
+}
+.acc-content {
+  padding: 20px;
+}
