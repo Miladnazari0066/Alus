@@ -8,11 +8,13 @@ var STORAGE_SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOi
 
 var supabaseClient = null;
 var supabaseStorageClient = null;
+
 var syncTimeout = null;
 var pollInterval = null;
 var isFetching = false;
+var isSaving = false;
+var lastLocalSaveTime = 0;
 
-// لود کتابخانه
 (function loadSupabaseSDK() {
   var script = document.createElement('script');
   script.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.8/dist/umd/supabase.min.js';
@@ -49,14 +51,24 @@ function initSupabase() {
   }
 }
 
-// آپلود به ابر
 function syncToCloud(db) {
   if (!supabaseClient) return;
+  
   clearTimeout(syncTimeout);
+  lastLocalSaveTime = Date.now(); // زمان ذخیره محلی را ثبت میکنیم
+  
   syncTimeout = setTimeout(function () {
+    isSaving = true;
     supabaseClient.from('alus_sync').upsert({ id: 'main_db', data: db, updated_at: new Date() })
-      .then(function (res) { if (res.error) console.error('[Sync Error]', res.error); });
-  }, 2000);
+      .then(function (res) { 
+        if (res.error) console.error('[Sync Error]', res.error); 
+        isSaving = false;
+      })
+      .catch(function(err) {
+        console.error('[Sync Network Error]', err);
+        isSaving = false;
+      });
+  }, 1000); // ۱ ثانیه صبر میکند تا تغییرات پشت سر هم را یکجا بفرستد
 }
 
 function pullFromCloud() {
@@ -81,13 +93,10 @@ function uploadImageToCloud(file) {
   });
 }
 
-// -------------------------------------------------------------
-// سیستم همگام‌سازی خودکار بین دستگاه‌ها
-// -------------------------------------------------------------
 function startCloudSync() {
   if (pollInterval) clearInterval(pollInterval);
-  // ⏱️ تنظیم مجدد روی ۵ ثانیه (5000 میلی‌ثانیه)
-  pollInterval = setInterval(fetchLatestCloudData, 5000); 
+  fetchLatestCloudData(); // یک بار در ابتدا چک میکنیم
+  pollInterval = setInterval(fetchLatestCloudData, 4000); // هر ۴ ثانیه چک میکند
   
   window.addEventListener('focus', fetchLatestCloudData);
   document.addEventListener('visibilitychange', function() {
@@ -96,23 +105,24 @@ function startCloudSync() {
 }
 
 function fetchLatestCloudData() {
-  if (!supabaseClient || isFetching) return;
-  if (syncTimeout) return; // اگر در حال ذخیره هستیم، تداخل نکن
+  if (!supabaseClient || isFetching || isSaving) return;
+  
+  // اگر همین الان تغییری در این دستگاه دادیم، ۳ ثانیه صبر میکنیم تا ابر آپدیت شود
+  if (Date.now() - lastLocalSaveTime < 3000) return; 
 
   isFetching = true;
   
-  supabaseClient.from('alus_sync').select('*').eq('id', 'main_db').single()
+  supabaseClient.from('alus_sync').select('data, updated_at').eq('id', 'main_db').single()
     .then(function(res) {
       isFetching = false;
       
-      if (res.error && res.error.code === 'PGRST116') {
-        return; 
-      }
+      if (res.error) return; 
       
       if (res.data && res.data.data) {
         var cloudStr = JSON.stringify(res.data.data);
         var localStr = localStorage.getItem(K_DB);
         
+        // مقایسه داده ابری با داده محلی
         if (cloudStr !== localStr) {
            localStorage.setItem(K_DB, cloudStr);
            if (typeof clearCache === 'function') clearCache();
@@ -124,7 +134,9 @@ function fetchLatestCloudData() {
            if (typeof render === 'function') {
                if (!isInput && !hasModal) {
                    render();
-                   if (typeof toast === 'function') toast('همگام‌سازی شد', 'تغییرات دستگاه دیگر اعمال شد', 'info');
+                   if (typeof toast === 'function') toast('همگام‌سازی شد', 'تغییرات دستگاه دیگر اعمال شد', 'success');
+               } else {
+                   if (typeof toast === 'function') toast('داده جدید', 'تغییرات جدید در پس‌زمینه ذخیره شد (پس از بستن صفحه اعمال می‌شود)', 'info');
                }
            }
         }
