@@ -13,10 +13,10 @@ function pageSettings(page) {
 
   var historyHTML = '';
   if (zeroHistory.length === 0) {
-    historyHTML = '<div class="muted small" style="text-align:center; padding: 24px; background:var(--surface-2); border-radius:16px;">تاریخچه‌ای وجود ندارد</div>';
+    historyHTML = '<div class="muted small" style="text-align:center; padding: 24px; background:var(--surface); border-radius:16px;">تاریخچه‌ای وجود ندارد</div>';
   } else {
     zeroHistory.forEach(function(a) {
-       historyHTML += '<div style="background:var(--surface-2); padding:10px 12px; border-radius:12px; font-size:12px; border:1px solid var(--border); margin-bottom:8px;">' +
+       historyHTML += '<div style="background:var(--surface); padding:12px 14px; border-radius:12px; font-size:12px; border:1px solid var(--border); margin-bottom:8px;">' +
           '<div style="display:flex; justify-content:space-between; margin-bottom:4px;">' +
             '<b style="color:var(--text)">' + esc(a.byName || '—') + '</b>' +
             '<span class="muted" style="font-size:10.5px; direction:ltr;">' + faDate(a.at) + '</span>' +
@@ -28,81 +28,116 @@ function pageSettings(page) {
 
   page.innerHTML = '<div class="page-head"><div><h1>تنظیمات</h1>' +
     '<div class="sub">مدیریت سیستمی — فقط راهبر</div></div></div>' +
-    '<div class="bento">' +
+    
+    '<div class="acc-list">' +
       
-      '<div class="widget w-6">' +
-        '<div class="w-head"><div><div class="w-title info"><div class="ic info">' + IC.info + '</div>وضعیت سیستم</div></div></div>' +
-        '<div class="dl" style="grid-template-columns:1fr 1fr;display:grid;gap:1px">' +
-          '<div class="dl-item"><div class="k">کالاها</div><div class="v">' + db.products.length + '</div></div>' +
-          '<div class="dl-item"><div class="k">انبارها</div><div class="v">' + db.warehouses.filter(function (w) { return w.type !== 'customer'; }).length + '</div></div>' +
-          '<div class="dl-item"><div class="k">اسناد</div><div class="v">' + db.transfers.length + '</div></div>' +
-          '<div class="dl-item"><div class="k">تعدیلات</div><div class="v">' + (db.adjustments || []).length + '</div></div>' +
-          '<div class="dl-item"><div class="k">جمع موجودی</div><div class="v">' + totalStock.toLocaleString('fa-IR') + ' عدد</div></div>' +
-          '<div class="dl-item"><div class="k">حجم داده‌ها</div><div class="v">' + (dbSize / 1024).toFixed(1) + ' KB</div></div>' +
+      // ۱. وضعیت سیستم و سرورها
+      '<div class="acc-item open" id="acc-status">' +
+        '<div class="acc-header" onclick="this.parentElement.classList.toggle(\'open\')">' +
+          '<div class="acc-icon info">' + IC.cloud + '</div>' +
+          '<div class="acc-titles"><div class="acc-title">وضعیت سرورها و حجم مصرفی</div><div class="acc-sub">وضعیت اتصال دیتابیس و استوریج عکس‌ها</div></div>' +
+          '<div class="acc-chevron">' + IC.chevD + '</div>' +
         '</div>' +
+        '<div class="acc-body"><div class="acc-content">' +
+          '<div style="display:flex; justify-content:flex-end; margin-bottom:12px;"><button type="button" class="btn xs ghost" id="refresh-status-btn">' + IC.refresh + ' بروزرسانی</button></div>' +
+          '<div class="table-scroll">' +
+            '<table class="dt" style="min-width: 100%; margin:0">' +
+              '<thead><tr><th>سرویس</th><th>وضعیت اتصال</th><th style="text-align:left">حجم مصرفی</th></tr></thead>' +
+              '<tbody>' +
+                '<tr>' +
+                  '<td><div class="cell-product"><div class="img-thumb-placeholder" style="background:rgba(0,122,255,.1);color:var(--blue);border-color:rgba(0,122,255,.2)">' + IC.package + '</div><div class="info"><b>دیتابیس</b><br><small style="font-size:10px;color:var(--muted)">Supabase DB</small></div></div></td>' +
+                  '<td id="db-status-cell" style="font-size:11px;direction:ltr;text-align:left"><span style="color:var(--orange);display:flex;align-items:center;gap:6px;direction:rtl;"><span class="dot" style="width:8px;height:8px;border-radius:50%;background:var(--orange);display:inline-block"></span>در حال بررسی...</span></td>' +
+                  '<td class="num" id="db-size-cell">-</td>' +
+                '</tr>' +
+                '<tr>' +
+                  '<td><div class="cell-product"><div class="img-thumb-placeholder" style="background:rgba(175,82,222,.1);color:var(--purple);border-color:rgba(175,82,222,.2)">' + IC.image + '</div><div class="info"><b>استوریج عکس‌ها</b><br><small style="font-size:10px;color:var(--muted)">Supabase Storage</small></div></div></td>' +
+                  '<td id="storage-status-cell" style="font-size:11px;direction:ltr;text-align:left"><span style="color:var(--orange);display:flex;align-items:center;gap:6px;direction:rtl;"><span class="dot" style="width:8px;height:8px;border-radius:50%;background:var(--orange);display:inline-block"></span>در حال بررسی...</span></td>' +
+                  '<td class="num" id="storage-size-cell">-</td>' +
+                '</tr>' +
+              '</tbody>' +
+            '</table>' +
+          '</div>' +
+        '</div></div>' +
       '</div>' +
 
-      '<div class="widget w-6">' +
-        '<div class="w-head"><div><div class="w-title warn"><div class="ic warn">' + IC.bellRing + '</div>اعلان مرورگر</div></div></div>' +
-        '<p style="font-size:12.5px;line-height:1.9;margin-bottom:14px">اعلان‌های مرورگر برای اطلاع سریع از تغییرات مهم (تأیید نهایی، ورود کالا).</p>' +
-        (notifPerm === 'granted' ?
-          '<div style="padding:12px 14px;background:rgba(52,199,89,.1);border:1px solid rgba(52,199,89,.24);border-radius:14px;font-size:12.5px;color:#047857">' + IC.check + ' فعال است</div>' :
-          notifPerm === 'denied' ?
-          '<div style="padding:12px 14px;background:rgba(255,59,48,.1);border:1px solid rgba(255,59,48,.24);border-radius:14px;font-size:12.5px;color:#b91c1c">' + IC.x + ' مسدود شده — از تنظیمات مرورگر فعال کنید</div>' :
-          '<div class="row" style="justify-content:flex-end"><button type="button" class="btn primary" id="req-notif">' + IC.bellRing + ' فعال‌سازی</button></div>') +
-      '</div>' +
-
-      '<div class="widget w-12">' +
-        '<div class="w-head"><div><div class="w-title"><div class="ic" style="background:var(--grad-info)">' + IC.cloud + '</div>وضعیت سرورها و حجم مصرفی ابری</div></div>' +
-        '<button type="button" class="btn xs ghost" id="refresh-status-btn">' + IC.refresh + ' بروزرسانی</button></div>' +
-        '<div class="table-scroll">' +
-          '<table class="dt" style="min-width: 100%;">' +
-            '<thead><tr><th>سرویس</th><th>وضعیت اتصال</th><th style="text-align:left">حجم مصرفی</th></tr></thead>' +
-            '<tbody>' +
-              '<tr>' +
-                '<td><div class="cell-product"><div class="img-thumb-placeholder" style="background:rgba(0,122,255,.1);color:var(--blue);border-color:rgba(0,122,255,.2)">' + IC.package + '</div><div class="info"><b>دیتابیس مرکزی</b></div></div></td>' +
-                '<td id="db-status-cell" style="font-size:11px;font-family:monospace;direction:ltr;text-align:left"><span style="color:var(--orange);display:flex;align-items:center;gap:6px;direction:rtl;font-family:Vazirmatn"><span class="dot" style="width:8px;height:8px;border-radius:50%;background:var(--orange);display:inline-block"></span>در حال بررسی...</span></td>' +
-                '<td class="num" id="db-size-cell">-</td>' +
-              '</tr>' +
-              '<tr>' +
-                '<td><div class="cell-product"><div class="img-thumb-placeholder" style="background:rgba(175,82,222,.1);color:var(--purple);border-color:rgba(175,82,222,.2)">' + IC.image + '</div><div class="info"><b>استوریج عکس‌ها</b></div></div></td>' +
-                '<td id="storage-status-cell" style="font-size:11px;font-family:monospace;direction:ltr;text-align:left"><span style="color:var(--orange);display:flex;align-items:center;gap:6px;direction:rtl;font-family:Vazirmatn"><span class="dot" style="width:8px;height:8px;border-radius:50%;background:var(--orange);display:inline-block"></span>در حال بررسی...</span></td>' +
-                '<td class="num" id="storage-size-cell">-</td>' +
-              '</tr>' +
-            '</tbody>' +
-          '</table>' +
+      // ۲. اعلان‌ها
+      '<div class="acc-item" id="acc-notif">' +
+        '<div class="acc-header" onclick="this.parentElement.classList.toggle(\'open\')">' +
+          '<div class="acc-icon warn">' + IC.bellRing + '</div>' +
+          '<div class="acc-titles"><div class="acc-title">اعلان مرورگر</div><div class="acc-sub">دریافت هشدارها روی دستگاه</div></div>' +
+          '<div class="acc-chevron">' + IC.chevD + '</div>' +
         '</div>' +
+        '<div class="acc-body"><div class="acc-content">' +
+          '<p style="font-size:12.5px;line-height:1.9;margin-bottom:14px;color:var(--text-2)">با فعال‌سازی این گزینه، هنگام تأیید نهایی اسناد یا ورود کالا، یک اعلان در گوشی یا کامپیوتر شما نمایش داده می‌شود.</p>' +
+          (notifPerm === 'granted' ?
+            '<div style="padding:12px 14px;background:rgba(52,199,89,.1);border:1px solid rgba(52,199,89,.24);border-radius:14px;font-size:12.5px;color:#047857;display:inline-block">' + IC.check + ' فعال است</div>' :
+            notifPerm === 'denied' ?
+            '<div style="padding:12px 14px;background:rgba(255,59,48,.1);border:1px solid rgba(255,59,48,.24);border-radius:14px;font-size:12.5px;color:#b91c1c;display:inline-block">' + IC.x + ' مسدود شده — از تنظیمات مرورگر فعال کنید</div>' :
+            '<button type="button" class="btn primary" id="req-notif">' + IC.bellRing + ' فعال‌سازی اعلان‌ها</button>') +
+        '</div></div>' +
       '</div>' +
 
-      '<div class="widget w-6">' +
-        '<div class="w-head"><div><div class="w-title danger"><div class="ic danger">' + IC.alert + '</div>صفر کردن موجودی</div></div></div>' +
-        '<p style="font-size:12.5px;line-height:1.9;margin-bottom:14px"><b>' + nonZero.length + ' ردیف</b> صفر می‌شود — تاریخچه حفظ می‌شود.</p>' +
-        '<div class="row" style="justify-content:flex-end; margin-top:auto;"><button type="button" class="btn danger" id="zero-btn">' + IC.refresh + ' صفر کردن موجودی</button></div>' +
-      '</div>' +
-
-      '<div class="widget w-6">' +
-        '<div class="w-head"><div><div class="w-title info"><div class="ic info">' + IC.history + '</div>تاریخچه صفر کردن</div></div></div>' +
-        '<div style="max-height: 160px; overflow-y: auto; padding-left: 4px;">' + historyHTML + '</div>' +
-      '</div>' +
-
-      // 👇 بخش ابزارهای تست و بازنشانی کارخانه‌ای 👇
-      '<div class="widget w-12" style="border: 1px solid rgba(255,59,48,.3); background: linear-gradient(135deg, rgba(255,59,48,.05), rgba(255,149,0,.02));">' +
-        '<div class="w-head"><div><div class="w-title danger"><div class="ic danger">' + IC.zap + '</div>ابزارهای تست و بازنشانی</div></div></div>' +
-        '<p style="font-size:12.5px;line-height:1.9;margin-bottom:14px">با دکمه اول می‌توانید ۱۰۰ کالای تصادفی بسازید. دکمه قرمز، <b>تمام اطلاعات (کالاها، اسناد، موجودی و عکس‌ها)</b> را از مرورگر و سرور ابری برای همیشه پاک می‌کند.</p>' +
-        '<div class="row" style="justify-content:flex-end;gap:8px;flex-wrap:wrap">' +
-          '<button type="button" class="btn success" id="gen-100-btn">' + IC.plus + ' تولید ۱۰۰ کالای تستی</button>' +
-          '<button type="button" class="btn danger" id="factory-reset-btn" style="background: #111; border-color: #333;">' + IC.trash + ' بازنشانی کارخانه‌ای (پاکسازی کامل)</button>' +
+      // ۳. پشتیبان‌گیری
+      '<div class="acc-item" id="acc-backup">' +
+        '<div class="acc-header" onclick="this.parentElement.classList.toggle(\'open\')">' +
+          '<div class="acc-icon primary">' + IC.download + '</div>' +
+          '<div class="acc-titles"><div class="acc-title">پشتیبان‌گیری و بازیابی</div><div class="acc-sub">دانلود و بارگذاری فایل اطلاعات</div></div>' +
+          '<div class="acc-chevron">' + IC.chevD + '</div>' +
         '</div>' +
+        '<div class="acc-body"><div class="acc-content">' +
+          '<p style="font-size:12.5px;line-height:1.9;margin-bottom:14px;color:var(--text-2)">اطلاعات فعلی سیستم (کالاها، انبارها و اسناد) را به صورت یک فایل دانلود کنید یا یک فایل قبلی را بازیابی کنید.</p>' +
+          '<div class="row">' +
+            '<button type="button" class="btn ghost" id="imp-btn">' + IC.upload + ' بازیابی از فایل</button>' +
+            '<button type="button" class="btn success" id="exp-btn">' + IC.download + ' دانلود فایل پشتیبان</button>' +
+            '<input type="file" id="imp-file" accept=".json" style="display:none" />' +
+          '</div>' +
+        '</div></div>' +
       '</div>' +
 
-      '<div class="widget w-12">' +
-        '<div class="w-head"><div><div class="w-title"><div class="ic">' + IC.download + '</div>پشتیبان‌گیری</div></div></div>' +
-        '<div class="row" style="justify-content:flex-end;gap:8px">' +
-          '<button type="button" class="btn ghost" id="imp-btn">' + IC.upload + ' بازیابی</button>' +
-          '<button type="button" class="btn success" id="exp-btn">' + IC.download + ' دانلود JSON</button>' +
-          '<input type="file" id="imp-file" accept=".json" style="display:none" />' +
+      // ۴. مدیریت موجودی (صفر کردن)
+      '<div class="acc-item" id="acc-zero">' +
+        '<div class="acc-header" onclick="this.parentElement.classList.toggle(\'open\')">' +
+          '<div class="acc-icon danger">' + IC.alert + '</div>' +
+          '<div class="acc-titles"><div class="acc-title">صفر کردن موجودی</div><div class="acc-sub">بستن دوره مالی و صفر کردن انبارها</div></div>' +
+          '<div class="acc-chevron">' + IC.chevD + '</div>' +
         '</div>' +
+        '<div class="acc-body"><div class="acc-content">' +
+          '<div style="padding:14px;background:var(--surface);border-radius:14px;border:1px solid var(--border);margin-bottom:14px">' +
+            '<div style="display:flex;justify-content:space-between;margin-bottom:8px"><span style="font-size:12.5px;color:var(--muted)">تعداد ردیف‌های دارای موجودی:</span><b>' + nonZero.length + ' ردیف</b></div>' +
+            '<div style="display:flex;justify-content:space-between"><span style="font-size:12.5px;color:var(--muted)">جمع کل موجودی:</span><b>' + totalStock.toLocaleString('fa-IR') + ' عدد</b></div>' +
+          '</div>' +
+          '<button type="button" class="btn danger" id="zero-btn">' + IC.refresh + ' صفر کردن موجودی</button>' +
+        '</div></div>' +
       '</div>' +
+
+      // ۵. تاریخچه صفر کردن
+      '<div class="acc-item" id="acc-history">' +
+        '<div class="acc-header" onclick="this.parentElement.classList.toggle(\'open\')">' +
+          '<div class="acc-icon info">' + IC.history + '</div>' +
+          '<div class="acc-titles"><div class="acc-title">تاریخچه صفر کردن</div><div class="acc-sub">سوابق بستن دوره‌های مالی</div></div>' +
+          '<div class="acc-chevron">' + IC.chevD + '</div>' +
+        '</div>' +
+        '<div class="acc-body"><div class="acc-content">' +
+          '<div style="max-height: 250px; overflow-y: auto; padding-right:4px;">' + historyHTML + '</div>' +
+        '</div></div>' +
+      '</div>' +
+
+      // ۶. ابزارهای تست و بازنشانی
+      '<div class="acc-item" id="acc-tools" style="border-color:rgba(255,59,48,.3)">' +
+        '<div class="acc-header" onclick="this.parentElement.classList.toggle(\'open\')">' +
+          '<div class="acc-icon danger" style="background:#111">' + IC.zap + '</div>' +
+          '<div class="acc-titles"><div class="acc-title" style="color:#b91c1c">ابزارهای تست و بازنشانی</div><div class="acc-sub">عملیات پیشرفته (مخصوص توسعه‌دهنده)</div></div>' +
+          '<div class="acc-chevron">' + IC.chevD + '</div>' +
+        '</div>' +
+        '<div class="acc-body"><div class="acc-content">' +
+          '<p style="font-size:12.5px;line-height:1.9;margin-bottom:14px;color:var(--text-2)">با دکمه اول می‌توانید ۱۰۰ کالای تصادفی بسازید. دکمه قرمز، تمام اطلاعات (کالاها، اسناد، موجودی و عکس‌ها) را برای همیشه پاک می‌کند.</p>' +
+          '<div class="row">' +
+            '<button type="button" class="btn success" id="gen-100-btn">' + IC.plus + ' تولید ۱۰۰ کالای تستی</button>' +
+            '<button type="button" class="btn danger" id="factory-reset-btn" style="background: #111; border-color: #333;">' + IC.trash + ' بازنشانی کارخانه‌ای</button>' +
+          '</div>' +
+        '</div></div>' +
+      '</div>' +
+
     '</div>';
 
   // -------------------------------------------------------------
@@ -114,35 +149,37 @@ function pageSettings(page) {
     var stStatusEl = document.getElementById('storage-status-cell');
     var stSizeEl = document.getElementById('storage-size-cell');
 
+    if (!dbStatusEl) return;
+
     if (typeof supabaseClient === 'undefined' || !supabaseClient) {
-      dbStatusEl.innerHTML = '<span style="color:var(--red);display:flex;align-items:center;gap:6px;direction:rtl;font-family:Vazirmatn"><span class="dot" style="width:8px;height:8px;border-radius:50%;background:var(--red);display:inline-block"></span>آفلاین</span>';
+      dbStatusEl.innerHTML = '<span style="color:var(--red);display:flex;align-items:center;gap:6px;direction:rtl;"><span class="dot" style="width:8px;height:8px;border-radius:50%;background:var(--red);display:inline-block"></span>آفلاین</span>';
       dbSizeEl.innerHTML = '—';
     } else {
       supabaseClient.from('alus_sync').select('count', { count: 'exact', head: true })
         .then(function (res) {
           if (res.error) {
-             dbStatusEl.innerHTML = '<span style="color:var(--red);direction:rtl;font-family:Vazirmatn;font-size:11px;display:block;text-align:right">خطا:<br><span style="font-size:10px;color:var(--text-2)">' + (res.error.message || res.error.code) + '</span></span>';
+             dbStatusEl.innerHTML = '<span style="color:var(--red);direction:rtl;font-size:11px;display:block;text-align:right">خطا:<br><span style="font-size:10px;color:var(--text-2)">' + (res.error.message || res.error.code) + '</span></span>';
           } else {
-             dbStatusEl.innerHTML = '<span style="color:var(--green);display:flex;align-items:center;gap:6px;direction:rtl;font-family:Vazirmatn"><span class="dot" style="width:8px;height:8px;border-radius:50%;background:var(--green);display:inline-block;box-shadow:0 0 6px var(--green)"></span>آنلاین (متصل)</span>';
+             dbStatusEl.innerHTML = '<span style="color:var(--green);display:flex;align-items:center;gap:6px;direction:rtl;"><span class="dot" style="width:8px;height:8px;border-radius:50%;background:var(--green);display:inline-block;box-shadow:0 0 6px var(--green)"></span>آنلاین</span>';
           }
         })
         .catch(function (err) {
-          dbStatusEl.innerHTML = '<span style="color:var(--red);direction:rtl;font-family:Vazirmatn;font-size:11px;display:block;text-align:right">خطای شبکه:<br><span style="font-size:10px;color:var(--text-2)">' + err.message + '</span></span>';
+          dbStatusEl.innerHTML = '<span style="color:var(--red);direction:rtl;font-size:11px;display:block;text-align:right">خطای شبکه:<br><span style="font-size:10px;color:var(--text-2)">' + err.message + '</span></span>';
         });
       dbSizeEl.innerHTML = (dbSize / 1024).toFixed(1) + ' <span class="unit">KB</span>';
     }
 
     if (typeof supabaseStorageClient === 'undefined' || !supabaseStorageClient) {
-      stStatusEl.innerHTML = '<span style="color:var(--red);display:flex;align-items:center;gap:6px;direction:rtl;font-family:Vazirmatn"><span class="dot" style="width:8px;height:8px;border-radius:50%;background:var(--red);display:inline-block"></span>آفلاین</span>';
+      stStatusEl.innerHTML = '<span style="color:var(--red);display:flex;align-items:center;gap:6px;direction:rtl;"><span class="dot" style="width:8px;height:8px;border-radius:50%;background:var(--red);display:inline-block"></span>آفلاین</span>';
       stSizeEl.innerHTML = '—';
     } else {
       supabaseStorageClient.storage.from('product-images').list()
         .then(function (res) {
           if (res.error) {
-            stStatusEl.innerHTML = '<span style="color:var(--red);direction:rtl;font-family:Vazirmatn;font-size:11px;display:block;text-align:right">خطا:<br><span style="font-size:10px;color:var(--text-2)">' + (res.error.message || res.error.name) + '</span></span>';
+            stStatusEl.innerHTML = '<span style="color:var(--red);direction:rtl;font-size:11px;display:block;text-align:right">خطا:<br><span style="font-size:10px;color:var(--text-2)">' + (res.error.message || res.error.name) + '</span></span>';
             stSizeEl.innerHTML = '—';
           } else {
-            stStatusEl.innerHTML = '<span style="color:var(--green);display:flex;align-items:center;gap:6px;direction:rtl;font-family:Vazirmatn"><span class="dot" style="width:8px;height:8px;border-radius:50%;background:var(--green);display:inline-block;box-shadow:0 0 6px var(--green)"></span>آنلاین (متصل)</span>';
+            stStatusEl.innerHTML = '<span style="color:var(--green);display:flex;align-items:center;gap:6px;direction:rtl;"><span class="dot" style="width:8px;height:8px;border-radius:50%;background:var(--green);display:inline-block;box-shadow:0 0 6px var(--green)"></span>آنلاین</span>';
             var totalBytes = 0;
             res.data.forEach(function(file) {
               if (file.metadata && file.metadata.size) totalBytes += file.metadata.size;
@@ -151,14 +188,16 @@ function pageSettings(page) {
           }
         })
         .catch(function (err) {
-          stStatusEl.innerHTML = '<span style="color:var(--red);direction:rtl;font-family:Vazirmatn;font-size:11px;display:block;text-align:right">خطای شبکه:<br><span style="font-size:10px;color:var(--text-2)">' + err.message + '</span></span>';
+          stStatusEl.innerHTML = '<span style="color:var(--red);direction:rtl;font-size:11px;display:block;text-align:right">خطای شبکه:<br><span style="font-size:10px;color:var(--text-2)">' + err.message + '</span></span>';
           stSizeEl.innerHTML = '—';
         });
     }
   }
 
   setTimeout(checkServerStatus, 500);
-  document.getElementById('refresh-status-btn').addEventListener('click', function() {
+  
+  document.getElementById('refresh-status-btn').addEventListener('click', function(e) {
+    e.stopPropagation(); // جلوگیری از بسته شدن آکاردئون
     var btn = this;
     btn.innerHTML = IC.refresh + ' در حال بررسی...';
     checkServerStatus();
@@ -166,92 +205,20 @@ function pageSettings(page) {
   });
 
   // -------------------------------------------------------------
-  // تولید ۱۰۰ کالای تستی
-  // -------------------------------------------------------------
-  $('#gen-100-btn').addEventListener('click', function () {
-    var btn = this;
-    btn.classList.add('loading');
-    setTimeout(function() {
-      try {
-        var fresh = loadDB();
-        var central = whByType(fresh, 'central');
-        var store = whByType(fresh, 'store');
-        var units = ['دست', 'سرویس', 'عدد', 'متر', 'بسته'];
-        for (var i = 1; i <= 100; i++) {
-          var pId = uid();
-          fresh.products.push({ id: pId, name: 'محصول تست ' + i, code: 'TEST-' + Math.floor(Math.random() * 10000), unit: units[Math.floor(Math.random() * units.length)], image: '', components: [], isTestData: true, createdAt: new Date().toISOString() });
-          if (central) fresh.stocks.push({ id: uid(), productId: pId, warehouseId: central.id, quantity: Math.floor(Math.random() * 100), reservedQty: 0, minQuantity: 5, updatedAt: new Date().toISOString() });
-          if (store) fresh.stocks.push({ id: uid(), productId: pId, warehouseId: store.id, quantity: Math.floor(Math.random() * 20), reservedQty: 0, minQuantity: 5, updatedAt: new Date().toISOString() });
-        }
-        saveDB(fresh);
-        btn.classList.remove('loading');
-        toast('انجام شد', '۱۰۰ کالای تستی تولید شد', 'success');
-        render();
-      } catch (err) { btn.classList.remove('loading'); toast('خطا', err.message || '', 'error'); }
-    }, 300);
-  });
-
-  // -------------------------------------------------------------
-  // بازنشانی کارخانه‌ای (پاکسازی کامل دیتابیس و استوریج)
-  // -------------------------------------------------------------
-  document.getElementById('factory-reset-btn').addEventListener('click', function() {
-    openModal({
-      title: 'بازنشانی کارخانه‌ای',
-      desc: 'هشدار! این عملیات غیرقابل بازگشت است.',
-      body: '<div style="padding:12px 14px;background:rgba(255,59,48,.1);border-radius:14px;font-size:13px;color:#b91c1c;line-height:1.8">' +
-        IC.alert + ' با این کار، <b>تمام کالاها، موجودی‌ها، اسناد و عکس‌ها</b> (هم در مرورگر و هم در سرورهای ابری) برای همیشه پاک می‌شوند. آیا مطمئن هستید؟</div>',
-      actions: [
-        { label: 'انصراف', cls: 'ghost', onClick: function (c) { c.remove(); } },
-        {
-          label: IC.trash + ' بله، همه چیز را پاک کن',
-          cls: 'danger',
-          onClick: function (c) {
-            var btn = c.querySelector('button.danger');
-            if (btn) btn.classList.add('loading');
-
-            // 1. پاک کردن حافظه مرورگر
-            localStorage.clear();
-            if (typeof clearCache === 'function') clearCache();
-
-            // 2. پاک کردن دیتابیس و استوریج ابری
-            if (typeof supabaseClient !== 'undefined' && supabaseClient) {
-              supabaseClient.from('alus_sync').delete().eq('id', 'main_db').then(function() {
-                if (typeof supabaseStorageClient !== 'undefined' && supabaseStorageClient) {
-                  supabaseStorageClient.storage.from('product-images').list().then(function(res) {
-                    if (res.data && res.data.length > 0) {
-                      var files = res.data.map(function(f) { return f.name; });
-                      supabaseStorageClient.storage.from('product-images').remove(files).then(function() {
-                        window.location.reload();
-                      });
-                    } else {
-                      window.location.reload();
-                    }
-                  });
-                } else {
-                  window.location.reload();
-                }
-              });
-            } else {
-              window.location.reload();
-            }
-          }
-        }
-      ]
-    });
-  });
-
-  // -------------------------------------------------------------
-  // بقیه (صفر کردن و پشتیبان‌گیری)
+  // بقیه رویدادها
   // -------------------------------------------------------------
   var reqBtn = $('#req-notif');
   if (reqBtn) { reqBtn.addEventListener('click', function () { requestNotifPermission(); setTimeout(render, 500); }); }
+  
   $('#zero-btn').addEventListener('click', openZeroOutModal);
+  
   $('#exp-btn').addEventListener('click', function () {
     var fresh = loadDB();
     var blob = new Blob([JSON.stringify(fresh, null, 2)], { type: 'application/json' });
     downloadBlob(blob, 'alus-backup-' + ymd() + '.json');
     celebrate('پشتیبان', 'فایل دانلود شد', 'success', 1800);
   });
+  
   $('#imp-btn').addEventListener('click', function () { $('#imp-file').click(); });
   $('#imp-file').addEventListener('change', function () {
     var f = this.files && this.files[0];
@@ -275,6 +242,62 @@ function pageSettings(page) {
       } catch (err) { toast('نامعتبر', err.message || '', 'error'); }
     };
     rd.readAsText(f);
+  });
+
+  $('#gen-100-btn').addEventListener('click', function () {
+    var btn = this;
+    btn.classList.add('loading');
+    setTimeout(function() {
+      try {
+        var fresh = loadDB();
+        var central = whByType(fresh, 'central');
+        var store = whByType(fresh, 'store');
+        var units = ['دست', 'سرویس', 'عدد', 'متر', 'بسته'];
+        for (var i = 1; i <= 100; i++) {
+          var pId = uid();
+          fresh.products.push({ id: pId, name: 'محصول تست ' + i, code: 'TEST-' + Math.floor(Math.random() * 10000), unit: units[Math.floor(Math.random() * units.length)], image: '', components: [], isTestData: true, createdAt: new Date().toISOString() });
+          if (central) fresh.stocks.push({ id: uid(), productId: pId, warehouseId: central.id, quantity: Math.floor(Math.random() * 100), reservedQty: 0, minQuantity: 5, updatedAt: new Date().toISOString() });
+          if (store) fresh.stocks.push({ id: uid(), productId: pId, warehouseId: store.id, quantity: Math.floor(Math.random() * 20), reservedQty: 0, minQuantity: 5, updatedAt: new Date().toISOString() });
+        }
+        saveDB(fresh);
+        btn.classList.remove('loading');
+        toast('انجام شد', '۱۰۰ کالای تستی تولید شد', 'success');
+        render();
+      } catch (err) { btn.classList.remove('loading'); toast('خطا', err.message || '', 'error'); }
+    }, 300);
+  });
+
+  document.getElementById('factory-reset-btn').addEventListener('click', function() {
+    openModal({
+      title: 'بازنشانی کارخانه‌ای',
+      desc: 'هشدار! این عملیات غیرقابل بازگشت است.',
+      body: '<div style="padding:12px 14px;background:rgba(255,59,48,.1);border-radius:14px;font-size:13px;color:#b91c1c;line-height:1.8">' +
+        IC.alert + ' با این کار، <b>تمام کالاها، موجودی‌ها، اسناد و عکس‌ها</b> (هم در مرورگر و هم در سرورهای ابری) برای همیشه پاک می‌شوند. آیا مطمئن هستید؟</div>',
+      actions: [
+        { label: 'انصراف', cls: 'ghost', onClick: function (c) { c.remove(); } },
+        {
+          label: IC.trash + ' بله، همه چیز را پاک کن', cls: 'danger',
+          onClick: function (c) {
+            var btn = c.querySelector('button.danger');
+            if (btn) btn.classList.add('loading');
+            localStorage.clear();
+            if (typeof clearCache === 'function') clearCache();
+            if (typeof supabaseClient !== 'undefined' && supabaseClient) {
+              supabaseClient.from('alus_sync').delete().eq('id', 'main_db').then(function() {
+                if (typeof supabaseStorageClient !== 'undefined' && supabaseStorageClient) {
+                  supabaseStorageClient.storage.from('product-images').list().then(function(res) {
+                    if (res.data && res.data.length > 0) {
+                      var files = res.data.map(function(f) { return f.name; });
+                      supabaseStorageClient.storage.from('product-images').remove(files).then(function() { window.location.reload(); });
+                    } else { window.location.reload(); }
+                  });
+                } else { window.location.reload(); }
+              });
+            } else { window.location.reload(); }
+          }
+        }
+      ]
+    });
   });
 }
 
