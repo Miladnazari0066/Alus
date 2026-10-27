@@ -67,7 +67,7 @@ function pageSettings(page) {
         '<div class="w-head"><div><div class="w-title danger"><div class="ic danger">' + IC.zap + '</div>ابزارهای تست و عیب‌یابی (محیط آزمایشی)</div></div></div>' +
         '<p style="font-size:12.5px;line-height:1.9;margin-bottom:14px">در اینجا می‌توانید ۱۰۰ کالای تصادفی تولید کنید، آن‌ها را پاک کنید، یا اتصال دیتابیس ابری را تست کنید.</p>' +
         '<div class="row" style="justify-content:flex-end;gap:8px;flex-wrap:wrap">' +
-          '<button type="button" class="btn primary" id="test-sb-btn" style="background: linear-gradient(135deg, #10b981, #059669);">' + IC.info + ' تست اتصال ابری</button>' +
+          '<button type="button" class="btn primary" id="test-sb-btn" style="background: linear-gradient(135deg, #10b981, #059669);">' + IC.info + ' تست اتصال دیتابیس ابری</button>' +
           '<button type="button" class="btn success" id="gen-100-btn">' + IC.plus + ' تولید ۱۰۰ کالای تستی</button>' +
           '<button type="button" class="btn danger hold-btn" id="del-random-btn">' +
             '<span class="hold-progress"></span>' +
@@ -151,7 +151,7 @@ function pageSettings(page) {
     if (typeof supabaseClient === 'undefined' || !supabaseClient) {
       setTimeout(function() {
         btn.classList.remove('loading');
-        toast('خطای راه‌اندازی', 'کتابخانه لود نشده است.', 'error');
+        toast('خطای راه‌اندازی', 'کتابخانه لود نشده است. (src/supabase.min.js را چک کنید)', 'error');
       }, 500);
       return;
     }
@@ -161,14 +161,11 @@ function pageSettings(page) {
         btn.classList.remove('loading');
         
         if (res.error) {
-          console.error("Supabase Error Details:", res.error);
-          
           if (res.error.code === 'PGRST116') {
             toast('اتصال موفقیت‌آمیز بود ✅', 'ابر وصل است اما هنوز دیتایی ذخیره نشده است.', 'success');
           } else if (res.error.code === '42P01') {
-            toast('جدول ساخته نشده ❌', 'لطفاً کدهای SQL را در پروژه جدید اجرا کنید.', 'error');
+            toast('جدول ساخته نشده ❌', 'کدهای SQL را در بخش SQL Editor سایت Supabase اجرا کنید.', 'error');
           } else {
-            // نمایش متن دقیق خطای دیتابیس در یک هشدار
             alert('خطای دیتابیس:\n' + (res.error.message || '') + '\nکد: ' + (res.error.code || ''));
             toast('خطای دیتابیس ❌', res.error.message || 'دسترسی مسدود است', 'error');
           }
@@ -179,7 +176,12 @@ function pageSettings(page) {
       })
       .catch(function (err) {
         btn.classList.remove('loading');
-        toast('خطای شبکه ❌', err.message || 'ارتباط با سرور برقرار نشد.', 'error');
+        if (err.message && err.message.includes('Failed to fetch')) {
+          alert('خطای شبکه:\nمرورگر نمی‌تواند به سرور وصل شود.\nلطفاً یک بار با VPN امتحان کنید یا DNS سیستم را تغییر دهید.');
+          toast('خطای شبکه ❌', 'اتصال به سرور برقرار نشد.', 'error');
+        } else {
+          toast('خطای شبکه ❌', err.message || 'ارتباط با سرور برقرار نشد.', 'error');
+        }
       });
   });
 
