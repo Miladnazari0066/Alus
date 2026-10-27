@@ -151,7 +151,7 @@ function pageSettings(page) {
     if (typeof supabaseClient === 'undefined' || !supabaseClient) {
       setTimeout(function() {
         btn.classList.remove('loading');
-        toast('خطای راه‌اندازی', 'کتابخانه لود نشده است. (src/supabase.min.js را چک کنید)', 'error');
+        toast('خطای راه‌اندازی', 'کتابخانه لود نشده است.', 'error');
       }, 500);
       return;
     }
@@ -161,11 +161,15 @@ function pageSettings(page) {
         btn.classList.remove('loading');
         
         if (res.error) {
+          console.error("Supabase Error Details:", res.error);
+          
           if (res.error.code === 'PGRST116') {
             toast('اتصال موفقیت‌آمیز بود ✅', 'ابر وصل است اما هنوز دیتایی ذخیره نشده است.', 'success');
           } else if (res.error.code === '42P01') {
-            toast('جدول ساخته نشده ❌', 'کدهای SQL را در بخش SQL Editor سایت Supabase اجرا کنید.', 'error');
+            toast('جدول ساخته نشده ❌', 'لطفاً کدهای SQL را در پروژه جدید اجرا کنید.', 'error');
           } else {
+            // نمایش متن دقیق خطای دیتابیس در یک هشدار
+            alert('خطای دیتابیس:\n' + (res.error.message || '') + '\nکد: ' + (res.error.code || ''));
             toast('خطای دیتابیس ❌', res.error.message || 'دسترسی مسدود است', 'error');
           }
         } else if (res.data) {
@@ -175,11 +179,7 @@ function pageSettings(page) {
       })
       .catch(function (err) {
         btn.classList.remove('loading');
-        if (err.message && err.message.includes('Failed to fetch')) {
-          toast('خطای شبکه ❌', 'مرورگر نمی‌تواند به سرور وصل شود. (پروژه متوقف شده یا مشکل DNS دارید)', 'error');
-        } else {
-          toast('خطای شبکه ❌', err.message || 'ارتباط با سرور برقرار نشد.', 'error');
-        }
+        toast('خطای شبکه ❌', err.message || 'ارتباط با سرور برقرار نشد.', 'error');
       });
   });
 
