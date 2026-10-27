@@ -1,19 +1,34 @@
 'use strict';
 
 try {
-  // اگر دیتابیس خالی است، دیتای نمایشی می‌سازیم
+  if (typeof initSupabase === 'function') initSupabase();
+
   if (!loadDB().users.length) saveDB(seed());
 
-  // بازیابی نشست کاربر
   App.user = currentUser();
   App.route = App.user ? restoreRoute() : { name: 'dashboard', params: {} };
 
-  // PWA و Splash — هر خطا فقط لاگ می‌شود، اجرای برنامه متوقف نمی‌شود
   try { PWA.init(); } catch (e) { console.error('[pwa]', e); }
   try { showSplash(); } catch (e) { console.error('[splash]', e); }
 
-  // رندر اولیه
-  render();
+  // گرفتن آخرین تغییرات از ابر قبل از رندر شدن اولیه
+  if (typeof pullFromCloud === 'function') {
+    pullFromCloud().then(function (cloudData) {
+      if (cloudData) {
+        var cloudStr = JSON.stringify(cloudData);
+        var localStr = localStorage.getItem(K_DB);
+        if (cloudStr !== localStr) {
+          localStorage.setItem(K_DB, cloudStr);
+          if (typeof clearCache === 'function') clearCache();
+        }
+      }
+      render();
+      if (typeof startCloudSync === 'function') startCloudSync();
+    });
+  } else {
+    render();
+  }
+
 } catch (err) {
   var ee = document.getElementById('err');
   if (ee) {
@@ -21,4 +36,5 @@ try {
     ee.textContent = 'BOOT ERROR: ' + (err.message || err) + '\n' + (err.stack || '');
   }
   console.error('[boot]', err);
+  render(); // Fallback
 }
