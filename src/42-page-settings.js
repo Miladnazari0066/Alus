@@ -31,17 +31,8 @@ function pageSettings(page) {
     '<div class="bento">' +
       
       '<div class="widget w-6">' +
-        '<div class="w-head"><div><div class="w-title info"><div class="ic info">' + IC.info + '</div>وضعیت</div></div></div>' +
+        '<div class="w-head"><div><div class="w-title info"><div class="ic info">' + IC.info + '</div>وضعیت سیستم</div></div></div>' +
         '<div class="dl" style="grid-template-columns:1fr 1fr;display:grid;gap:1px">' +
-          '<div class="dl-item" style="grid-column: 1 / -1; background: linear-gradient(135deg, rgba(0,122,255,.05), rgba(88,86,214,.02));">' +
-            '<div class="k">وضعیت اتصال ابری (Supabase)</div>' +
-            '<div class="v" id="cloud-status">' +
-              '<span style="color:var(--muted); display:flex; align-items:center; gap:6px;">' +
-                '<span class="dot" style="width:10px; height:10px; border-radius:50%; background:var(--orange); display:inline-block;"></span>' +
-                'در حال بررسی...' +
-              '</span>' +
-            '</div>' +
-          '</div>' +
           '<div class="dl-item"><div class="k">کالاها</div><div class="v">' + db.products.length + '</div></div>' +
           '<div class="dl-item"><div class="k">انبارها</div><div class="v">' + db.warehouses.filter(function (w) { return w.type !== 'customer'; }).length + '</div></div>' +
           '<div class="dl-item"><div class="k">اسناد</div><div class="v">' + db.transfers.length + '</div></div>' +
@@ -60,7 +51,36 @@ function pageSettings(page) {
           '<div style="padding:12px 14px;background:rgba(255,59,48,.1);border:1px solid rgba(255,59,48,.24);border-radius:14px;font-size:12.5px;color:#b91c1c">' + IC.x + ' مسدود شده — از تنظیمات مرورگر فعال کنید</div>' :
           '<div class="row" style="justify-content:flex-end"><button type="button" class="btn primary" id="req-notif">' + IC.bellRing + ' فعال‌سازی</button></div>') +
       '</div>' +
-      
+
+      // 👇 بخش جدید: جدول وضعیت سرورها و حجم مصرفی 👇
+      '<div class="widget w-12">' +
+        '<div class="w-head"><div><div class="w-title"><div class="ic" style="background:var(--grad-info)">' + IC.cloud + '</div>وضعیت سرورها و حجم مصرفی ابری</div></div>' +
+        '<button type="button" class="btn xs ghost" id="refresh-status-btn">' + IC.refresh + ' بروزرسانی</button></div>' +
+        '<div class="table-scroll">' +
+          '<table class="dt" style="min-width: 100%;">' +
+            '<thead><tr>' +
+              '<th>سرویس</th>' +
+              '<th>وضعیت اتصال</th>' +
+              '<th style="text-align:left">حجم مصرفی</th>' +
+            '</tr></thead>' +
+            '<tbody>' +
+              '<tr>' +
+                '<td><div class="cell-product"><div class="img-thumb-placeholder" style="background:rgba(0,122,255,.1);color:var(--blue);border-color:rgba(0,122,255,.2)">' + IC.package + '</div><div class="info"><b>دیتابیس مرکزی (متن‌ها)</b><small style="color:var(--muted);font-size:11px">Supabase DB</small></div></div></td>' +
+                '<td id="db-status-cell"><span style="color:var(--orange);display:flex;align-items:center;gap:6px"><span class="dot" style="width:8px;height:8px;border-radius:50%;background:var(--orange);display:inline-block"></span>در حال بررسی...</span></td>' +
+                '<td class="num" id="db-size-cell">-</td>' +
+              '</tr>' +
+              '<tr>' +
+                '<td><div class="cell-product"><div class="img-thumb-placeholder" style="background:rgba(175,82,222,.1);color:var(--purple);border-color:rgba(175,82,222,.2)">' + IC.image + '</div><div class="info"><b>استوریج عکس‌ها</b><small style="color:var(--muted);font-size:11px">Supabase Storage</small></div></div></td>' +
+                '<td id="storage-status-cell"><span style="color:var(--orange);display:flex;align-items:center;gap:6px"><span class="dot" style="width:8px;height:8px;border-radius:50%;background:var(--orange);display:inline-block"></span>در حال بررسی...</span></td>' +
+                '<td class="num" id="storage-size-cell">-</td>' +
+              '</tr>' +
+            '</tbody>' +
+          '</table>' +
+        '</div>' +
+        '<div class="hint" style="padding:12px 16px 0; color:var(--muted); font-size:11px;">' + IC.info + ' حجم دیتابیس بر اساس داده‌های فعلی محاسبه می‌شود. حجم استوریج مجموع حجم فایل‌های آپلود شده است.</div>' +
+      '</div>' +
+      // 👆 ========================================= 👆
+
       '<div class="widget w-6">' +
         '<div class="w-head"><div><div class="w-title danger"><div class="ic danger">' + IC.alert + '</div>صفر کردن موجودی</div></div></div>' +
         '<p style="font-size:12.5px;line-height:1.9;margin-bottom:14px"><b>' + nonZero.length + ' ردیف</b> صفر می‌شود — تاریخچه حفظ می‌شود.</p>' +
@@ -94,42 +114,90 @@ function pageSettings(page) {
       '</div>' +
     '</div>';
 
-  // تابع بررسی خودکار اتصال ابری
-  function checkCloudStatus() {
-    var statusEl = document.getElementById('cloud-status');
-    if (!statusEl) return;
+  // -------------------------------------------------------------
+  // تابع بررسی وضعیت و حجم دیتابیس و استوریج
+  // -------------------------------------------------------------
+  function checkServerStatus() {
+    var dbStatusEl = document.getElementById('db-status-cell');
+    var dbSizeEl = document.getElementById('db-size-cell');
+    var stStatusEl = document.getElementById('storage-status-cell');
+    var stSizeEl = document.getElementById('storage-size-cell');
 
-    // اگر کلاینت وجود نداشت، یعنی کتابخانه هنوز لود نشده یا اینترنت قطع است
+    // وضعیت دیتابیس
     if (typeof supabaseClient === 'undefined' || !supabaseClient) {
-      setTimeout(function() {
-        if (typeof supabaseClient === 'undefined' || !supabaseClient) {
-          statusEl.innerHTML = '<span style="color:var(--red); display:flex; align-items:center; gap:6px;"><span class="dot" style="width:10px; height:10px; border-radius:50%; background:var(--red); display:inline-block;"></span>آفلاین (عدم دسترسی به کتابخانه)</span>';
-        } else {
-          checkCloudStatus(); // دوباره تلاش کن
-        }
-      }, 2000);
-      return;
+      dbStatusEl.innerHTML = '<span style="color:var(--red);display:flex;align-items:center;gap:6px"><span class="dot" style="width:8px;height:8px;border-radius:50%;background:var(--red);display:inline-block"></span>آفلاین</span>';
+      dbSizeEl.innerHTML = '—';
+    } else {
+      supabaseClient.from('alus_sync').select('id').limit(1)
+        .then(function (res) {
+          if (res.error) {
+             dbStatusEl.innerHTML = '<span style="color:var(--red);display:flex;align-items:center;gap:6px"><span class="dot" style="width:8px;height:8px;border-radius:50%;background:var(--red);display:inline-block"></span>خطای دیتابیس</span>';
+          } else {
+             dbStatusEl.innerHTML = '<span style="color:var(--green);display:flex;align-items:center;gap:6px"><span class="dot" style="width:8px;height:8px;border-radius:50%;background:var(--green);display:inline-block;box-shadow:0 0 6px var(--green)"></span>آنلاین (متصل)</span>';
+          }
+        })
+        .catch(function () {
+          dbStatusEl.innerHTML = '<span style="color:var(--red);display:flex;align-items:center;gap:6px"><span class="dot" style="width:8px;height:8px;border-radius:50%;background:var(--red);display:inline-block"></span>آفلاین</span>';
+        });
+      
+      // محاسبه حجم فعلی دیتابیس (بر اساس داده‌های لوکال)
+      var currentSizeKB = (dbSize / 1024).toFixed(1);
+      dbSizeEl.innerHTML = currentSizeKB + ' <span class="unit">KB</span>';
     }
 
-    // تست دیتابیس
-    supabaseClient.from('alus_sync').select('id').limit(1)
-      .then(function (res) {
-        if (res.error && res.error.message === 'Failed to fetch') {
-          statusEl.innerHTML = '<span style="color:var(--red); display:flex; align-items:center; gap:6px;"><span class="dot" style="width:10px; height:10px; border-radius:50%; background:var(--red); display:inline-block;"></span>آفلاین (خطای شبکه یا VPN)</span>';
-        } else if (res.error && res.error.code === '42P01') {
-          statusEl.innerHTML = '<span style="color:var(--orange); display:flex; align-items:center; gap:6px;"><span class="dot" style="width:10px; height:10px; border-radius:50%; background:var(--orange); display:inline-block;"></span>متصل (جدول ساخته نشده)</span>';
-        } else {
-          statusEl.innerHTML = '<span style="color:var(--green); display:flex; align-items:center; gap:6px;"><span class="dot" style="width:10px; height:10px; border-radius:50%; background:var(--green); display:inline-block; box-shadow: 0 0 8px var(--green);"></span>آنلاین (متصل) ✅</span>';
-        }
-      })
-      .catch(function (err) {
-        statusEl.innerHTML = '<span style="color:var(--red); display:flex; align-items:center; gap:6px;"><span class="dot" style="width:10px; height:10px; border-radius:50%; background:var(--red); display:inline-block;"></span>آفلاین (خطای شبکه)</span>';
-      });
+    // وضعیت استوریج و محاسبه حجم عکس‌ها
+    if (typeof supabaseStorageClient === 'undefined' || !supabaseStorageClient) {
+      stStatusEl.innerHTML = '<span style="color:var(--red);display:flex;align-items:center;gap:6px"><span class="dot" style="width:8px;height:8px;border-radius:50%;background:var(--red);display:inline-block"></span>آفلاین (تنظیم نشده)</span>';
+      stSizeEl.innerHTML = '—';
+    } else {
+      // لیست کردن همه فایل‌های باکت برای محاسبه حجم
+      supabaseStorageClient.storage.from('product-images').list()
+        .then(function (res) {
+          if (res.error) {
+            stStatusEl.innerHTML = '<span style="color:var(--red);display:flex;align-items:center;gap:6px"><span class="dot" style="width:8px;height:8px;border-radius:50%;background:var(--red);display:inline-block"></span>خطا در دسترسی</span>';
+            stSizeEl.innerHTML = '—';
+          } else {
+            stStatusEl.innerHTML = '<span style="color:var(--green);display:flex;align-items:center;gap:6px"><span class="dot" style="width:8px;height:8px;border-radius:50%;background:var(--green);display:inline-block;box-shadow:0 0 6px var(--green)"></span>آنلاین (متصل)</span>';
+            
+            // محاسبه حجم کل فایل‌ها
+            var totalBytes = 0;
+            res.data.forEach(function(file) {
+              if (file.metadata && file.metadata.size) {
+                totalBytes += file.metadata.size;
+              }
+            });
+            
+            var sizeText = '';
+            if (totalBytes === 0) {
+              sizeText = '0 <span class="unit">KB</span>';
+            } else if (totalBytes < 1024 * 1024) {
+              sizeText = (totalBytes / 1024).toFixed(1) + ' <span class="unit">KB</span>';
+            } else {
+              sizeText = (totalBytes / (1024 * 1024)).toFixed(2) + ' <span class="unit">MB</span>';
+            }
+            
+            stSizeEl.innerHTML = sizeText;
+          }
+        })
+        .catch(function () {
+          stStatusEl.innerHTML = '<span style="color:var(--red);display:flex;align-items:center;gap:6px"><span class="dot" style="width:8px;height:8px;border-radius:50%;background:var(--red);display:inline-block"></span>خطای شبکه</span>';
+          stSizeEl.innerHTML = '—';
+        });
+    }
   }
 
-  // اجرای خودکار بررسی اتصال بعد از رندر شدن صفحه
-  setTimeout(checkCloudStatus, 500);
+  // اجرای بررسی وضعیت هنگام باز شدن صفحه و دکمه بروزرسانی
+  setTimeout(checkServerStatus, 500);
+  document.getElementById('refresh-status-btn').addEventListener('click', function() {
+    this.innerHTML = IC.refresh + ' در حال بررسی...';
+    var btn = this;
+    checkServerStatus();
+    setTimeout(function() { btn.innerHTML = IC.refresh + ' بروزرسانی'; }, 1000);
+  });
 
+  // -------------------------------------------------------------
+  // بقیه بخش‌ها (صفر کردن، اعلان و...)
+  // -------------------------------------------------------------
   var reqBtn = $('#req-notif');
   if (reqBtn) {
     reqBtn.addEventListener('click', function () {
