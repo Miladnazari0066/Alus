@@ -20,7 +20,6 @@
 <div class="toast-wrap" id="toast-wrap"></div>
 <div id="err" style="position:fixed;top:0;left:0;right:0;z-index:99999;background:#dc2626;color:#fff;padding:12px 20px;font-family:monospace;font-size:12px;direction:ltr;text-align:left;white-space:pre-wrap;display:none"></div>
 
-<!-- ERROR BOUNDARY -->
 <script>
 (function () {
   function isCrossOriginNoise(msg, src) {
@@ -34,10 +33,9 @@
         var u = new URL(src, location.href);
         if (u.origin !== location.origin) return true;
       }
-    } catch (e) { /* ignore */ }
+    } catch (e) {}
     return false;
   }
-
   function show(msg, line, col) {
     var e = document.getElementById('err');
     if (!e) return;
@@ -46,14 +44,12 @@
     clearTimeout(e._t);
     e._t = setTimeout(function () { e.style.display = 'none'; }, 8000);
   }
-
   window.onerror = function (msg, src, line, col, err) {
     if (isCrossOriginNoise(msg, src)) return false;
     if (!line && !col && err && !err.stack) return false;
     show(msg, line, col);
     return false;
   };
-
   window.addEventListener('unhandledrejection', function (ev) {
     var r = ev.reason;
     if (!r) return;
@@ -62,7 +58,6 @@
     if (txt.indexOf('Script error') >= 0) return;
     show(txt, 0, 0);
   });
-
   window.addEventListener('error', function (ev) {
     if (ev.target && ev.target !== window &&
         (ev.target.tagName === 'SCRIPT' || ev.target.tagName === 'LINK' || ev.target.tagName === 'IMG')) {
@@ -72,10 +67,6 @@
 })();
 </script>
 
-<!-- SUPABASE SDK (تغییر یافته به unpkg برای پایداری بیشتر در ایران) -->
-<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
-
-<!-- CORE SCRIPTS -->
 <script src="src/00-supabase.js"></script>
 <script src="src/01-icons.js"></script>
 <script src="src/02-utils.js"></script>
@@ -85,7 +76,6 @@
 <script src="src/06-permissions.js"></script>
 <script src="src/07-state.js"></script>
 
-<!-- UI PRIMITIVES -->
 <script src="src/08-toast.js"></script>
 <script src="src/09-skeleton.js"></script>
 <script src="src/10-ripple.js"></script>
@@ -97,7 +87,6 @@
 <script src="src/16-splash.js"></script>
 <script src="src/17-pwa.js"></script>
 
-<!-- CORE LOGIC -->
 <script src="src/18-notifications.js"></script>
 <script src="src/19-actions.js"></script>
 <script src="src/20-search.js"></script>
@@ -107,10 +96,10 @@
 <script src="src/24-shortcuts.js"></script>
 <script src="src/24b-pages-placeholder.js"></script>
 
-<!-- PAGES -->
 <script src="src/30-page-dashboard.js"></script>
 <script src="src/31-page-stock.js"></script>
 <script src="src/32-page-stock-init.js"></script>
+
 <script src="src/33-page-transfers.js"></script>
 <script src="src/34-page-inbounds.js"></script>
 <script src="src/35-page-new-transfer.js"></script>
@@ -119,12 +108,10 @@
 <script src="src/38-page-products.js"></script>
 <script src="src/39-page-users.js"></script>
 
-<!-- REPORTS & SETTINGS -->
 <script src="src/40-exporters.js"></script>
 <script src="src/41-page-reports.js"></script>
 <script src="src/42-page-settings.js"></script>
 
-<!-- BOOT -->
 <script src="src/99-boot.js"></script>
 </body>
 </html>
