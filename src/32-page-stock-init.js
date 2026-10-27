@@ -40,7 +40,7 @@ function pageStockInit(page) {
             '<div class="img-upload-preview" id="img-preview">' + IC.image + '</div>' +
             '<div class="img-upload-info">' +
               '<label for="img-input">انتخاب یا تغییر تصویر</label>' +
-              '<small>فرمت JPG/PNG · تصویر خودکار فشرده می‌شود (حداکثر ۴۰۰×۴۰۰ پیکسل)</small>' +
+              '<small>فرمت JPG/PNG · تصویر مستقیماً در ابر (Supabase) ذخیره می‌شود</small>' +
               '<div class="img-upload-actions">' +
                 '<button type="button" class="btn ghost sm" id="img-btn">' + IC.upload + ' انتخاب فایل</button>' +
                 '<button type="button" class="btn ghost sm" id="img-clear" style="display:none">' + IC.trash + ' حذف</button>' +
@@ -94,11 +94,32 @@ function pageStockInit(page) {
     var f = e.target.files && e.target.files[0];
     if (!f) return;
     if (f.size > 4 * 1024 * 1024) { toast('حجم زیاد', 'حداکثر ۴ مگابایت', 'error'); return; }
+    
+    var btn = $('#img-btn');
+    if (btn) { btn.classList.add('loading'); btn.textContent = 'در حال آپلود...'; }
+
+    // فشرده‌سازی و آپلود به ابر
     compressImage(f, 400, 0.75).then(function (dataUrl) {
-      currentImage = dataUrl;
-      updateImagePreview();
-      toast('تصویر آماده شد', '', 'success');
-    }).catch(function (err) { toast('خطا', err.message || '', 'error'); });
+      // تبدیل Base64 به Blob (فایل فیزیکی) برای ارسال به Supabase
+      var arr = dataUrl.split(','), mime = arr[0].match(/:(.*?);/)[1],
+          bstr = atob(arr[1]), n = bstr.length, u8arr = new Uint8Array(n);
+      while(n--){ u8arr[n] = bstr.charCodeAt(n); }
+      var blob = new Blob([u8arr], {type:mime});
+
+      uploadImageToCloud(blob).then(function(publicUrl) {
+        currentImage = publicUrl; // فقط لینک عکس رو ذخیره میکنیم
+        updateImagePreview();
+        toast('آپلود موفق', 'تصویر در ابر ذخیره شد', 'success');
+      }).catch(function(err) {
+        toast('خطای آپلود', err.message || 'اتصال به استوریج برقرار نشد', 'error');
+      }).finally(function() {
+        if (btn) { btn.classList.remove('loading'); btn.innerHTML = IC.upload + ' انتخاب فایل'; }
+      });
+    }).catch(function (err) { 
+      if (btn) { btn.classList.remove('loading'); btn.innerHTML = IC.upload + ' انتخاب فایل'; }
+      toast('خطا', err.message || '', 'error'); 
+    });
+    
     e.target.value = '';
   });
   $('#img-clear').addEventListener('click', function () { currentImage = ''; updateImagePreview(); });
