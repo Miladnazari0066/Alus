@@ -6,7 +6,7 @@ var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYm
 
 // --- ۲. پروژه دوم (عکس‌ها) ---
 // ⚠️ این دو خط را با آدرس و کلید پروژه دوم (مخصوص عکس) جایگزین کن 👇
-var STORAGE_SUPABASE_URL = 'https://njmuhoisajdcbyafpsai.supabase.co/rest/v1';
+var STORAGE_SUPABASE_URL = 'https://njmuhoisajdcbyafpsai.supabase.co';
 var STORAGE_SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5qbXVob2lzYWpkY2J5YWZwc2FpIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc5MzA5MzY1OSwiZXhwIjoyMTA4NjY5NjU5fQ.4lapNcxrfLxp2B7tIoF1QwMwqb1zZeXv4ajiecAb01c';
 // ⚠️ ======================================================= 👆
 
