@@ -17,7 +17,7 @@ function openSheet() {
   html += '<button type="button" class="sheet-item" data-act="notif"><div class="sheet-ic info">' + IC.bell + '</div><b>مرکز اعلان‌ها</b>' + (pending ? '<span class="sheet-count">' + (pending > 9 ? '9+' : pending) + '</span>' : '') + '</button>';
   html += '<button type="button" class="sheet-item" data-act="reports"><div class="sheet-ic">' + IC.chart + '</div><b>گزارش‌ها و خروجی</b></button>';
   html += '<button type="button" class="sheet-item" data-act="theme"><div class="sheet-ic">' + (App.theme === 'light' ? IC.moon : IC.sun) + '</div><b>' + (App.theme === 'light' ? 'حالت تاریک' : 'حالت روشن') + '</b></button>';
-  html += '<button type="button" class="sheet-item" data-act="shortcuts"><div class="sheet-ic info">' + IC.keyboard + '</div><b>میانبرهای کیبورد</b></button>';
+  // 👇 گزینه میانبرهای کیبورد حذف شد 👇
   if (canManageUsers(App.user)) {
     html += '<div class="sheet-sec">مدیریت</div>';
     html += '<button type="button" class="sheet-item" data-act="users"><div class="sheet-ic warn">' + IC.users + '</div><b>کاربران و دسترسی‌ها</b></button>';
@@ -48,7 +48,6 @@ function openSheet() {
         else if (a === 'stockInit') go('stockInit');
         else if (a === 'reports') go('reports');
         else if (a === 'settings') go('settings');
-        else if (a === 'shortcuts') openShortcutsHelp();
       }, 120);
     });
   });
@@ -72,7 +71,7 @@ function openUserMenu(anchor) {
     '<button type="button" class="menu-i" data-a="notif">' + IC.bell + ' مرکز اعلان‌ها</button>' +
     '<button type="button" class="menu-i" data-a="reports">' + IC.chart + ' گزارش‌ها</button>' +
     '<button type="button" class="menu-i" data-a="theme">' + (App.theme === 'light' ? IC.moon : IC.sun) + ' تغییر تم</button>' +
-    '<button type="button" class="menu-i" data-a="shortcuts">' + IC.keyboard + ' میانبرها</button>' +
+    // 👇 گزینه میانبرهای کیبورد از منوی دسکتاپ هم حذف شد 👇
     (canZeroOut(App.user) ? '<button type="button" class="menu-i" data-a="settings">' + IC.settings + ' تنظیمات</button>' : '') +
     '<div class="sep"></div>' +
     '<button type="button" class="menu-i" data-a="logout" style="color:var(--red)">' + IC.logout + ' خروج</button>';
@@ -86,7 +85,6 @@ function openUserMenu(anchor) {
       else if (a === 'notif') openNotif();
       else if (a === 'reports') go('reports');
       else if (a === 'settings') go('settings');
-      else if (a === 'shortcuts') openShortcutsHelp();
     });
   });
   setTimeout(function () {
