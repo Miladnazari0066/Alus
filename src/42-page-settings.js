@@ -53,7 +53,6 @@ function pageSettings(page) {
           '<div class="row" style="justify-content:flex-end"><button type="button" class="btn primary" id="req-notif">' + IC.bellRing + ' فعال‌سازی</button></div>') +
       '</div>' +
       
-      // دکمه صفر کردن و تاریخچه در کنار هم (هر کدام w-6)
       '<div class="widget w-6">' +
         '<div class="w-head"><div><div class="w-title danger"><div class="ic danger">' + IC.alert + '</div>صفر کردن موجودی</div></div></div>' +
         '<p style="font-size:12.5px;line-height:1.9;margin-bottom:14px"><b>' + nonZero.length + ' ردیف</b> صفر می‌شود — تاریخچه حفظ می‌شود.</p>' +
@@ -65,12 +64,11 @@ function pageSettings(page) {
         '<div style="max-height: 160px; overflow-y: auto; padding-left: 4px;">' + historyHTML + '</div>' +
       '</div>' +
 
-      // ابزارهای تست
       '<div class="widget w-12">' +
         '<div class="w-head"><div><div class="w-title danger"><div class="ic danger">' + IC.zap + '</div>ابزارهای تست و عیب‌یابی (محیط آزمایشی)</div></div></div>' +
         '<p style="font-size:12.5px;line-height:1.9;margin-bottom:14px">در اینجا می‌توانید ۱۰۰ کالای تصادفی تولید کنید، آن‌ها را پاک کنید، یا اتصال دیتابیس ابری را تست کنید.</p>' +
         '<div class="row" style="justify-content:flex-end;gap:8px;flex-wrap:wrap">' +
-          '<button type="button" class="btn primary" id="test-sb-btn" style="background: linear-gradient(135deg, #10b981, #059669);">' + IC.info + ' تست اتصال به Supabase</button>' +
+          '<button type="button" class="btn primary" id="test-sb-btn" style="background: linear-gradient(135deg, #10b981, #059669);">' + IC.info + ' تست اتصال ابری</button>' +
           '<button type="button" class="btn success" id="gen-100-btn">' + IC.plus + ' تولید ۱۰۰ کالای تستی</button>' +
           '<button type="button" class="btn danger hold-btn" id="del-random-btn">' +
             '<span class="hold-progress"></span>' +
@@ -89,7 +87,6 @@ function pageSettings(page) {
       '</div>' +
     '</div>';
 
-  // تنظیمات اعلان
   var reqBtn = $('#req-notif');
   if (reqBtn) {
     reqBtn.addEventListener('click', function () {
@@ -98,10 +95,8 @@ function pageSettings(page) {
     });
   }
   
-  // صفر کردن موجودی
   $('#zero-btn').addEventListener('click', openZeroOutModal);
   
-  // پشتیبان‌گیری
   $('#exp-btn').addEventListener('click', function () {
     var fresh = loadDB();
     var blob = new Blob([JSON.stringify(fresh, null, 2)], { type: 'application/json' });
@@ -109,7 +104,6 @@ function pageSettings(page) {
     celebrate('پشتیبان', 'فایل دانلود شد', 'success', 1800);
   });
   
-  // بازیابی از فایل
   $('#imp-btn').addEventListener('click', function () { $('#imp-file').click(); });
   $('#imp-file').addEventListener('change', function () {
     var f = this.files && this.files[0];
@@ -148,38 +142,55 @@ function pageSettings(page) {
   });
 
   // -------------------------------------------------------------
-  // دکمه تست اتصال به Supabase
+  // دکمه تست اتصال ابری (Supabase)
   // -------------------------------------------------------------
   $('#test-sb-btn').addEventListener('click', function () {
     var btn = this;
     btn.classList.add('loading');
-    
+
+    // اگر کلاینت وجود نداشت، یک بار دیگر تلاش میکنیم راه‌اندازی کنیم
+    if (!supabaseClient && typeof initSupabase === 'function') {
+      initSupabase();
+    }
+
     if (typeof supabaseClient === 'undefined' || !supabaseClient) {
       setTimeout(function() {
         btn.classList.remove('loading');
-        toast('اتصال برقرار نیست', 'تنظیمات Supabase در فایل 00-supabase.js یافت نشد.', 'error');
+        if (!window.supabase) {
+          toast('خطای CDN', 'کتابخانه Supabase از اینترنت لود نشده است. (ممکن است به دلیل تحریم باشد، از فیلترشکن استفاده کنید)', 'error');
+        } else {
+          toast('اتصال برقرار نیست', 'تنظیمات URL یا KEY در فایل 00-supabase.js ناقص است.', 'error');
+        }
       }, 500);
       return;
     }
 
+    // درخواست به جدول
     supabaseClient.from('alus_sync').select('updated_at').eq('id', 'main_db').single()
       .then(function (res) {
         btn.classList.remove('loading');
         
         if (res.error) {
+          // کد PGRST116 یعنی جدول هست ولی رکوردی برای main_db وجود ندارد
           if (res.error.code === 'PGRST116') {
-            toast('اتصال موفقیت‌آمیز بود ✅', 'دیتابیس وصل است اما هنوز هیچ دیتایی در ابر ذخیره نشده است.', 'success');
-          } else {
-            toast('خطا در اتصال ❌', 'لطفاً کدهای SQL را در Supabase اجرا کرده‌اید؟ (' + (res.error.message || 'دسترسی مسدود') + ')', 'error');
+            toast('اتصال موفقیت‌آمیز بود ✅', 'ابر وصل است اما هنوز هیچ داده‌ای در آن ذخیره نشده است.', 'success');
+          } 
+          // کد 42P01 یعنی اصلاً جدول ساخته نشده
+          else if (res.error.code === '42P01') {
+            toast('جدول ساخته نشده ❌', 'لطفاً کدهای SQL را در سایت Supabase (بخش SQL Editor) اجرا کنید.', 'error');
+          } 
+          else {
+            toast('خطای دسترسی ❌', res.error.message || 'دسترسی مسدود', 'error');
           }
         } else if (res.data) {
           var dateStr = new Date(res.data.updated_at).toLocaleString('fa-IR');
-          toast('اتصال موفقیت‌آمیز بود ✅', 'آخرین سینک اطلاعات در: ' + dateStr, 'success');
+          toast('اتصال موفقیت‌آمیز بود ✅', 'آخرین سینک اطلاعات: ' + dateStr, 'success');
         }
       })
       .catch(function (err) {
         btn.classList.remove('loading');
-        toast('خطای شبکه ❌', err.message || 'ارتباط با سرور Supabase برقرار نشد.', 'error');
+        toast('خطای شبکه ❌', err.message || 'ارتباط با سرور برقرار نشد.', 'error');
+        console.error('[Supabase Test Error]', err);
       });
   });
 
@@ -396,6 +407,7 @@ function openZeroOutModal() {
                 try {
                   var f2 = loadDB();
                   f2.adjustments = (f2.adjustments || []).filter(function (a) { return a.id !== adjId; });
+                  
                   // برگرداندن موجودی
                   snap.forEach(function (old) {
                     var s = findStock(f2, old.productId, old.warehouseId);
@@ -405,7 +417,6 @@ function openZeroOutModal() {
                       s.updatedAt = new Date().toISOString();
                     }
                   });
-                  // (توجه: ما درخواست‌های رد شده را در این بازگردانی سریع برنمی‌گردانیم)
                   saveDB(f2);
                   toast('بازگردانی شد', 'موجودی‌ها بازگشتند', 'success');
                   render();
