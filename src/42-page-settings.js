@@ -32,10 +32,12 @@ function pageSettings(page) {
           '<div class="row" style="justify-content:flex-end"><button type="button" class="btn primary" id="req-notif">' + IC.bellRing + ' فعال‌سازی</button></div>') +
       '</div>' +
       
+      // بخش جدید: ابزارهای تست
       '<div class="widget w-12">' +
-        '<div class="w-head"><div><div class="w-title danger"><div class="ic danger">' + IC.zap + '</div>ابزارهای تست (محیط آزمایشی)</div></div></div>' +
-        '<p style="font-size:12.5px;line-height:1.9;margin-bottom:14px">در اینجا می‌توانید ۱۰۰ کالای تصادفی برای تست ساختار برنامه تولید کنید. برای پاک کردن آن‌ها، باید دکمه قرمز را به مدت ۳ ثانیه نگه دارید.</p>' +
-        '<div class="row" style="justify-content:flex-end;gap:8px">' +
+        '<div class="w-head"><div><div class="w-title danger"><div class="ic danger">' + IC.zap + '</div>ابزارهای تست و عیب‌یابی (محیط آزمایشی)</div></div></div>' +
+        '<p style="font-size:12.5px;line-height:1.9;margin-bottom:14px">در اینجا می‌توانید ۱۰۰ کالای تصادفی تولید کنید، آن‌ها را پاک کنید، یا اتصال دیتابیس ابری را تست کنید.</p>' +
+        '<div class="row" style="justify-content:flex-end;gap:8px;flex-wrap:wrap">' +
+          '<button type="button" class="btn primary" id="test-sb-btn" style="background: linear-gradient(135deg, #10b981, #059669);">' + IC.info + ' تست اتصال به Supabase</button>' +
           '<button type="button" class="btn success" id="gen-100-btn">' + IC.plus + ' تولید ۱۰۰ کالای تستی</button>' +
           '<button type="button" class="btn danger hold-btn" id="del-random-btn">' +
             '<span class="hold-progress"></span>' +
@@ -59,6 +61,7 @@ function pageSettings(page) {
       '</div>' +
     '</div>';
 
+  // تنظیمات اعلان
   var reqBtn = $('#req-notif');
   if (reqBtn) {
     reqBtn.addEventListener('click', function () {
@@ -67,8 +70,10 @@ function pageSettings(page) {
     });
   }
   
+  // صفر کردن موجودی
   $('#zero-btn').addEventListener('click', openZeroOutModal);
   
+  // پشتیبان‌گیری
   $('#exp-btn').addEventListener('click', function () {
     var fresh = loadDB();
     var blob = new Blob([JSON.stringify(fresh, null, 2)], { type: 'application/json' });
@@ -76,6 +81,7 @@ function pageSettings(page) {
     celebrate('پشتیبان', 'فایل دانلود شد', 'success', 1800);
   });
   
+  // بازیابی از فایل
   $('#imp-btn').addEventListener('click', function () { $('#imp-file').click(); });
   $('#imp-file').addEventListener('change', function () {
     var f = this.files && this.files[0];
@@ -113,6 +119,50 @@ function pageSettings(page) {
     rd.readAsText(f);
   });
 
+  // -------------------------------------------------------------
+  // دکمه تست اتصال به Supabase
+  // -------------------------------------------------------------
+  $('#test-sb-btn').addEventListener('click', function () {
+    var btn = this;
+    btn.classList.add('loading');
+    
+    if (typeof supabaseClient === 'undefined' || !supabaseClient) {
+      setTimeout(function() {
+        btn.classList.remove('loading');
+        toast('اتصال برقرار نیست', 'تنظیمات Supabase در فایل 00-supabase.js یافت نشد.', 'error');
+      }, 500);
+      return;
+    }
+
+    // یک درخواست ساده به جدول می‌فرستیم تا ببینیم آیا پاسخ می‌دهد یا نه
+    supabaseClient.from('alus_sync').select('updated_at').eq('id', 'main_db').single()
+      .then(function (res) {
+        btn.classList.remove('loading');
+        
+        if (res.error) {
+          if (res.error.code === 'PGRST116') {
+            // رکوردی وجود ندارد (یعنی به دیتابیس وصل شد ولی هنوز دیتایی ذخیره نشده)
+            toast('اتصال موفقیت‌آمیز بود ✅', 'دیتابیس وصل است اما هنوز هیچ دیتایی در ابر ذخیره نشده است.', 'success');
+          } else {
+            // خطای مربوط به نبودن جدول یا دسترسی
+            toast('خطا در اتصال ❌', 'لطفاً کدهای SQL را در Supabase اجرا کرده‌اید؟ (' + (res.error.message || 'دسترسی مسدود') + ')', 'error');
+          }
+        } else if (res.data) {
+          // دیتا وجود دارد و خوانده شد
+          var dateStr = new Date(res.data.updated_at).toLocaleString('fa-IR');
+          toast('اتصال موفقیت‌آمیز بود ✅', 'آخرین سینک اطلاعات در: ' + dateStr, 'success');
+        }
+      })
+      .catch(function (err) {
+        btn.classList.remove('loading');
+        toast('خطای شبکه ❌', err.message || 'ارتباط با سرور Supabase برقرار نشد.', 'error');
+        console.error('[Supabase Test Error]', err);
+      });
+  });
+
+  // -------------------------------------------------------------
+  // بخش تولید ۱۰۰ کالای تستی
+  // -------------------------------------------------------------
   $('#gen-100-btn').addEventListener('click', function () {
     var btn = this;
     btn.classList.add('loading');
@@ -122,6 +172,7 @@ function pageSettings(page) {
         var fresh = loadDB();
         var central = whByType(fresh, 'central');
         var store = whByType(fresh, 'store');
+        
         var units = ['دست', 'سرویس', 'عدد', 'متر', 'بسته'];
         
         for (var i = 1; i <= 100; i++) {
@@ -175,6 +226,9 @@ function pageSettings(page) {
     }, 300);
   });
 
+  // -------------------------------------------------------------
+  // بخش حذف کالاهای تستی (با نگه داشتن ۳ ثانیه)
+  // -------------------------------------------------------------
   var delBtn = $('#del-random-btn');
   var holdTimer = null;
   var holdInterval = null;
