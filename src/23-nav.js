@@ -212,8 +212,8 @@ function renderShell() {
       '</div>' +
       '<div class="nav-pills">' + pillsHTML + '</div>' +
       '<div class="nav-right">' +
-        '<button type="button" class="search-btn" id="search-btn">' + IC.search + '<span>جستجو...</span><kbd>⌘K</kbd></button>' +
-        '<button type="button" class="icon-btn" id="shortcuts-btn" title="میانبرها (?)">' + IC.keyboard + '</button>' +
+        // 👇 حذف کد ⌘K از دکمه جستجو و حذف دکمه کیبورد 👇
+        '<button type="button" class="search-btn" id="search-btn">' + IC.search + '<span>جستجو...</span></button>' +
         '<button type="button" class="icon-btn" id="notif-btn" title="اعلان‌ها">' + IC.bell + (pendingAll ? '<span class="pulse"></span>' : '') + '</button>' +
         '<button type="button" class="icon-btn" id="theme-btn" title="تم">' + (App.theme === 'light' ? IC.moon : IC.sun) + '</button>' +
         '<button type="button" class="user-btn" id="user-menu">' +
@@ -237,8 +237,7 @@ function renderShell() {
   });
   var sb = $('#search-btn');
   if (sb) sb.addEventListener('click', openCmd);
-  var shb = $('#shortcuts-btn');
-  if (shb) shb.addEventListener('click', openShortcutsHelp);
+  // دکمه شورت کات حذف شد
   var tb = $('#theme-btn');
   if (tb) tb.addEventListener('click', toggleTheme);
   var nb = $('#notif-btn');
