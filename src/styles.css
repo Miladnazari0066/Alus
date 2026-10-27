@@ -1051,6 +1051,7 @@ tr.row-low:hover td { background: rgba(255,149,0,.08); }
   border-radius: 100px;
   padding: 4px;
   flex: 1;
+  min-width: 0;
   overflow-x: auto;
   scrollbar-width: none;
 }
@@ -1914,66 +1915,13 @@ tr.row-low:hover td { background: rgba(255,149,0,.08); }
 [data-theme="dark"] .pdf-frame-wrap { background: #1e2739; }
 
 /* ============================================================
-   FIX FOR MOBILE AND TABLET
+   FIX LOGIN FOR MOBILE
    ============================================================ */
-@media (max-width: 1024px) {
-  /* تک ستونی کردن همه کارت‌ها در تبلت و موبایل */
-  .bento > * {
-    grid-column: span 12 !important;
-  }
-
-  /* اصلاح هدر بالای صفحه */
-  .navbar {
-    padding: 0 12px !important;
-  }
-  .search-btn {
-    min-width: 38px !important;
-    width: 38px !important;
-    padding: 0 !important;
-    justify-content: center !important;
-  }
-  .search-btn span, .search-btn kbd {
-    display: none !important;
-  }
-  .nav-pills {
-    display: none !important;
-  }
-  .bottom-tabs {
-    display: flex !important;
-  }
-  .nav-right {
-    margin-right: 0 !important;
-    margin-left: auto !important;
-  }
-  
-  /* اصلاح کارت آبی (Hero) */
-  .hero {
-    padding: 20px !important;
-  }
-  .hero-stats {
-    flex-direction: column !important;
-    gap: 14px !important;
-    margin-top: 14px !important;
-  }
-  .hero-quick {
-    flex-direction: column !important;
-    gap: 8px !important;
-    width: 100% !important;
-  }
-  .hero-quick button {
-    width: 100% !important;
-    justify-content: center !important;
-  }
-  
-  /* اصلاح دسترسی سریع */
-  .qa {
-    grid-template-columns: 1fr 1fr !important;
-  }
-
-  /* اصلاح لاگین در موبایل */
+@media (max-width: 900px) {
   .login {
     display: flex;
     flex-direction: column;
+    grid-template-columns: 1fr;
     min-height: 100vh;
   }
   .login-left {
@@ -1981,11 +1929,20 @@ tr.row-low:hover td { background: rgba(255,149,0,.08); }
     min-height: auto;
     border-radius: 0 0 30px 30px;
   }
-  .login-left .ltag h2 { font-size: 24px; margin-bottom: 8px; }
-  .login-left .ltag p { font-size: 13px; line-height: 1.8; }
+  .login-left .ltag h2 {
+    font-size: 24px;
+    margin-bottom: 8px;
+  }
+  .login-left .ltag p {
+    font-size: 13px;
+    line-height: 1.8;
+  }
   .login-left .lfeat { display: none; }
   .login-left > div:last-child { display: none; }
-  .login-right { padding: 30px 16px; align-items: flex-start; }
+  .login-right {
+    padding: 30px 16px;
+    align-items: flex-start;
+  }
   .login-card { max-width: 100%; }
 }
 
@@ -2013,6 +1970,97 @@ tr.row-low:hover td { background: rgba(255,149,0,.08); }
   position: relative;
   z-index: 1;
   pointer-events: none;
+}
+
+/* ============================================================
+   ACCORDION SETTINGS
+   ============================================================ */
+.acc-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-width: 900px;
+  margin: 0 auto;
+}
+.acc-item {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  overflow: hidden;
+  transition: all 0.3s var(--ease);
+}
+.acc-item:hover {
+  border-color: var(--border-2);
+  box-shadow: var(--card-shadow);
+}
+.acc-header {
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  cursor: pointer;
+  user-select: none;
+  background: var(--surface);
+}
+.acc-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  color: #fff;
+  flex-shrink: 0;
+}
+.acc-icon.info { background: var(--grad-info); }
+.acc-icon.warn { background: var(--grad-warn); }
+.acc-icon.danger { background: var(--grad-danger); }
+.acc-icon.success { background: var(--grad-success); }
+.acc-icon.primary { background: var(--grad-2); }
+
+.acc-titles {
+  flex: 1;
+  min-width: 0;
+}
+.acc-title {
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--text);
+  letter-spacing: -0.2px;
+}
+.acc-sub {
+  font-size: 11.5px;
+  color: var(--muted);
+  margin-top: 2px;
+  font-weight: 500;
+}
+.acc-chevron {
+  width: 24px;
+  height: 24px;
+  display: grid;
+  place-items: center;
+  color: var(--muted);
+  transition: transform 0.35s var(--spring);
+}
+.acc-chevron svg {
+  width: 18px;
+  height: 18px;
+}
+.acc-item.open .acc-chevron {
+  transform: rotate(180deg);
+}
+.acc-body {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  background: var(--surface-2);
+  border-top: 1px dashed transparent;
+}
+.acc-item.open .acc-body {
+  max-height: 2000px;
+  border-top-color: var(--border);
+}
+.acc-content {
+  padding: 20px;
 }
 
 /* ============================================================
@@ -2445,94 +2493,4 @@ tr.row-low:hover td { background: rgba(255,149,0,.08); }
 @media print {
   .nav-wrap, .bottom-tabs, .install-toast, .pdf-toolbar, .toast-wrap, .bulk-bar { display: none !important; }
   body { background: #fff; }
-}
-/* ============================================================
-   ACCORDION SETTINGS
-   ============================================================ */
-.acc-list {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  max-width: 900px;
-  margin: 0 auto;
-}
-.acc-item {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 18px;
-  overflow: hidden;
-  transition: all 0.3s var(--ease);
-}
-.acc-item:hover {
-  border-color: var(--border-2);
-  box-shadow: var(--card-shadow);
-}
-.acc-header {
-  padding: 16px 20px;
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  cursor: pointer;
-  user-select: none;
-  background: var(--surface);
-}
-.acc-icon {
-  width: 42px;
-  height: 42px;
-  border-radius: 12px;
-  display: grid;
-  place-items: center;
-  color: #fff;
-  flex-shrink: 0;
-}
-.acc-icon.info { background: var(--grad-info); }
-.acc-icon.warn { background: var(--grad-warn); }
-.acc-icon.danger { background: var(--grad-danger); }
-.acc-icon.success { background: var(--grad-success); }
-.acc-icon.primary { background: var(--grad-2); }
-
-.acc-titles {
-  flex: 1;
-  min-width: 0;
-}
-.acc-title {
-  font-size: 14px;
-  font-weight: 800;
-  color: var(--text);
-  letter-spacing: -0.2px;
-}
-.acc-sub {
-  font-size: 11.5px;
-  color: var(--muted);
-  margin-top: 2px;
-  font-weight: 500;
-}
-.acc-chevron {
-  width: 24px;
-  height: 24px;
-  display: grid;
-  place-items: center;
-  color: var(--muted);
-  transition: transform 0.35s var(--spring);
-}
-.acc-chevron svg {
-  width: 18px;
-  height: 18px;
-}
-.acc-item.open .acc-chevron {
-  transform: rotate(180deg);
-}
-.acc-body {
-  max-height: 0;
-  overflow: hidden;
-  transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  background: var(--surface-2);
-  border-top: 1px dashed transparent;
-}
-.acc-item.open .acc-body {
-  max-height: 2000px;
-  border-top-color: var(--border);
-}
-.acc-content {
-  padding: 20px;
 }
