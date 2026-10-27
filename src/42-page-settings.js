@@ -8,9 +8,8 @@ function pageSettings(page) {
   try { dbSize = new Blob([JSON.stringify(db)]).size; } catch (e) {}
   var notifPerm = ('Notification' in window) ? Notification.permission : 'unsupported';
 
-  // پیدا کردن تاریخچه صفر کردن‌ها (تعدیلات از نوع period_close)
   var zeroHistory = (db.adjustments || []).filter(function(a) { return a.type === 'period_close'; });
-  zeroHistory.sort(function(a, b) { return new Date(b.at) - new Date(a.at); }); // جدیدترین‌ها اول
+  zeroHistory.sort(function(a, b) { return new Date(b.at) - new Date(a.at); });
 
   var historyHTML = '';
   if (zeroHistory.length === 0) {
@@ -141,45 +140,32 @@ function pageSettings(page) {
     rd.readAsText(f);
   });
 
-  // -------------------------------------------------------------
-  // دکمه تست اتصال ابری (Supabase)
-  // -------------------------------------------------------------
   $('#test-sb-btn').addEventListener('click', function () {
     var btn = this;
     btn.classList.add('loading');
-
-    // اگر کلاینت وجود نداشت، یک بار دیگر تلاش میکنیم راه‌اندازی کنیم
-    if (!supabaseClient && typeof initSupabase === 'function') {
-      initSupabase();
-    }
 
     if (typeof supabaseClient === 'undefined' || !supabaseClient) {
       setTimeout(function() {
         btn.classList.remove('loading');
         if (!window.supabase) {
-          toast('خطای CDN', 'کتابخانه Supabase از اینترنت لود نشده است. (ممکن است به دلیل تحریم باشد، از فیلترشکن استفاده کنید)', 'error');
+          toast('خطای شبکه', 'کتابخانه Supabase لود نشد. لطفا از فیلترشکن استفاده کنید یا اینترنت خود را تغییر دهید.', 'error');
         } else {
-          toast('اتصال برقرار نیست', 'تنظیمات URL یا KEY در فایل 00-supabase.js ناقص است.', 'error');
+          toast('در حال آماده‌سازی', 'کتابخانه در حال لود است، چند لحظه دیگر امتحان کنید.', 'warn');
         }
       }, 500);
       return;
     }
 
-    // درخواست به جدول
     supabaseClient.from('alus_sync').select('updated_at').eq('id', 'main_db').single()
       .then(function (res) {
         btn.classList.remove('loading');
         
         if (res.error) {
-          // کد PGRST116 یعنی جدول هست ولی رکوردی برای main_db وجود ندارد
           if (res.error.code === 'PGRST116') {
             toast('اتصال موفقیت‌آمیز بود ✅', 'ابر وصل است اما هنوز هیچ داده‌ای در آن ذخیره نشده است.', 'success');
-          } 
-          // کد 42P01 یعنی اصلاً جدول ساخته نشده
-          else if (res.error.code === '42P01') {
+          } else if (res.error.code === '42P01') {
             toast('جدول ساخته نشده ❌', 'لطفاً کدهای SQL را در سایت Supabase (بخش SQL Editor) اجرا کنید.', 'error');
-          } 
-          else {
+          } else {
             toast('خطای دسترسی ❌', res.error.message || 'دسترسی مسدود', 'error');
           }
         } else if (res.data) {
@@ -190,65 +176,29 @@ function pageSettings(page) {
       .catch(function (err) {
         btn.classList.remove('loading');
         toast('خطای شبکه ❌', err.message || 'ارتباط با سرور برقرار نشد.', 'error');
-        console.error('[Supabase Test Error]', err);
       });
   });
 
-  // -------------------------------------------------------------
-  // تولید ۱۰۰ کالای تستی
-  // -------------------------------------------------------------
   $('#gen-100-btn').addEventListener('click', function () {
     var btn = this;
     btn.classList.add('loading');
-    
     setTimeout(function() {
       try {
         var fresh = loadDB();
         var central = whByType(fresh, 'central');
         var store = whByType(fresh, 'store');
-        
         var units = ['دست', 'سرویس', 'عدد', 'متر', 'بسته'];
         
         for (var i = 1; i <= 100; i++) {
-          var randomNum = Math.floor(Math.random() * 10000);
           var pId = uid();
-          var pName = 'محصول تست ' + i;
-          
           fresh.products.push({
-            id: pId,
-            name: pName,
-            code: 'TEST-' + randomNum,
-            unit: units[Math.floor(Math.random() * units.length)],
-            image: '',
-            components: [],
-            isTestData: true,
+            id: pId, name: 'محصول تست ' + i, code: 'TEST-' + Math.floor(Math.random() * 10000),
+            unit: units[Math.floor(Math.random() * units.length)], image: '', components: [], isTestData: true,
             createdAt: new Date().toISOString()
           });
-          
-          if (central) {
-            fresh.stocks.push({
-              id: uid(),
-              productId: pId,
-              warehouseId: central.id,
-              quantity: Math.floor(Math.random() * 100),
-              reservedQty: 0,
-              minQuantity: 5,
-              updatedAt: new Date().toISOString()
-            });
-          }
-          if (store) {
-            fresh.stocks.push({
-              id: uid(),
-              productId: pId,
-              warehouseId: store.id,
-              quantity: Math.floor(Math.random() * 20),
-              reservedQty: 0,
-              minQuantity: 5,
-              updatedAt: new Date().toISOString()
-            });
-          }
+          if (central) fresh.stocks.push({ id: uid(), productId: pId, warehouseId: central.id, quantity: Math.floor(Math.random() * 100), reservedQty: 0, minQuantity: 5, updatedAt: new Date().toISOString() });
+          if (store) fresh.stocks.push({ id: uid(), productId: pId, warehouseId: store.id, quantity: Math.floor(Math.random() * 20), reservedQty: 0, minQuantity: 5, updatedAt: new Date().toISOString() });
         }
-        
         saveDB(fresh);
         btn.classList.remove('loading');
         toast('انجام شد', '۱۰۰ کالای تستی تولید شد', 'success');
@@ -260,24 +210,17 @@ function pageSettings(page) {
     }, 300);
   });
 
-  // -------------------------------------------------------------
-  // حذف کالاهای تستی (نگه داشتن ۳ ثانیه)
-  // -------------------------------------------------------------
   var delBtn = $('#del-random-btn');
-  var holdTimer = null;
-  var holdInterval = null;
-  var holdDuration = 3000;
-  var holdProgress = 0;
+  var holdTimer = null, holdInterval = null, holdProgress = 0;
   var progressBar = delBtn.querySelector('.hold-progress');
 
   function startHold(e) {
     e.preventDefault();
     holdProgress = 0;
     progressBar.style.width = '0%';
-    
     holdInterval = setInterval(function() {
       holdProgress += 50;
-      var pct = (holdProgress / holdDuration) * 100;
+      var pct = (holdProgress / 3000) * 100;
       if (pct > 100) pct = 100;
       progressBar.style.width = pct + '%';
     }, 50);
@@ -285,29 +228,18 @@ function pageSettings(page) {
     holdTimer = setTimeout(function() {
       clearInterval(holdInterval);
       progressBar.style.width = '0%';
-      
       try {
         var fresh = loadDB();
-        var testProductIds = fresh.products
-          .filter(function (p) { return p.isTestData === true; })
-          .map(function (p) { return p.id; });
-          
-        if (testProductIds.length === 0) {
-          toast('موردی یافت نشد', 'هیچ کالای تستی برای حذف وجود ندارد', 'info');
-          return;
-        }
-        
+        var testProductIds = fresh.products.filter(function (p) { return p.isTestData === true; }).map(function (p) { return p.id; });
+        if (testProductIds.length === 0) { toast('موردی یافت نشد', 'کالای تستی وجود ندارد', 'info'); return; }
         fresh.products = fresh.products.filter(function (p) { return p.isTestData !== true; });
         fresh.stocks = fresh.stocks.filter(function (s) { return testProductIds.indexOf(s.productId) < 0; });
         fresh.transfers = fresh.transfers.filter(function (t) { return testProductIds.indexOf(t.productId) < 0; });
-        
         saveDB(fresh);
         toast('پاکسازی شد', testProductIds.length + ' کالای تستی حذف شد', 'success');
         render();
-      } catch (err) {
-        toast('خطا در حذف', err.message || '', 'error');
-      }
-    }, holdDuration);
+      } catch (err) { toast('خطا در حذف', err.message || '', 'error'); }
+    }, 3000);
   }
 
   function cancelHold() {
@@ -358,64 +290,31 @@ function openZeroOutModal() {
           setTimeout(function () {
             try {
               var fresh = loadDB();
-              var snap = fresh.stocks
-                .filter(function (s) { return s.quantity > 0 || (s.reservedQty || 0) > 0; })
-                .map(function (s) {
-                  return { productId: s.productId, warehouseId: s.warehouseId, quantity: s.quantity, reservedQty: s.reservedQty || 0 };
-                });
+              var snap = fresh.stocks.filter(function (s) { return s.quantity > 0 || (s.reservedQty || 0) > 0; }).map(function (s) { return { productId: s.productId, warehouseId: s.warehouseId, quantity: s.quantity, reservedQty: s.reservedQty || 0 }; });
               
-              // 1. لغو کردن تمام درخواست‌های در انتظار (برای صفر شدن نوتیفیکیشن‌ها)
               fresh.transfers.forEach(function(t) {
                 if (t.status.indexOf('pending') === 0) {
                   t.status = 'rejected';
-                  t.rejection = {
-                    userId: App.user.id,
-                    userName: App.user.name,
-                    at: new Date().toISOString(),
-                    reason: 'سیستم: موجودی انبارها صفر شد',
-                    stage: 'system'
-                  };
+                  t.rejection = { userId: App.user.id, userName: App.user.name, at: new Date().toISOString(), reason: 'سیستم: موجودی انبارها صفر شد', stage: 'system' };
                 }
               });
 
-              // 2. ثبت تاریخچه صفر کردن
               fresh.adjustments = fresh.adjustments || [];
               var adjId = uid();
-              fresh.adjustments.push({
-                id: adjId, 
-                at: new Date().toISOString(), 
-                by: App.user.id, 
-                byName: App.user.name,
-                type: 'period_close', 
-                note: note, 
-                itemsCount: snap.length, 
-                snapshot: snap
-              });
+              fresh.adjustments.push({ id: adjId, at: new Date().toISOString(), by: App.user.id, byName: App.user.name, type: 'period_close', note: note, itemsCount: snap.length, snapshot: snap });
 
-              // 3. صفر کردن موجودی
-              fresh.stocks.forEach(function (s) {
-                s.quantity = 0;
-                s.reservedQty = 0;
-                s.updatedAt = new Date().toISOString();
-              });
+              fresh.stocks.forEach(function (s) { s.quantity = 0; s.reservedQty = 0; s.updatedAt = new Date().toISOString(); });
               
               saveDB(fresh);
               c.remove();
 
-              // امکان بازگردانی
               showUndoToast('موجودی و اعلان‌ها صفر شدند', function () {
                 try {
                   var f2 = loadDB();
                   f2.adjustments = (f2.adjustments || []).filter(function (a) { return a.id !== adjId; });
-                  
-                  // برگرداندن موجودی
                   snap.forEach(function (old) {
                     var s = findStock(f2, old.productId, old.warehouseId);
-                    if (s) {
-                      s.quantity = old.quantity;
-                      s.reservedQty = old.reservedQty;
-                      s.updatedAt = new Date().toISOString();
-                    }
+                    if (s) { s.quantity = old.quantity; s.reservedQty = old.reservedQty; s.updatedAt = new Date().toISOString(); }
                   });
                   saveDB(f2);
                   toast('بازگردانی شد', 'موجودی‌ها بازگشتند', 'success');
@@ -423,9 +322,7 @@ function openZeroOutModal() {
                 } catch (e) {}
               }, 6000);
               
-              requestAnimationFrame(function () {
-                requestAnimationFrame(function () { render(); });
-              });
+              requestAnimationFrame(function () { requestAnimationFrame(function () { render(); }); });
             } catch (err) {
               try { c.remove(); } catch (e) {}
               toast('خطا', err.message || '', 'error');
