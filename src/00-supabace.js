@@ -6,6 +6,30 @@ var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYm
 var supabaseClient = null;
 var syncTimeout = null;
 
+// بارگذاری پس‌زمینه (Async) کتابخانه برای جلوگیری از هنگ کردن سایت در صورت فیلتر بودن CDN
+(function loadSupabaseSDK() {
+  var script = document.createElement('script');
+  script.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
+  script.async = true;
+  script.onload = function () {
+    initSupabase();
+  };
+  script.onerror = function () {
+    console.warn('[Supabase] jsdelivr failed, trying unpkg...');
+    var script2 = document.createElement('script');
+    script2.src = 'https://unpkg.com/@supabase/supabase-js@2';
+    script2.async = true;
+    script2.onload = function () {
+      initSupabase();
+    };
+    script2.onerror = function () {
+      console.error('[Supabase] Failed to load SDK. Internet is restricted.');
+    };
+    document.head.appendChild(script2);
+  };
+  document.head.appendChild(script);
+})();
+
 function initSupabase() {
   if (window.supabase) {
     supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
