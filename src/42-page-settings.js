@@ -59,7 +59,7 @@ function pageSettings(page) {
           '<table class="dt" style="min-width: 100%;">' +
             '<thead><tr>' +
               '<th>سرویس</th>' +
-              '<th>وضعیت اتصال (متن دقیق خطا)</th>' +
+              '<th>وضعیت اتصال</th>' +
               '<th style="text-align:left">حجم مصرفی</th>' +
             '</tr></thead>' +
             '<tbody>' +
@@ -112,7 +112,7 @@ function pageSettings(page) {
     '</div>';
 
   // -------------------------------------------------------------
-  // تابع بررسی وضعیت و حجم دیتابیس و استوریج (با نمایش متن دقیق خطا)
+  // بررسی وضعیت و حجم
   // -------------------------------------------------------------
   function checkServerStatus() {
     var dbStatusEl = document.getElementById('db-status-cell');
@@ -120,15 +120,15 @@ function pageSettings(page) {
     var stStatusEl = document.getElementById('storage-status-cell');
     var stSizeEl = document.getElementById('storage-size-cell');
 
-    // بررسی دیتابیس
+    // --- دیتابیس ---
     if (typeof supabaseClient === 'undefined' || !supabaseClient) {
       dbStatusEl.innerHTML = '<span style="color:var(--red);display:flex;align-items:center;gap:6px;direction:rtl;font-family:Vazirmatn"><span class="dot" style="width:8px;height:8px;border-radius:50%;background:var(--red);display:inline-block"></span>آفلاین (کلاینت ساخته نشده)</span>';
       dbSizeEl.innerHTML = '—';
     } else {
-      supabaseClient.from('alus_sync').select('id').limit(1)
+      // استفاده از select('count') برای تست اتصال دیتابیس
+      supabaseClient.from('alus_sync').select('count', { count: 'exact', head: true })
         .then(function (res) {
           if (res.error) {
-             // نمایش دقیق خطای دیتابیس
              dbStatusEl.innerHTML = '<span style="color:var(--red);direction:rtl;font-family:Vazirmatn;font-size:11px;display:block;text-align:right">خطا:<br><span style="font-size:10px;color:var(--text-2)">' + (res.error.message || res.error.code) + '</span></span>';
           } else {
              dbStatusEl.innerHTML = '<span style="color:var(--green);display:flex;align-items:center;gap:6px;direction:rtl;font-family:Vazirmatn"><span class="dot" style="width:8px;height:8px;border-radius:50%;background:var(--green);display:inline-block;box-shadow:0 0 6px var(--green)"></span>آنلاین (متصل)</span>';
@@ -142,15 +142,15 @@ function pageSettings(page) {
       dbSizeEl.innerHTML = currentSizeKB + ' <span class="unit">KB</span>';
     }
 
-    // بررسی استوریج
+    // --- استوریج ---
     if (typeof supabaseStorageClient === 'undefined' || !supabaseStorageClient) {
       stStatusEl.innerHTML = '<span style="color:var(--red);display:flex;align-items:center;gap:6px;direction:rtl;font-family:Vazirmatn"><span class="dot" style="width:8px;height:8px;border-radius:50%;background:var(--red);display:inline-block"></span>آفلاین (کلاینت ساخته نشده)</span>';
       stSizeEl.innerHTML = '—';
     } else {
+      // استفاده از لیست کردن فایل‌های باکت برای تست اتصال و محاسبه حجم
       supabaseStorageClient.storage.from('product-images').list()
         .then(function (res) {
           if (res.error) {
-            // نمایش دقیق خطای استوریج
             stStatusEl.innerHTML = '<span style="color:var(--red);direction:rtl;font-family:Vazirmatn;font-size:11px;display:block;text-align:right">خطا در دسترسی:<br><span style="font-size:10px;color:var(--text-2)">' + (res.error.message || res.error.name) + '</span></span>';
             stSizeEl.innerHTML = '—';
           } else {
@@ -184,14 +184,14 @@ function pageSettings(page) {
   setTimeout(checkServerStatus, 500);
   
   document.getElementById('refresh-status-btn').addEventListener('click', function() {
-    this.innerHTML = IC.refresh + ' در حال بررسی...';
     var btn = this;
+    btn.innerHTML = IC.refresh + ' در حال بررسی...';
     checkServerStatus();
     setTimeout(function() { btn.innerHTML = IC.refresh + ' بروزرسانی'; }, 1000);
   });
 
   // -------------------------------------------------------------
-  // بقیه بخش‌ها
+  // بقیه بخش‌ها (بدون تغییر)
   // -------------------------------------------------------------
   var reqBtn = $('#req-notif');
   if (reqBtn) {
