@@ -1,37 +1,13 @@
 'use strict';
 
-// ⚠️ این مقادیر را با اطلاعات پروژه جدید خودت جایگزین کن
-var SUPABASE_URL = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRoY2ZseHNqbG5lbm1hcmRycWt6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTMwOTI3NzgsImV4cCI6MjEwODY2ODc3OH0.SpJPTFzds6-5htJ6PdtRywDUlqUsIHBbvJzPRM8tr0U';
+// ⚠️ مقادیر پروژه جدید خودت را اینجا جایگذاری کن
+var SUPABASE_URL = 'https://thcflxsjlnenmardrqkz.supabase.co/rest/v1/';
 var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRoY2ZseHNqbG5lbm1hcmRycWt6Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc5MzA5Mjc3OCwiZXhwIjoyMTA4NjY4Nzc4fQ.XChyHfZkbMMMsLwMPGBHGQCVkyg83D7oorbcpyYPTDg';
 
 var supabaseClient = null;
 var syncTimeout = null;
 
-// این تابع کتابخانه را از اینترنت دانلود می‌کند و سایت را قفل نمی‌کند
-(function loadSupabaseSDK() {
-  var script = document.createElement('script');
-  script.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
-  script.async = true;
-  
-  script.onload = function () {
-    initSupabase();
-  };
-  
-  script.onerror = function () {
-    console.warn('[Supabase] jsdelivr failed, trying unpkg...');
-    var script2 = document.createElement('script');
-    script2.src = 'https://unpkg.com/@supabase/supabase-js@2';
-    script2.async = true;
-    script2.onload = function () { initSupabase(); };
-    script2.onerror = function () {
-      console.error('[Supabase] Failed to load SDK from all CDNs. Check your internet connection.');
-    };
-    document.head.appendChild(script2);
-  };
-  
-  document.head.appendChild(script);
-})();
-
+// ساخت کلاینت با استفاده از فایل لوکال (بدون نیاز به اینترنت برای لود کتابخانه)
 function initSupabase() {
   if (window.supabase) {
     try {
@@ -40,8 +16,12 @@ function initSupabase() {
     } catch(e) {
       console.error('[Supabase] Error creating client:', e);
     }
+  } else {
+    console.warn('[Supabase] Library not found. Ensure src/supabase.min.js is loaded.');
   }
 }
+
+initSupabase();
 
 function syncToCloud(db) {
   if (!supabaseClient) return;
