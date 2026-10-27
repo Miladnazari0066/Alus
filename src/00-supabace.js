@@ -6,18 +6,17 @@ var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYm
 var supabaseClient = null;
 var syncTimeout = null;
 
-// از آنجایی که فایل کتابخانه به صورت لوکال (در پوشه src) لود می‌شود،
-// نیازی به لود داینامیک از CDN نداریم و مستقیم کلاینت را می‌سازیم.
+// ساخت کلاینت با استفاده از فایل لوکال
 function initSupabase() {
   if (window.supabase) {
     try {
       supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-      console.log('[Supabase] Connected successfully.');
+      console.log('[Supabase] Client initialized successfully.');
     } catch(e) {
-      console.error('[Supabase] Init error:', e);
+      console.error('[Supabase] Error creating client:', e);
     }
   } else {
-    console.warn('[Supabase] Library not found. Make sure src/supabase.min.js exists.');
+    console.warn('[Supabase] Library not found. Ensure src/supabase.min.js is loaded before this file.');
   }
 }
 
