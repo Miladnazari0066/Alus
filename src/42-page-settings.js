@@ -144,13 +144,18 @@ function pageSettings(page) {
     var btn = this;
     btn.classList.add('loading');
 
+    // اگر کلاینت به هر دلیلی ساخته نشده بود، همین الان دوباره تلاش میکنیم
+    if (!supabaseClient && typeof initSupabase === 'function') {
+      initSupabase();
+    }
+
     if (typeof supabaseClient === 'undefined' || !supabaseClient) {
       setTimeout(function() {
         btn.classList.remove('loading');
         if (!window.supabase) {
-          toast('خطای شبکه', 'کتابخانه Supabase لود نشد. لطفا از فیلترشکن استفاده کنید یا اینترنت خود را تغییر دهید.', 'error');
+          toast('خطای شبکه', 'فایل supabase.min.js در پوشه src پیدا نشد یا لود نشد.', 'error');
         } else {
-          toast('در حال آماده‌سازی', 'کتابخانه در حال لود است، چند لحظه دیگر امتحان کنید.', 'warn');
+          toast('خطا در ساخت کلاینت', 'کتابخانه لود شده اما کلاینت ساخته نشد. (تنظیمات URL یا KEY را چک کنید)', 'error');
         }
       }, 500);
       return;
