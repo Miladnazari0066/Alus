@@ -1,10 +1,10 @@
 'use strict';
 
 var NAV = [
-  { key: 'dashboard',     label: 'داشبورد',        icon: IC.home,     roles: ['admin', 'manager', 'accountant', 'warehouse_officer'], kbd: '1' },
-  { key: 'stock',         label: 'موجودی',         icon: IC.layers,   roles: ['admin', 'manager', 'accountant', 'warehouse_officer'], kbd: '2' },
-  { key: 'transfers',     label: 'جابه‌جایی',      icon: IC.swap,     roles: ['admin', 'manager', 'accountant', 'warehouse_officer'], kbd: '3' },
-  { key: 'inbounds',      label: 'ورود کالا',      icon: IC.inbound,  roles: ['admin', 'manager', 'accountant', 'warehouse_officer'], kbd: '4' },
+  { key: 'dashboard',     label: 'داشبورد',        icon: IC.home,     roles: ['admin', 'manager', 'accountant', 'warehouse_officer'] },
+  { key: 'stock',         label: 'موجودی',         icon: IC.layers,   roles: ['admin', 'manager', 'accountant', 'warehouse_officer'] },
+  { key: 'transfers',     label: 'جابه‌جایی',      icon: IC.swap,     roles: ['admin', 'manager', 'accountant', 'warehouse_officer'] },
+  { key: 'inbounds',      label: 'ورود کالا',      icon: IC.inbound,  roles: ['admin', 'manager', 'accountant', 'warehouse_officer'] },
   { key: 'reports',       label: 'گزارش‌ها',       icon: IC.chart,    roles: ['admin', 'manager', 'accountant', 'warehouse_officer'] },
   { key: 'newTransfer',   label: 'درخواست جدید',   icon: IC.plus,     roles: ['admin', 'manager', 'warehouse_officer'] },
   { key: 'newInbound',    label: 'ثبت ورود',       icon: IC.factory,  roles: ['admin', 'manager', 'warehouse_officer'] },
@@ -185,8 +185,8 @@ function renderShell() {
   var pillsHTML = items.map(function (it) {
     return '<button type="button" class="nav-pill ' + (App.route.name === it.key ? 'active' : '') + '" data-nav="' + it.key + '">' +
       it.icon + '<span>' + it.label + '</span>' +
-      (it.key === 'transfers' && pendingTransfers ? '<span class="nbadge">' + pendingTransfers + '</span>' : '') +
-      (it.kbd ? '<span class="kbd">' + it.kbd + '</span>' : '') + '</button>';
+      (it.key === 'transfers' && pendingTransfers ? '<span class="nbadge">' + pendingTransfers + '</span>' : '') + 
+      '</button>';
   }).join('');
 
   var tabsDef = [
