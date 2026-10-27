@@ -33,6 +33,15 @@ function pageSettings(page) {
       '<div class="widget w-6">' +
         '<div class="w-head"><div><div class="w-title info"><div class="ic info">' + IC.info + '</div>وضعیت</div></div></div>' +
         '<div class="dl" style="grid-template-columns:1fr 1fr;display:grid;gap:1px">' +
+          '<div class="dl-item" style="grid-column: 1 / -1; background: linear-gradient(135deg, rgba(0,122,255,.05), rgba(88,86,214,.02));">' +
+            '<div class="k">وضعیت اتصال ابری (Supabase)</div>' +
+            '<div class="v" id="cloud-status">' +
+              '<span style="color:var(--muted); display:flex; align-items:center; gap:6px;">' +
+                '<span class="dot" style="width:10px; height:10px; border-radius:50%; background:var(--orange); display:inline-block;"></span>' +
+                'در حال بررسی...' +
+              '</span>' +
+            '</div>' +
+          '</div>' +
           '<div class="dl-item"><div class="k">کالاها</div><div class="v">' + db.products.length + '</div></div>' +
           '<div class="dl-item"><div class="k">انبارها</div><div class="v">' + db.warehouses.filter(function (w) { return w.type !== 'customer'; }).length + '</div></div>' +
           '<div class="dl-item"><div class="k">اسناد</div><div class="v">' + db.transfers.length + '</div></div>' +
@@ -64,10 +73,9 @@ function pageSettings(page) {
       '</div>' +
 
       '<div class="widget w-12">' +
-        '<div class="w-head"><div><div class="w-title danger"><div class="ic danger">' + IC.zap + '</div>ابزارهای تست و عیب‌یابی (محیط آزمایشی)</div></div></div>' +
-        '<p style="font-size:12.5px;line-height:1.9;margin-bottom:14px">در اینجا می‌توانید ۱۰۰ کالای تصادفی تولید کنید، آن‌ها را پاک کنید، یا اتصال دیتابیس ابری را تست کنید.</p>' +
+        '<div class="w-head"><div><div class="w-title danger"><div class="ic danger">' + IC.zap + '</div>ابزارهای تست (محیط آزمایشی)</div></div></div>' +
+        '<p style="font-size:12.5px;line-height:1.9;margin-bottom:14px">در اینجا می‌توانید ۱۰۰ کالای تصادفی تولید کنید تا عملکرد سیستم را با داده‌های زیاد تست کنید.</p>' +
         '<div class="row" style="justify-content:flex-end;gap:8px;flex-wrap:wrap">' +
-          '<button type="button" class="btn primary" id="test-sb-btn" style="background: linear-gradient(135deg, #10b981, #059669);">' + IC.info + ' تست اتصال دیتابیس ابری</button>' +
           '<button type="button" class="btn success" id="gen-100-btn">' + IC.plus + ' تولید ۱۰۰ کالای تستی</button>' +
           '<button type="button" class="btn danger hold-btn" id="del-random-btn">' +
             '<span class="hold-progress"></span>' +
@@ -85,6 +93,42 @@ function pageSettings(page) {
         '</div>' +
       '</div>' +
     '</div>';
+
+  // تابع بررسی خودکار اتصال ابری
+  function checkCloudStatus() {
+    var statusEl = document.getElementById('cloud-status');
+    if (!statusEl) return;
+
+    // اگر کلاینت وجود نداشت، یعنی کتابخانه هنوز لود نشده یا اینترنت قطع است
+    if (typeof supabaseClient === 'undefined' || !supabaseClient) {
+      setTimeout(function() {
+        if (typeof supabaseClient === 'undefined' || !supabaseClient) {
+          statusEl.innerHTML = '<span style="color:var(--red); display:flex; align-items:center; gap:6px;"><span class="dot" style="width:10px; height:10px; border-radius:50%; background:var(--red); display:inline-block;"></span>آفلاین (عدم دسترسی به کتابخانه)</span>';
+        } else {
+          checkCloudStatus(); // دوباره تلاش کن
+        }
+      }, 2000);
+      return;
+    }
+
+    // تست دیتابیس
+    supabaseClient.from('alus_sync').select('id').limit(1)
+      .then(function (res) {
+        if (res.error && res.error.message === 'Failed to fetch') {
+          statusEl.innerHTML = '<span style="color:var(--red); display:flex; align-items:center; gap:6px;"><span class="dot" style="width:10px; height:10px; border-radius:50%; background:var(--red); display:inline-block;"></span>آفلاین (خطای شبکه یا VPN)</span>';
+        } else if (res.error && res.error.code === '42P01') {
+          statusEl.innerHTML = '<span style="color:var(--orange); display:flex; align-items:center; gap:6px;"><span class="dot" style="width:10px; height:10px; border-radius:50%; background:var(--orange); display:inline-block;"></span>متصل (جدول ساخته نشده)</span>';
+        } else {
+          statusEl.innerHTML = '<span style="color:var(--green); display:flex; align-items:center; gap:6px;"><span class="dot" style="width:10px; height:10px; border-radius:50%; background:var(--green); display:inline-block; box-shadow: 0 0 8px var(--green);"></span>آنلاین (متصل) ✅</span>';
+        }
+      })
+      .catch(function (err) {
+        statusEl.innerHTML = '<span style="color:var(--red); display:flex; align-items:center; gap:6px;"><span class="dot" style="width:10px; height:10px; border-radius:50%; background:var(--red); display:inline-block;"></span>آفلاین (خطای شبکه)</span>';
+      });
+  }
+
+  // اجرای خودکار بررسی اتصال بعد از رندر شدن صفحه
+  setTimeout(checkCloudStatus, 500);
 
   var reqBtn = $('#req-notif');
   if (reqBtn) {
@@ -138,51 +182,6 @@ function pageSettings(page) {
       } catch (err) { toast('نامعتبر', err.message || '', 'error'); }
     };
     rd.readAsText(f);
-  });
-
-  $('#test-sb-btn').addEventListener('click', function () {
-    var btn = this;
-    btn.classList.add('loading');
-
-    if (!supabaseClient && typeof initSupabase === 'function') {
-      initSupabase();
-    }
-
-    if (typeof supabaseClient === 'undefined' || !supabaseClient) {
-      setTimeout(function() {
-        btn.classList.remove('loading');
-        toast('خطای راه‌اندازی', 'کتابخانه لود نشده است. (src/supabase.min.js را چک کنید)', 'error');
-      }, 500);
-      return;
-    }
-
-    supabaseClient.from('alus_sync').select('updated_at').eq('id', 'main_db').single()
-      .then(function (res) {
-        btn.classList.remove('loading');
-        
-        if (res.error) {
-          if (res.error.code === 'PGRST116') {
-            toast('اتصال موفقیت‌آمیز بود ✅', 'ابر وصل است اما هنوز دیتایی ذخیره نشده است.', 'success');
-          } else if (res.error.code === '42P01') {
-            toast('جدول ساخته نشده ❌', 'کدهای SQL را در بخش SQL Editor سایت Supabase اجرا کنید.', 'error');
-          } else {
-            alert('خطای دیتابیس:\n' + (res.error.message || '') + '\nکد: ' + (res.error.code || ''));
-            toast('خطای دیتابیس ❌', res.error.message || 'دسترسی مسدود است', 'error');
-          }
-        } else if (res.data) {
-          var dateStr = new Date(res.data.updated_at).toLocaleString('fa-IR');
-          toast('اتصال موفقیت‌آمیز بود ✅', 'آخرین سینک: ' + dateStr, 'success');
-        }
-      })
-      .catch(function (err) {
-        btn.classList.remove('loading');
-        if (err.message && err.message.includes('Failed to fetch')) {
-          alert('خطای شبکه:\nمرورگر نمی‌تواند به سرور وصل شود.\nلطفاً یک بار با VPN امتحان کنید یا DNS سیستم را تغییر دهید.');
-          toast('خطای شبکه ❌', 'اتصال به سرور برقرار نشد.', 'error');
-        } else {
-          toast('خطای شبکه ❌', err.message || 'ارتباط با سرور برقرار نشد.', 'error');
-        }
-      });
   });
 
   $('#gen-100-btn').addEventListener('click', function () {
