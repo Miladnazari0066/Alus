@@ -80,6 +80,8 @@ function pageDashboard(page) {
           '<button type="button" data-action="newTransfer">' + IC.plus + ' درخواست جدید</button>' +
           '<button type="button" data-action="newInbound">' + IC.factory + ' ثبت ورود</button>' +
           '<button type="button" data-action="directCustomer">' + IC.truck + ' ارسال به مشتری</button>' +
+          // 👇 دکمه مقداردهی اولیه که در هر دستگاهی دیده می‌شود 👇
+          '<button type="button" data-action="stockInit">' + IC.sparkle + ' مقداردهی اولیه</button>' +
         '</div>' : '') +
     '</div>' +
 
@@ -208,14 +210,14 @@ function pageDashboard(page) {
   $$('[data-action]', page).forEach(function (b) {
     b.addEventListener('click', function () {
       var a = b.dataset.action;
-      if (a === 'newTransfer')        go('newTransfer');
-      else if (a === 'newInbound')    go('newInbound');
+      if (a === 'newTransfer') go('newTransfer');
+      else if (a === 'newInbound') go('newInbound');
       else if (a === 'directCustomer') go('directCustomer');
-      else if (a === 'stockInit')     go('stockInit');
-      else if (a === 'transfers')     go('transfers');
-      else if (a === 'users')         go('users');
-      else if (a === 'reports')       go('reports');
-      else if (a === 'notif')         openNotif();
+      else if (a === 'stockInit') go('stockInit'); // 👈 انتقال به صفحه مقداردهی
+      else if (a === 'transfers') go('transfers');
+      else if (a === 'users') go('users');
+      else if (a === 'reports') go('reports');
+      else if (a === 'notif') openNotif();
     });
   });
   $$('[data-tid]', page).forEach(function (el) {
