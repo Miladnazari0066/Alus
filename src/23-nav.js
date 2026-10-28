@@ -212,10 +212,9 @@ function renderShell() {
       '</div>' +
       '<div class="nav-pills">' + pillsHTML + '</div>' +
       '<div class="nav-right">' +
-        // 👇 نشانگر وضعیت سینک که به هدر اضافه شد 👇
-        '<div id="sync-indicator" class="sync-indicator">' +
+        '<div id="sync-indicator" class="sync-indicator online">' +
           '<span class="dot"></span>' +
-          '<span class="txt">اتصال...</span>' +
+          '<span class="txt">متصل</span>' +
         '</div>' +
         '<button type="button" class="search-btn" id="search-btn">' + IC.search + '<span>جستجو...</span></button>' +
         '<button type="button" class="icon-btn" id="notif-btn" title="اعلان‌ها">' + IC.bell + (pendingAll ? '<span class="pulse"></span>' : '') + '</button>' +
@@ -256,9 +255,9 @@ function renderShell() {
   renderPage();
   attachRippleAll();
   
-  // بعد از رندر شدن صفحه، وضعیت فعلی را روی نشانگر اعمال میکنیم
+  // 👇 اینجا باگ رفع شد. به جای متغیر تعریف نشده، از اینترنت دستگاه چک میکنیم 👇
   if (typeof updateSyncIndicator === 'function') {
-    updateSyncIndicator(lastSyncStatus);
+    updateSyncIndicator(navigator.onLine ? 'online' : 'offline');
   }
 }
 
