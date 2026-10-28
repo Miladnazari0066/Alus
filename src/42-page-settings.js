@@ -53,10 +53,10 @@ function pageSettings(page) {
                   '<td id="storage-status-cell" style="font-size:11px;direction:ltr;text-align:left"><span style="color:var(--orange);display:flex;align-items:center;gap:6px;direction:rtl;"><span class="dot" style="width:8px;height:8px;border-radius:50%;background:var(--orange);display:inline-block"></span>در حال بررسی...</span></td>' +
                   '<td class="num" id="storage-size-cell">-</td>' +
                 '</tr>' +
-                // 👇 ردیف جدید سینک زنده 👇
+                // 👇 ردیف سینک زنده با کلاس‌های جدید 👇
                 '<tr>' +
-                  '<td><div class="cell-product"><div class="img-thumb-placeholder" style="background:rgba(52,199,89,.1);color:var(--green);border-color:rgba(52,199,89,.2)">' + IC.refresh + '</div><div class="info"><b>سینک زنده</b><br><small style="font-size:10px;color:var(--muted)">Realtime Sync</small></div></div></td>' +
-                  '<td style="font-size:11px;direction:ltr;text-align:left"><div id="sync-indicator" class="sync-indicator online" style="display:inline-flex;padding:4px 8px;"><span class="dot"></span><span class="txt">متصل</span></div></td>' +
+                  '<td><div class="cell-product"><div class="img-thumb-placeholder" style="background:rgba(52,199,89,.1);color:var(--green);border-color:rgba(52,199,89,.2)">' + IC.cloud + '</div><div class="info"><b>سینک زنده</b><br><small style="font-size:10px;color:var(--muted)">Realtime Sync</small></div></div></td>' +
+                  '<td style="font-size:11px;direction:ltr;text-align:left"><div id="sync-indicator" class="sync-pill online" style="display:inline-flex;"></div></td>' +
                   '<td class="num">-</td>' +
                 '</tr>' +
               '</tbody>' +
@@ -139,6 +139,11 @@ function pageSettings(page) {
       '</div>' +
 
     '</div>';
+
+  // آپدیت نشانگر در تنظیمات
+  if (typeof updateSyncIndicator === 'function') {
+    updateSyncIndicator(navigator.onLine ? 'online' : 'offline');
+  }
 
   function checkServerStatus() {
     var dbStatusEl = document.getElementById('db-status-cell');
