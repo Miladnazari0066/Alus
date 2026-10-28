@@ -46,7 +46,6 @@ function pageStock(page) {
   var state = { wh: '', q: '', sort: null, dir: null };
   var selectedStocks = {};
 
-  // آیکون مداد برای ویرایش
   var editIcon = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>';
 
   page.innerHTML = '<div class="page-head"><div><h1>موجودی انبارها</h1>' +
@@ -66,12 +65,11 @@ function pageStock(page) {
       '<div class="table-scroll" id="s-table"></div>' +
     '</div>' +
     
-    // 👇 نوار شناور گروهی (طراحی شیک‌تر) 👇
     '<div class="bulk-bar" id="stock-bulk-bar" style="background:var(--g3); backdrop-filter:blur(24px); border-radius:100px; padding:10px 10px 10px 20px; box-shadow:0 20px 40px -10px rgba(0,0,0,.3)">' +
       '<span class="bulk-count" style="font-size:13.5px"><b id="stock-bulk-n" style="font-size:15px">0</b> مورد انتخاب شد</span>' +
-      '<button type="button" class="btn danger sm hold-btn" id="stock-bulk-delete" style="height:40px; padding:0 18px; position:relative; overflow:hidden; border-radius:100px;">' +
+      '<button type="button" class="btn danger sm hold-btn" id="stock-bulk-delete" style="height:40px; padding:0 18px; position:relative; overflow:hidden; border-radius:100px; width:120px;">' +
         '<span class="hold-progress"></span>' +
-        '<span class="hold-text" style="display:flex;align-items:center;gap:6px;font-weight:700">' + IC.trash + ' حذف (نگه دارید)</span>' +
+        '<span class="hold-text" id="bulk-del-txt" style="display:flex;align-items:center;gap:6px;font-weight:700;justify-content:center">حذف</span>' +
       '</button>' +
       '<button type="button" class="btn ghost sm" id="stock-bulk-clear" style="height:40px; width:40px; padding:0; border-radius:50%; justify-content:center">' + IC.close + '</button>' +
     '</div>';
@@ -206,7 +204,7 @@ function pageStock(page) {
       });
     });
 
-    // مدیریت پاپ‌آپ عکس
+    // پاپ‌آپ عکس
     var pop = document.getElementById('global-img-pop');
     if (!pop) {
       pop = document.createElement('div');
@@ -265,7 +263,7 @@ function pageStock(page) {
       if (!e.target.closest('.img-trigger') && !e.target.closest('.img-pop')) hidePopover();
     });
 
-    // 👇 فرم ویرایش کامل (مشکل آیکون غول‌آسا حل شد) 👇
+    // 👇 فرم ویرایش کامل (با عکس و همه مشخصات) 👇
     $$('[data-edit]', tbl).forEach(function(btn) {
       btn.addEventListener('click', function(e) {
         e.stopPropagation();
@@ -275,19 +273,31 @@ function pageStock(page) {
         var prod = getProd(db, stock.productId);
         var wh = getWh(db, stock.warehouseId);
         
+        var editCurrentImage = prod.image || '';
+        
         openModal({
-          title: 'ویرایش موجودی',
-          desc: 'مدیریت و اصلاح موجودی انبار',
+          title: 'ویرایش کالا و موجودی',
+          desc: 'تغییر تمام مشخصات کالا و موجودی در این انبار',
           body: 
-            '<div style="display:flex;align-items:center;gap:12px;padding:14px;background:var(--surface-2);border-radius:16px;margin-bottom:16px;border:1px solid var(--border)">' +
-              (prod.image ? '<img src="' + esc(prod.image) + '" style="width:50px;height:50px;border-radius:12px;object-fit:cover;">' : '<div class="img-thumb-placeholder" style="width:50px;height:50px">' + IC.package + '</div>') +
-              '<div style="flex:1;min-width:0">' +
-                '<div style="font-weight:800;font-size:14px;color:var(--text)">' + esc(prod.name) + '</div>' +
-                '<div style="font-size:11.5px;color:var(--muted);margin-top:2px">' + esc(wh.name) + '</div>' +
+            '<div class="form-grid" style="gap:14px">' +
+              // باکس عکس
+              '<div class="full" style="display:flex; gap:14px; align-items:flex-start; padding:12px; background:var(--surface-2); border-radius:16px; border:1px dashed var(--border-2)">' +
+                '<div id="edit-img-preview" style="width:64px; height:64px; border-radius:12px; background:var(--surface); display:grid; place-items:center; color:var(--muted); border:1px solid var(--border); flex-shrink:0; overflow:hidden">' + 
+                  (editCurrentImage ? '<img src="'+esc(editCurrentImage)+'" style="width:100%;height:100%;object-fit:cover">' : IC.image) + 
+                '</div>' +
+                '<div style="flex:1">' +
+                  '<div style="font-size:12.5px; font-weight:700; margin-bottom:6px">تصویر کالا</div>' +
+                  '<button type="button" class="btn ghost sm" id="edit-img-btn">' + IC.upload + ' انتخاب تصویر</button>' +
+                  '<input type="file" id="edit-img-input" accept="image/*" style="display:none">' +
+                '</div>' +
               '</div>' +
-            '</div>' +
-            
-            '<div class="form-grid" style="gap:12px">' +
+              
+              '<div class="field"><label>نام کالا <span class="req">*</span></label><input id="edit-name" value="' + esc(prod.name) + '" /></div>' +
+              '<div class="field"><label>کد کالا</label><input id="edit-code" value="' + esc(prod.code || '') + '" /></div>' +
+              '<div class="field"><label>واحد شمارش</label><select id="edit-unit">' + 
+                UNITS.map(function(u) { return '<option value="'+u+'" '+(prod.unit === u ? 'selected' : '')+'>'+u+'</option>'; }).join('') + 
+              '</select></div>' +
+              
               '<div class="field"><label>تعداد موجودی <span class="req">*</span></label><input id="edit-qty" type="number" min="0" value="' + stock.quantity + '" style="font-weight:800;font-size:16px;color:var(--blue)" /></div>' +
               '<div class="field"><label>حد هشدار (کم‌موجودی)</label><input id="edit-min" type="number" min="0" value="' + (stock.minQuantity || 5) + '" /></div>' +
             '</div>' +
@@ -299,26 +309,83 @@ function pageStock(page) {
           actions: [
             { label: 'انصراف', cls: 'ghost', onClick: function(c) { c.remove(); } },
             { label: IC.check + ' ذخیره تغییرات', cls: 'primary', onClick: function(c) {
+                var newName = document.getElementById('edit-name').value.trim();
+                var newCode = document.getElementById('edit-code').value.trim();
+                var newUnit = document.getElementById('edit-unit').value;
                 var newQty = parseInt(document.getElementById('edit-qty').value, 10);
                 var newMin = parseInt(document.getElementById('edit-min').value, 10);
+                
+                if (!newName) { toast('نام الزامی است', '', 'error'); return; }
                 if (isNaN(newQty) || newQty < (stock.reservedQty || 0)) {
                   toast('مقدار نامعتبر', 'تعداد نمی‌تواند کمتر از رزرو باشد', 'error');
                   return;
                 }
+                
                 var fresh = loadDB();
+                var fp = fresh.products.filter(function(p){return p.id === prod.id;})[0];
+                if (fp) {
+                  fp.name = newName;
+                  fp.code = newCode;
+                  fp.unit = newUnit;
+                  fp.image = editCurrentImage;
+                }
+                
                 var fs = fresh.stocks.filter(function(s){return s.id === sid;})[0];
                 if (fs) {
                   fs.quantity = newQty;
                   fs.minQuantity = isNaN(newMin) ? 5 : newMin;
                   fs.updatedAt = new Date().toISOString();
-                  saveDB(fresh);
-                  toast('ویرایش شد', 'موجودی با موفقیت تغییر کرد', 'success');
-                  c.remove();
-                  go('stock');
                 }
+                
+                saveDB(fresh);
+                toast('ویرایش شد', 'تغییرات با موفقیت ذخیره شد', 'success');
+                c.remove();
+                go('stock');
             }}
           ]
         });
+        
+        // لاجیک آپلود عکس در مودال
+        setTimeout(function() {
+          var imgBtn = document.getElementById('edit-img-btn');
+          var imgInput = document.getElementById('edit-img-input');
+          var imgPreview = document.getElementById('edit-img-preview');
+          
+          if (imgBtn && imgInput) {
+            imgBtn.addEventListener('click', function() { imgInput.click(); });
+            imgInput.addEventListener('change', function(e) {
+              var f = e.target.files && e.target.files[0];
+              if (!f) return;
+              if (f.size > 4 * 1024 * 1024) { toast('حجم زیاد', 'حداکثر ۴ مگابایت', 'error'); return; }
+              
+              imgBtn.classList.add('loading');
+              imgBtn.textContent = 'در حال آپلود...';
+              
+              compressImage(f, 400, 0.75).then(function(dataUrl) {
+                var arr = dataUrl.split(','), mime = arr[0].match(/:(.*?);/)[1],
+                    bstr = atob(arr[1]), n = bstr.length, u8arr = new Uint8Array(n);
+                while(n--){ u8arr[n] = bstr.charCodeAt(n); }
+                var blob = new Blob([u8arr], {type:mime});
+                
+                uploadImageToCloud(blob).then(function(publicUrl) {
+                  editCurrentImage = publicUrl;
+                  imgPreview.innerHTML = '<img src="'+esc(publicUrl)+'" style="width:100%;height:100%;object-fit:cover">';
+                  toast('آپلود موفق', 'تصویر جدید ذخیره شد', 'success');
+                }).catch(function(err) {
+                  toast('خطای آپلود', err.message || '', 'error');
+                }).finally(function() {
+                  imgBtn.classList.remove('loading');
+                  imgBtn.innerHTML = IC.upload + ' انتخاب تصویر';
+                });
+              }).catch(function(err) {
+                imgBtn.classList.remove('loading');
+                imgBtn.innerHTML = IC.upload + ' انتخاب تصویر';
+                toast('خطا', err.message || '', 'error');
+              });
+              e.target.value = '';
+            });
+          }
+        }, 100);
       });
     });
 
@@ -358,16 +425,37 @@ function pageStock(page) {
     });
   }
 
+  // تابع حذف مستقیم (بدون مودال) برای دکمه نگه‌داشتن
+  function executeDirectDelete(ids) {
+    var fresh = loadDB();
+    var backup = fresh.stocks.filter(function(s) { return ids.indexOf(s.id) >= 0; });
+    fresh.stocks = fresh.stocks.filter(function(s) { return ids.indexOf(s.id) < 0; });
+    saveDB(fresh);
+    selectedStocks = {};
+    
+    showUndoToast(ids.length + ' ردیف موجودی حذف شد', function() {
+      var f2 = loadDB();
+      f2.stocks = f2.stocks.concat(backup);
+      saveDB(f2);
+      toast('بازگردانی شد', 'موجودی‌ها بازگشتند', 'success');
+      go('stock');
+    }, 5000);
+    
+    go('stock');
+  }
+
   $('#s-q').addEventListener('input', function (e) { state.q = e.target.value.trim(); draw(); });
   $('#s-wh').addEventListener('change', function (e) { state.wh = e.target.value; draw(); });
 
-  $('#stock-bulk-clear').addEventListener('click', function() {
+  document.getElementById('stock-bulk-clear').addEventListener('click', function(e) {
+    e.stopPropagation();
     selectedStocks = {};
     draw();
   });
 
-  // 👇 منطق نگه داشتن ۳ ثانیه‌ای برای دکمه حذف گروهی 👇
+  // 👇 منطق نگه داشتن ۳ ثانیه‌ای برای دکمه حذف گروهی با نمایش متن راهنما 👇
   var delBtn = document.getElementById('stock-bulk-delete');
+  var delTxt = document.getElementById('bulk-del-txt');
   var holdTimer = null, holdInterval = null, holdProgress = 0;
   var holdDuration = 3000;
   var progressBar = delBtn.querySelector('.hold-progress');
@@ -376,6 +464,11 @@ function pageStock(page) {
     e.preventDefault();
     holdProgress = 0;
     progressBar.style.width = '0%';
+    
+    // تغییر متن و نمایش پیام راهنما
+    delTxt.textContent = 'نگه دارید...';
+    toast('برای تایید حذف، ۳ ثانیه نگه دارید', '', 'info');
+
     holdInterval = setInterval(function() {
       holdProgress += 50;
       var pct = (holdProgress / holdDuration) * 100;
@@ -386,10 +479,11 @@ function pageStock(page) {
     holdTimer = setTimeout(function() {
       clearInterval(holdInterval);
       progressBar.style.width = '0%';
+      delTxt.textContent = 'حذف';
       
       var ids = Object.keys(selectedStocks).filter(function(k) { return selectedStocks[k]; });
       if (ids.length > 0) {
-        deleteStocks(ids);
+        executeDirectDelete(ids); // حذف بدون تایید دوم
       }
     }, holdDuration);
   }
@@ -398,6 +492,7 @@ function pageStock(page) {
     if (holdTimer) clearTimeout(holdTimer);
     if (holdInterval) clearInterval(holdInterval);
     progressBar.style.width = '0%';
+    delTxt.textContent = 'حذف'; // برگرداندن متن به حالت اول
   }
 
   delBtn.addEventListener('mousedown', startHold);
