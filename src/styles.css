@@ -2526,3 +2526,82 @@ tr.row-low:hover td { background: rgba(255,149,0,.08); }
   .sync-indicator .txt { display: none; } /* در موبایل فقط دایره نشان داده شود */
   .sync-indicator { padding: 7px; }
 }
+/* ============================================================
+   PRODUCT IMAGE POPOVER
+   ============================================================ */
+.img-pop {
+  position: fixed;
+  z-index: 9999;
+  background: var(--surface);
+  border: 1px solid var(--border-2);
+  border-radius: 18px;
+  box-shadow: 0 24px 50px -12px rgba(15,23,42,.4);
+  padding: 12px;
+  width: 240px;
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(10px) scale(0.95);
+  transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.img-pop.show {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0) scale(1);
+  pointer-events: auto; /* در موبایل برای بستن با کلیک روی خود پاپ‌آپ */
+}
+
+.img-pop img {
+  width: 100%;
+  height: 170px;
+  object-fit: cover;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+}
+
+.img-pop .info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.img-pop .info b {
+  font-size: 13.5px;
+  color: var(--text);
+  font-weight: 800;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.img-pop .info small {
+  font-size: 11.5px;
+  color: var(--muted);
+}
+
+.img-pop .info .wh-badge {
+  font-size: 11px;
+  background: rgba(0,122,255,.1);
+  color: var(--blue);
+  padding: 4px 8px;
+  border-radius: 8px;
+  display: inline-block;
+  width: fit-content;
+  border: 1px solid rgba(0,122,255,.2);
+  margin-top: 4px;
+  font-weight: 600;
+}
+
+.img-trigger {
+  cursor: pointer;
+  transition: transform 0.2s var(--ease);
+}
+.img-trigger:hover {
+  transform: scale(1.05);
+  border-color: var(--blue);
+}
