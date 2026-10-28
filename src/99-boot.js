@@ -11,7 +11,6 @@ try {
   try { PWA.init(); } catch (e) { console.error('[pwa]', e); }
   try { showSplash(); } catch (e) { console.error('[splash]', e); }
 
-  // گرفتن آخرین تغییرات از ابر قبل از رندر شدن اولیه
   if (typeof pullFromCloud === 'function') {
     pullFromCloud().then(function (cloudData) {
       if (cloudData) {
@@ -36,5 +35,5 @@ try {
     ee.textContent = 'BOOT ERROR: ' + (err.message || err) + '\n' + (err.stack || '');
   }
   console.error('[boot]', err);
-  render(); // Fallback
+  render();
 }
