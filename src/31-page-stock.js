@@ -41,6 +41,16 @@ function transferItemHTML(db, t) {
   '</div>';
 }
 
+// 👇 لیسنر سراسری برای بستن پاپ‌آپ عکس (فقط یک بار اجرا می‌شود) 👇
+document.addEventListener('click', function(e) {
+  var pop = document.getElementById('global-img-pop');
+  if (pop && pop.classList.contains('show')) {
+    if (!e.target.closest('.img-trigger') && !e.target.closest('.img-pop')) {
+      pop.classList.remove('show');
+    }
+  }
+});
+
 function pageStock(page) {
   var db = loadDB();
   var state = { wh: '', q: '', sort: null, dir: null, page: 1, perPage: 15 };
@@ -189,7 +199,6 @@ function pageStock(page) {
         '</tr>';
       }).join('') + '</tbody></table>';
 
-    // رندر دکمه‌های صفحه‌بندی
     pag.innerHTML = '<div class="pagination-container">' +
       '<button type="button" class="btn xs ghost" id="pg-prev" ' + (state.page === 1 ? 'disabled' : '') + '>' + IC.chevR + ' قبلی</button>' +
       '<span class="pagination-info">صفحه ' + state.page + ' از ' + totalPages + '</span>' +
@@ -276,16 +285,10 @@ function pageStock(page) {
       pop.style.left = left + 'px';
     }
 
-    function hidePopover() { pop.classList.remove('show'); }
-
     $$('.img-trigger', tbl).forEach(function(img) {
       img.addEventListener('mouseenter', function() { if (window.innerWidth > 900) showPopover(img); });
-      img.addEventListener('mouseleave', function() { if (window.innerWidth > 900) hidePopover(); });
+      img.addEventListener('mouseleave', function() { if (window.innerWidth > 900) pop.classList.remove('show'); });
       img.addEventListener('click', function(e) { e.stopPropagation(); showPopover(img); });
-    });
-
-    document.addEventListener('click', function(e) {
-      if (!e.target.closest('.img-trigger') && !e.target.closest('.img-pop')) hidePopover();
     });
 
     // فرم ویرایش
