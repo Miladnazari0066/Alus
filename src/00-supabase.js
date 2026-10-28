@@ -8,11 +8,10 @@ var STORAGE_SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOi
 
 var supabaseClient = null;
 var supabaseStorageClient = null;
-
+var syncChannel = null;
 var syncTimeout = null;
 var pollInterval = null;
 var isFetching = false;
-var isSaving = false;
 var lastLocalSaveTime = 0;
 
 (function loadSupabaseSDK() {
@@ -53,22 +52,14 @@ function initSupabase() {
 
 function syncToCloud(db) {
   if (!supabaseClient) return;
-  
   clearTimeout(syncTimeout);
-  lastLocalSaveTime = Date.now(); // زمان ذخیره محلی را ثبت میکنیم
+  lastLocalSaveTime = Date.now(); // ثبت زمان ذخیره برای جلوگیری از تداخل
   
   syncTimeout = setTimeout(function () {
-    isSaving = true;
     supabaseClient.from('alus_sync').upsert({ id: 'main_db', data: db, updated_at: new Date() })
-      .then(function (res) { 
-        if (res.error) console.error('[Sync Error]', res.error); 
-        isSaving = false;
-      })
-      .catch(function(err) {
-        console.error('[Sync Network Error]', err);
-        isSaving = false;
-      });
-  }, 1000); // ۱ ثانیه صبر میکند تا تغییرات پشت سر هم را یکجا بفرستد
+      .then(function (res) { if (res.error) console.error('[Sync Error]', res.error); })
+      .catch(function(err) { console.error('[Sync Network Error]', err); });
+  }, 500); 
 }
 
 function pullFromCloud() {
@@ -93,10 +84,43 @@ function uploadImageToCloud(file) {
   });
 }
 
+// -------------------------------------------------------------
+// سیستم همگام‌سازی زنده (Realtime) + پشتیبان (Polling)
+// -------------------------------------------------------------
 function startCloudSync() {
+  if (!supabaseClient) return;
+
+  // روش اول: Realtime (سیگنال زنده از سرور)
+  if (syncChannel) supabaseClient.removeChannel(syncChannel);
+  syncChannel = supabaseClient.channel('alus_sync_changes')
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'alus_sync' }, function(payload) {
+      if (payload.new && payload.new.id === 'main_db' && payload.new.data) {
+        var cloudStr = JSON.stringify(payload.new.data);
+        var localStr = localStorage.getItem(K_DB);
+        
+        // اگر از سمت خودمان نیامده باشد
+        if (cloudStr !== localStr && (Date.now() - lastLocalSaveTime > 2000)) {
+          localStorage.setItem(K_DB, cloudStr);
+          if (typeof clearCache === 'function') clearCache();
+          
+          var activeEl = document.activeElement;
+          var isInput = activeEl && (activeEl.tagName === 'INPUT' || activeEl.tagName === 'TEXTAREA' || activeEl.tagName === 'SELECT');
+          var hasModal = document.querySelector('.modal-bd') || document.querySelector('.drawer') || document.querySelector('.cmd-bd');
+          
+          if (typeof render === 'function') {
+              if (!isInput && !hasModal) {
+                  render();
+                  if (typeof toast === 'function') toast('همگام‌سازی زنده', 'تغییرات دستگاه دیگر اعمال شد', 'success');
+              }
+          }
+        }
+      }
+    })
+    .subscribe();
+
+  // روش دوم (پشتیبان): هر ۵ ثانیه چک میکند
   if (pollInterval) clearInterval(pollInterval);
-  fetchLatestCloudData(); // یک بار در ابتدا چک میکنیم
-  pollInterval = setInterval(fetchLatestCloudData, 4000); // هر ۴ ثانیه چک میکند
+  pollInterval = setInterval(fetchLatestCloudData, 5000); 
   
   window.addEventListener('focus', fetchLatestCloudData);
   document.addEventListener('visibilitychange', function() {
@@ -105,24 +129,20 @@ function startCloudSync() {
 }
 
 function fetchLatestCloudData() {
-  if (!supabaseClient || isFetching || isSaving) return;
-  
-  // اگر همین الان تغییری در این دستگاه دادیم، ۳ ثانیه صبر میکنیم تا ابر آپدیت شود
+  if (!supabaseClient || isFetching) return;
   if (Date.now() - lastLocalSaveTime < 3000) return; 
 
   isFetching = true;
   
-  supabaseClient.from('alus_sync').select('data, updated_at').eq('id', 'main_db').single()
+  supabaseClient.from('alus_sync').select('data').eq('id', 'main_db').single()
     .then(function(res) {
       isFetching = false;
-      
       if (res.error) return; 
       
       if (res.data && res.data.data) {
         var cloudStr = JSON.stringify(res.data.data);
         var localStr = localStorage.getItem(K_DB);
         
-        // مقایسه داده ابری با داده محلی
         if (cloudStr !== localStr) {
            localStorage.setItem(K_DB, cloudStr);
            if (typeof clearCache === 'function') clearCache();
@@ -135,8 +155,6 @@ function fetchLatestCloudData() {
                if (!isInput && !hasModal) {
                    render();
                    if (typeof toast === 'function') toast('همگام‌سازی شد', 'تغییرات دستگاه دیگر اعمال شد', 'success');
-               } else {
-                   if (typeof toast === 'function') toast('داده جدید', 'تغییرات جدید در پس‌زمینه ذخیره شد (پس از بستن صفحه اعمال می‌شود)', 'info');
                }
            }
         }
