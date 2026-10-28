@@ -1,6 +1,7 @@
 'use strict';
 
 try {
+  // این تابع خودش منتظر می‌ماند تا کتابخانه لود شود، بعد سینک را روشن می‌کند
   if (typeof initSupabase === 'function') initSupabase();
 
   if (!loadDB().users.length) saveDB(seed());
@@ -11,22 +12,7 @@ try {
   try { PWA.init(); } catch (e) { console.error('[pwa]', e); }
   try { showSplash(); } catch (e) { console.error('[splash]', e); }
 
-  if (typeof pullFromCloud === 'function') {
-    pullFromCloud().then(function (cloudData) {
-      if (cloudData) {
-        var cloudStr = JSON.stringify(cloudData);
-        var localStr = localStorage.getItem(K_DB);
-        if (cloudStr !== localStr) {
-          localStorage.setItem(K_DB, cloudStr);
-          if (typeof clearCache === 'function') clearCache();
-        }
-      }
-      render();
-      if (typeof startCloudSync === 'function') startCloudSync();
-    });
-  } else {
-    render();
-  }
+  render();
 
 } catch (err) {
   var ee = document.getElementById('err');
