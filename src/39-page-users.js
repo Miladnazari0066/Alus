@@ -127,7 +127,7 @@ function pageUsers(page) {
   }
 
   if (canEdit) {
-    $('#uf').addEventListener('submit', function (e) {
+    $('#uf').addEventListener('submit', async function (e) {
       e.preventDefault();
       var name = $('#un').value.trim();
       var username = $('#uu').value.trim();
@@ -137,11 +137,14 @@ function pageUsers(page) {
       if (!canAssignRole(role)) { toast('دسترسی ندارید', '', 'error'); return; }
       var fresh = loadDB();
       if (fresh.users.some(function (u) { return u.username === username; })) {
-        toast('تکراری', 'این نام کاربری قبلاً ثبت شده', 'error');
+        toast('تکرار', 'این نام کاربری قبلاً ثبت شده', 'error');
         return;
       }
+      
+      var hashedPassword = await hashPassword(password);
+      
       fresh.users.push({
-        id: uid(), name: name, username: username, password: password,
+        id: uid(), name: name, username: username, password: hashedPassword,
         role: role, isActive: true
       });
       saveDB(fresh);
@@ -150,4 +153,5 @@ function pageUsers(page) {
     });
   }
   draw();
+  attachRippleAll();
 }
