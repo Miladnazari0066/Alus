@@ -51,13 +51,11 @@ function relTime(iso) {
   return faDate(iso);
 }
 
-/** Convert any number/string to Persian digits with separators. */
 function faNum(n) {
   if (n == null) return '—';
   try { return Number(n).toLocaleString('fa-IR'); } catch (e) { return String(n); }
 }
 
-/** Sort rows by key + direction. Uses localeCompare with 'fa' for Persian strings. */
 function sortRows(rows, key, dir, getter) {
   if (!dir) return rows.slice();
   var copy = rows.slice();
@@ -93,7 +91,6 @@ function emptyState(title, desc, actionHTML) {
   '</div>';
 }
 
-/** Resize + re-encode an image file to JPEG. Used by product image upload. */
 function compressImage(file, maxDim, quality) {
   return new Promise(function (resolve, reject) {
     try {
@@ -141,4 +138,29 @@ function downloadBlob(blob, filename) {
     if (typeof toast === 'function') toast('خطا در دانلود', e.message || '', 'error');
     else console.error('[downloadBlob]', e);
   }
+}
+
+// هش کردن رمز عبور با SHA-256
+function hashPassword(password) {
+  return new Promise(function(resolve) {
+    if (!window.crypto || !window.crypto.subtle) {
+      console.warn('Web Crypto API not available, using fallback.');
+      var hash = 0;
+      for (var i = 0; i < password.length; i++) {
+        var char = password.charCodeAt(i);
+        hash = ((hash << 5) - hash) + char;
+        hash = hash & hash;
+      }
+      return resolve('fallback_' + hash.toString(16));
+    }
+    
+    var msgBuffer = new TextEncoder().encode(password);
+    window.crypto.subtle.digest('SHA-256', msgBuffer).then(function(hashBuffer) {
+      var hashArray = Array.from(new Uint8Array(hashBuffer));
+      var hashHex = hashArray.map(function(b) { return b.toString(16).padStart(2, '0'); }).join('');
+      resolve(hashHex);
+    }).catch(function() {
+      resolve(password);
+    });
+  });
 }
