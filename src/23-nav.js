@@ -204,6 +204,7 @@ function renderShell() {
     return '<button type="button" class="tab-btn ' + (active ? 'active' : '') + '" data-tab="' + t.key + '">' + t.icon + bdg + '<span>' + t.label + '</span></button>';
   }).join('');
 
+  // 👇 نشانگر سینک از اینجا حذف شد 👇
   app.innerHTML =
     '<div class="nav-wrap"><nav class="navbar">' +
       '<div class="nav-brand">' +
@@ -212,10 +213,6 @@ function renderShell() {
       '</div>' +
       '<div class="nav-pills">' + pillsHTML + '</div>' +
       '<div class="nav-right">' +
-        '<div id="sync-indicator" class="sync-indicator online">' +
-          '<span class="dot"></span>' +
-          '<span class="txt">متصل</span>' +
-        '</div>' +
         '<button type="button" class="search-btn" id="search-btn">' + IC.search + '<span>جستجو...</span></button>' +
         '<button type="button" class="icon-btn" id="notif-btn" title="اعلان‌ها">' + IC.bell + (pendingAll ? '<span class="pulse"></span>' : '') + '</button>' +
         '<button type="button" class="icon-btn" id="theme-btn" title="تم">' + (App.theme === 'light' ? IC.moon : IC.sun) + '</button>' +
@@ -254,11 +251,6 @@ function renderShell() {
   }
   renderPage();
   attachRippleAll();
-  
-  // 👇 اینجا باگ رفع شد. به جای متغیر تعریف نشده، از اینترنت دستگاه چک میکنیم 👇
-  if (typeof updateSyncIndicator === 'function') {
-    updateSyncIndicator(navigator.onLine ? 'online' : 'offline');
-  }
 }
 
 function renderPage() {
