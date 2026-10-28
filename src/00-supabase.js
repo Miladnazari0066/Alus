@@ -44,10 +44,7 @@ window.addEventListener('offline', function() {
 });
 
 (function loadSupabaseSDK() {
-  if (window.supabase) {
-    initSupabase();
-    return;
-  }
+  if (window.supabase) { initSupabase(); return; }
   var script = document.createElement('script');
   script.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.8/dist/umd/supabase.min.js';
   script.async = true;
@@ -64,15 +61,11 @@ window.addEventListener('offline', function() {
 
 function cleanUrl(url) {
   if (!url) return '';
-  var cleaned = url.replace(/\/+$/, ''); 
-  cleaned = cleaned.replace(/\/rest\/v1\/?$/, ''); 
-  cleaned = cleaned.replace(/\/storage\/v1\/?$/, ''); 
-  return cleaned;
+  return url.replace(/\/+$/, '').replace(/\/rest\/v1\/?$/, '').replace(/\/storage\/v1\/?$/, '');
 }
 
 function initSupabase() {
-  if (!window.supabase) return;
-  if (supabaseClient) return;
+  if (!window.supabase || supabaseClient) return;
 
   try {
     var dbUrl = cleanUrl(SUPABASE_URL);
@@ -85,19 +78,35 @@ function initSupabase() {
     console.log('[Supabase] Clients initialized.');
     checkDeviceOnline();
 
-    startCloudSync();
-    
+    // 👇 این بخش حیاتی اصلاح شد تا از پاک شدن دیتا جلوگیری کند 👇
     pullFromCloud().then(function(cloudData) {
-      if (cloudData) {
+      var localData = loadDB();
+      var hasCloudData = cloudData && cloudData.users && cloudData.users.length > 0;
+      var hasLocalData = localData.users && localData.users.length > 0;
+
+      if (hasCloudData) {
+        // اگر در ابر دیتا وجود دارد، آن را جایگزین دیتای محلی میکنیم
         var cloudStr = JSON.stringify(cloudData);
         var localStr = localStorage.getItem(K_DB);
         if (cloudStr !== localStr) {
           localStorage.setItem(K_DB, cloudStr);
           if (typeof clearCache === 'function') clearCache();
           if (typeof render === 'function') render();
-          console.log('[Sync] Initial data pulled from cloud');
         }
+      } else if (!hasLocalData) {
+        // اگر نه در ابر دیتا هست و نه محلی، آن‌وقت دیتابیس اولیه ساخته میشود
+        console.log('[Sync] Both cloud and local are empty. Creating seed...');
+        var seedData = seed();
+        localStorage.setItem(K_DB, JSON.stringify(seedData));
+        if (typeof clearCache === 'function') clearCache();
+        syncToCloud(seedData);
+        if (typeof render === 'function') render();
+      } else {
+        // اگر ابر خالی است اما محلی دیتا دارد (مثلاً آفلاین بوده)، محلی را به ابر میفرستیم
+        syncToCloud(localData);
       }
+
+      startCloudSync();
     });
 
   } catch(e) {
@@ -137,7 +146,6 @@ function doSync() {
 
 function pullFromCloud() {
   if (!supabaseClient) return Promise.resolve(null);
-  // 👇 تغییر .single به .maybeSingle 👇
   return supabaseClient.from('alus_sync').select('data').eq('id', 'main_db').maybeSingle()
     .then(function (res) { return res.data ? res.data.data : null; })
     .catch(function () { return null; });
@@ -202,14 +210,10 @@ function fetchLatestCloudData() {
   if (!supabaseClient || isFetching || isSaving) return;
   isFetching = true;
   
-  // 👇 تغییر .single به .maybeSingle 👇
   supabaseClient.from('alus_sync').select('data').eq('id', 'main_db').maybeSingle()
     .then(function(res) {
       isFetching = false;
-      if (res.error) {
-        if (res.error.code !== 'PGRST116') console.warn('[Sync] Poll error:', res.error);
-        return; 
-      }
+      if (res.error) return; 
       
       if (res.data && res.data.data) {
         var cloudStr = JSON.stringify(res.data.data);
@@ -233,7 +237,6 @@ function fetchLatestCloudData() {
     })
     .catch(function(err) {
       isFetching = false;
-      console.warn('[Sync] Poll network error:', err);
     });
 }
 
