@@ -1,6 +1,5 @@
 'use strict';
 
-/* Bulk selection state — persists across renders until user clears it */
 var bulkSelection = {};
 
 function pageTransfers(page) {
@@ -9,6 +8,7 @@ function pageTransfers(page) {
   var q = '';
   var list = db.transfers.filter(function (t) { return t.type !== 'inbound'; });
   var selectMode = false;
+  var state = { page: 1, perPage: 15 };
 
   function cnt(f) { return list.filter(function (t) { return t.status === f; }).length; }
 
@@ -31,6 +31,7 @@ function pageTransfers(page) {
         '<div class="search-input" style="margin-right:auto">' + IC.search + '<input id="t-q" placeholder="جستجو..." /></div>' +
       '</div>' +
       '<div id="t-list"></div>' +
+      '<div id="t-pagination"></div>' +
     '</div>' +
     '<div class="bulk-bar" id="bulk-bar">' +
       '<span class="bulk-count"><b id="bulk-n">0</b> مورد انتخاب شد</span>' +
@@ -57,13 +58,25 @@ function pageTransfers(page) {
         return t.code.toLowerCase().indexOf(s) >= 0 || ((p && p.name) || '').toLowerCase().indexOf(s) >= 0;
       });
     }
+
+    var totalPages = Math.ceil(l.length / state.perPage) || 1;
+    if (state.page > totalPages) state.page = totalPages;
+    if (state.page < 1) state.page = 1;
+
+    var startIndex = (state.page - 1) * state.perPage;
+    var paginatedList = l.slice(startIndex, startIndex + state.perPage);
+
     var el = $('#t-list');
+    var pag = $('#t-pagination');
+
     if (!l.length) {
       el.innerHTML = emptyState('موردی یافت نشد', 'فیلتر را تغییر دهید یا درخواست جدید ثبت کنید');
+      pag.innerHTML = '';
       updateBulkBar();
       return;
     }
-    el.innerHTML = '<div class="t-list">' + l.map(function (t) {
+
+    el.innerHTML = '<div class="t-list">' + paginatedList.map(function (t) {
       var item = transferItemHTML(db, t);
       if (selectMode) {
         var selCls = bulkSelection[t.id] ? ' selected' : '';
@@ -72,6 +85,15 @@ function pageTransfers(page) {
       }
       return item;
     }).join('') + '</div>';
+
+    pag.innerHTML = '<div class="pagination-container">' +
+      '<button type="button" class="btn xs ghost" id="pg-prev" ' + (state.page === 1 ? 'disabled' : '') + '>' + IC.chevR + ' قبلی</button>' +
+      '<span class="pagination-info">صفحه ' + state.page + ' از ' + totalPages + '</span>' +
+      '<button type="button" class="btn xs ghost" id="pg-next" ' + (state.page === totalPages ? 'disabled' : '') + '>بعدی ' + IC.chevL + '</button>' +
+    '</div>';
+
+    $('#pg-prev').addEventListener('click', function() { if (state.page > 1) { state.page--; draw(); } });
+    $('#pg-next').addEventListener('click', function() { if (state.page < totalPages) { state.page++; draw(); } });
 
     $$('[data-tid]', el).forEach(function (x) {
       x.addEventListener('click', function (e) {
@@ -91,11 +113,16 @@ function pageTransfers(page) {
   $$('.chip[data-f]').forEach(function (b) {
     b.addEventListener('click', function () {
       filter = b.dataset.f;
+      state.page = 1;
       $$('.chip[data-f]').forEach(function (x) { x.classList.toggle('active', x.dataset.f === filter); });
       draw();
     });
   });
-  $('#t-q').addEventListener('input', function (e) { q = e.target.value.trim(); draw(); });
+  $('#t-q').addEventListener('input', function (e) { 
+    q = e.target.value.trim(); 
+    state.page = 1;
+    draw(); 
+  });
 
   var nb = $('#n-btn');
   if (nb) nb.addEventListener('click', function () { go('newTransfer'); });
@@ -117,7 +144,6 @@ function pageTransfers(page) {
     draw();
   });
 
-  /* Single-transaction bulk approve — one loadDB, all mutations, one saveDB */
   $('#bulk-approve').addEventListener('click', function () {
     var ids = Object.keys(bulkSelection).filter(function (k) { return bulkSelection[k]; });
     if (!ids.length) return;
