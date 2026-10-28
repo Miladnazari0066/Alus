@@ -12,9 +12,16 @@ var syncChannel = null;
 var pollInterval = null;
 var isFetching = false;
 var isSaving = false;
-var lastSyncStatus = 'offline'; 
+var pendingData = null; // صف ارسال داده‌ها
+var lastSyncStatus = 'offline';
 
 (function loadSupabaseSDK() {
+  // اگر از قبل لود شده بود، مستقیماً راه‌اندازی کن
+  if (window.supabase) {
+    initSupabase();
+    return;
+  }
+  
   var script = document.createElement('script');
   script.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.8/dist/umd/supabase.min.js';
   script.async = true;
@@ -34,20 +41,39 @@ function cleanUrl(url) {
 }
 
 function initSupabase() {
-  if (window.supabase) {
-    try {
-      var dbUrl = cleanUrl(SUPABASE_URL);
-      supabaseClient = window.supabase.createClient(dbUrl, SUPABASE_ANON_KEY);
-      
-      if (STORAGE_SUPABASE_URL) {
-        var stUrl = cleanUrl(STORAGE_SUPABASE_URL);
-        supabaseStorageClient = window.supabase.createClient(stUrl, STORAGE_SUPABASE_ANON_KEY);
-      }
-      console.log('[Supabase] Clients initialized.');
-      updateSyncIndicator('online');
-    } catch(e) {
-      console.error('[Supabase] Init error:', e);
+  if (!window.supabase) return;
+  if (supabaseClient) return; // جلوگیری از ساخت مجدد
+
+  try {
+    var dbUrl = cleanUrl(SUPABASE_URL);
+    supabaseClient = window.supabase.createClient(dbUrl, SUPABASE_ANON_KEY);
+    
+    if (STORAGE_SUPABASE_URL) {
+      var stUrl = cleanUrl(STORAGE_SUPABASE_URL);
+      supabaseStorageClient = window.supabase.createClient(stUrl, STORAGE_SUPABASE_ANON_KEY);
     }
+    console.log('[Supabase] Clients initialized.');
+    updateSyncIndicator('online');
+
+    // 👇 حالا که کلاینت آماده است، سیستم سینک را روشن می‌کنیم 👇
+    startCloudSync();
+    
+    // دریافت اولیه اطلاعات از ابر
+    pullFromCloud().then(function(cloudData) {
+      if (cloudData) {
+        var cloudStr = JSON.stringify(cloudData);
+        var localStr = localStorage.getItem(K_DB);
+        if (cloudStr !== localStr) {
+          localStorage.setItem(K_DB, cloudStr);
+          if (typeof clearCache === 'function') clearCache();
+          if (typeof render === 'function') render();
+          if (typeof toast === 'function') toast('سینک شد', 'اطلاعات از سرور دریافت شد', 'success');
+        }
+      }
+    });
+
+  } catch(e) {
+    console.error('[Supabase] Init error:', e);
   }
 }
 
@@ -67,27 +93,44 @@ function updateSyncIndicator(status) {
   }
 }
 
+// سیستم ارسال داده (با صف انتظار برای جلوگیری از گم شدن دیتا)
 function syncToCloud(db) {
   if (!supabaseClient) return;
+  
+  pendingData = db;
   if (isSaving) return; 
+  
+  doSync();
+}
+
+function doSync() {
+  if (!pendingData || !supabaseClient) return;
+  
+  var dataToSync = pendingData;
+  pendingData = null;
   
   isSaving = true;
   updateSyncIndicator('syncing');
+  console.log('[Sync] Uploading to cloud...');
   
-  supabaseClient.from('alus_sync').upsert({ id: 'main_db', data: db, updated_at: new Date() })
+  supabaseClient.from('alus_sync').upsert({ id: 'main_db', data: dataToSync, updated_at: new Date() })
     .then(function (res) { 
       isSaving = false;
       if (res.error) {
         console.error('[Sync Error]', res.error);
         updateSyncIndicator('offline');
       } else {
+        console.log('[Sync] Upload success');
         updateSyncIndicator('online');
       }
+      // اگر در حین ارسال، داده جدیدی ذخیره شده بود، آن را هم بفرست
+      if (pendingData) doSync();
     })
     .catch(function(err) { 
       isSaving = false;
       console.error('[Sync Network Error]', err);
       updateSyncIndicator('offline');
+      if (pendingData) doSync();
     });
 }
 
@@ -116,7 +159,6 @@ function uploadImageToCloud(file) {
 function startCloudSync() {
   if (!supabaseClient) return;
 
-  // تلاش برای اتصال Realtime (اگر اینترنت اجازه دهد)
   if (syncChannel) supabaseClient.removeChannel(syncChannel);
   syncChannel = supabaseClient.channel('alus_sync_changes')
     .on('postgres_changes', { event: '*', schema: 'public', table: 'alus_sync' }, function(payload) {
@@ -144,13 +186,11 @@ function startCloudSync() {
     })
     .subscribe(function(status) {
       console.log('[Realtime] Status:', status);
-      // 🚨 دیگه اگر WebSocket قطع شد، چراغ رو قرمز نمیکنیم. میذاریم Polling تصمیم بگیره.
       if (status === 'SUBSCRIBED') {
         updateSyncIndicator('online');
       }
     });
 
-  // پشتیبان: هر ۲ ثانیه چک میکند (این بخش در ایران خیلی پایدارتر است)
   if (pollInterval) clearInterval(pollInterval);
   pollInterval = setInterval(fetchLatestCloudData, 2000); 
   
@@ -159,7 +199,6 @@ function startCloudSync() {
     if (document.visibilityState === 'visible') fetchLatestCloudData();
   });
   
-  // از آنجایی که فچ کردن (HTTP) کار میکند، همین اول کار چراغ را سبز میکنیم
   updateSyncIndicator('online');
 }
 
@@ -172,13 +211,11 @@ function fetchLatestCloudData() {
       isFetching = false;
       if (res.error) {
         if (res.error.code !== 'PGRST116') {
-          // اگر خطای شبکه واقعی بود، چراغ را قرمز کن
           updateSyncIndicator('offline');
         }
         return; 
       }
       
-      // اگر درخواست موفق بود، یعنی به اینترنت وصل هستیم
       updateSyncIndicator('online');
       
       if (res.data && res.data.data) {
@@ -203,7 +240,6 @@ function fetchLatestCloudData() {
     })
     .catch(function(err) {
       isFetching = false;
-      // اگر کل شبکه قطع بود، چراغ قرمز شود
       updateSyncIndicator('offline');
       console.warn('[Poll Network Error]', err);
     });
