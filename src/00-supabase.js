@@ -1,6 +1,5 @@
 'use strict';
 
-// ⚠️ فقط این دو مقدار را چک کن (آدرس پروژه جدید است)
 var SUPABASE_URL = 'https://thcflxsjlnenmardrqkz.supabase.co/rest/v1';
 var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRoY2ZseHNqbG5lbm1hcmRycWt6Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc5MzA5Mjc3OCwiZXhwIjoyMTA4NjY4Nzc4fQ.XChyHfZkbMMMsLwMPGBHGQCVkyg83D7oorbcpyYPTDg';
 
@@ -63,12 +62,11 @@ window.addEventListener('offline', function() {
   document.head.appendChild(script);
 })();
 
-// 👇 این تابع مشکل تکرار /rest/v1 را برای همیشه حل میکند 👇
 function cleanUrl(url) {
   if (!url) return '';
-  var cleaned = url.replace(/\/+$/, ''); // حذف اسلش آخر
-  cleaned = cleaned.replace(/\/rest\/v1\/?$/, ''); // حذف /rest/v1 اضافی
-  cleaned = cleaned.replace(/\/storage\/v1\/?$/, ''); // حذف /storage/v1 اضافی
+  var cleaned = url.replace(/\/+$/, ''); 
+  cleaned = cleaned.replace(/\/rest\/v1\/?$/, ''); 
+  cleaned = cleaned.replace(/\/storage\/v1\/?$/, ''); 
   return cleaned;
 }
 
@@ -139,7 +137,8 @@ function doSync() {
 
 function pullFromCloud() {
   if (!supabaseClient) return Promise.resolve(null);
-  return supabaseClient.from('alus_sync').select('data').eq('id', 'main_db').single()
+  // 👇 تغییر .single به .maybeSingle 👇
+  return supabaseClient.from('alus_sync').select('data').eq('id', 'main_db').maybeSingle()
     .then(function (res) { return res.data ? res.data.data : null; })
     .catch(function () { return null; });
 }
@@ -203,7 +202,8 @@ function fetchLatestCloudData() {
   if (!supabaseClient || isFetching || isSaving) return;
   isFetching = true;
   
-  supabaseClient.from('alus_sync').select('data').eq('id', 'main_db').single()
+  // 👇 تغییر .single به .maybeSingle 👇
+  supabaseClient.from('alus_sync').select('data').eq('id', 'main_db').maybeSingle()
     .then(function(res) {
       isFetching = false;
       if (res.error) {
