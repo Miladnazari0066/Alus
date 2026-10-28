@@ -14,7 +14,6 @@ var isFetching = false;
 var isSaving = false;
 var lastSyncStatus = 'offline'; // 'online', 'syncing', 'offline'
 
-// لود کتابخانه
 (function loadSupabaseSDK() {
   var script = document.createElement('script');
   script.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.8/dist/umd/supabase.min.js';
@@ -52,38 +51,25 @@ function initSupabase() {
   }
 }
 
-// -------------------------------------------------------------
-// نمایش وضعیت سینک روی صفحه (نشانگر بالای سایت)
-// -------------------------------------------------------------
 function updateSyncIndicator(status) {
   lastSyncStatus = status;
   var el = document.getElementById('sync-indicator');
   if (!el) return;
   
+  el.className = 'sync-indicator ' + (status === 'syncing' ? '' : status);
+  
   if (status === 'online') {
-    el.style.background = 'rgba(52,199,89,.15)';
-    el.style.color = '#047857';
-    el.style.borderColor = 'rgba(52,199,89,.3)';
-    el.innerHTML = '<span style="width:8px;height:8px;border-radius:50%;background:#34C759;display:inline-block;box-shadow:0 0 6px #34C759;"></span> متصل';
+    el.innerHTML = '<span class="dot"></span><span class="txt">متصل</span>';
   } else if (status === 'syncing') {
-    el.style.background = 'rgba(255,149,0,.15)';
-    el.style.color = '#b45309';
-    el.style.borderColor = 'rgba(255,149,0,.3)';
-    el.innerHTML = '<span style="width:8px;height:8px;border-radius:50%;background:#FF9500;display:inline-block;"></span> در حال ارسال...';
+    el.innerHTML = '<span class="dot"></span><span class="txt">در حال ارسال...</span>';
   } else {
-    el.style.background = 'rgba(255,59,48,.15)';
-    el.style.color = '#b91c1c';
-    el.style.borderColor = 'rgba(255,59,48,.3)';
-    el.innerHTML = '<span style="width:8px;height:8px;border-radius:50%;background:#FF3B30;display:inline-block;"></span> قطع';
+    el.innerHTML = '<span class="dot"></span><span class="txt">قطع</span>';
   }
 }
 
-// -------------------------------------------------------------
-// آپلود فوری (بدون تاخیر) به ابر
-// -------------------------------------------------------------
 function syncToCloud(db) {
   if (!supabaseClient) return;
-  if (isSaving) return; // جلوگیری از تداخل
+  if (isSaving) return; 
   
   isSaving = true;
   updateSyncIndicator('syncing');
@@ -129,20 +115,16 @@ function uploadImageToCloud(file) {
   });
 }
 
-// -------------------------------------------------------------
-// سیستم سینک خودکار
-// -------------------------------------------------------------
 function startCloudSync() {
   if (!supabaseClient) return;
 
-  // روش اول: Realtime
   if (syncChannel) supabaseClient.removeChannel(syncChannel);
   syncChannel = supabaseClient.channel('alus_sync_changes')
     .on('postgres_changes', { event: '*', schema: 'public', table: 'alus_sync' }, function(payload) {
       if (payload.new && payload.new.id === 'main_db' && payload.new.data) {
-        if (isSaving) return; // اگر خودمان در حال آپلود هستیم، نادیده بگیر
-        console.log('[Realtime] Change detected from other device');
+        if (isSaving) return; 
         
+        console.log('[Realtime] Change detected from other device');
         var cloudStr = JSON.stringify(payload.new.data);
         var localStr = localStorage.getItem(K_DB);
         
@@ -167,7 +149,6 @@ function startCloudSync() {
       else if (status === 'CLOSED' || status === 'CHANNEL_ERROR') updateSyncIndicator('offline');
     });
 
-  // روش دوم (پشتیبان): هر ۲ ثانیه ابر را چک می‌کند
   if (pollInterval) clearInterval(pollInterval);
   pollInterval = setInterval(fetchLatestCloudData, 2000); 
   
@@ -187,9 +168,7 @@ function fetchLatestCloudData() {
     .then(function(res) {
       isFetching = false;
       if (res.error) {
-        if (res.error.code !== 'PGRST116') {
-          console.warn('[Poll Error]', res.error);
-        }
+        if (res.error.code !== 'PGRST116') console.warn('[Poll Error]', res.error);
         return; 
       }
       
