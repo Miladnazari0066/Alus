@@ -12,7 +12,7 @@ var syncChannel = null;
 var pollInterval = null;
 var isFetching = false;
 var isSaving = false;
-var lastSyncStatus = 'offline'; // 'online', 'syncing', 'offline'
+var lastSyncStatus = 'offline'; 
 
 (function loadSupabaseSDK() {
   var script = document.createElement('script');
@@ -73,7 +73,6 @@ function syncToCloud(db) {
   
   isSaving = true;
   updateSyncIndicator('syncing');
-  console.log('[Sync] Uploading to cloud...', new Date().toISOString());
   
   supabaseClient.from('alus_sync').upsert({ id: 'main_db', data: db, updated_at: new Date() })
     .then(function (res) { 
@@ -82,7 +81,6 @@ function syncToCloud(db) {
         console.error('[Sync Error]', res.error);
         updateSyncIndicator('offline');
       } else {
-        console.log('[Sync] Upload success');
         updateSyncIndicator('online');
       }
     })
@@ -118,6 +116,7 @@ function uploadImageToCloud(file) {
 function startCloudSync() {
   if (!supabaseClient) return;
 
+  // تلاش برای اتصال Realtime (اگر اینترنت اجازه دهد)
   if (syncChannel) supabaseClient.removeChannel(syncChannel);
   syncChannel = supabaseClient.channel('alus_sync_changes')
     .on('postgres_changes', { event: '*', schema: 'public', table: 'alus_sync' }, function(payload) {
@@ -145,10 +144,13 @@ function startCloudSync() {
     })
     .subscribe(function(status) {
       console.log('[Realtime] Status:', status);
-      if (status === 'SUBSCRIBED') updateSyncIndicator('online');
-      else if (status === 'CLOSED' || status === 'CHANNEL_ERROR') updateSyncIndicator('offline');
+      // 🚨 دیگه اگر WebSocket قطع شد، چراغ رو قرمز نمیکنیم. میذاریم Polling تصمیم بگیره.
+      if (status === 'SUBSCRIBED') {
+        updateSyncIndicator('online');
+      }
     });
 
+  // پشتیبان: هر ۲ ثانیه چک میکند (این بخش در ایران خیلی پایدارتر است)
   if (pollInterval) clearInterval(pollInterval);
   pollInterval = setInterval(fetchLatestCloudData, 2000); 
   
@@ -157,6 +159,7 @@ function startCloudSync() {
     if (document.visibilityState === 'visible') fetchLatestCloudData();
   });
   
+  // از آنجایی که فچ کردن (HTTP) کار میکند، همین اول کار چراغ را سبز میکنیم
   updateSyncIndicator('online');
 }
 
@@ -168,9 +171,15 @@ function fetchLatestCloudData() {
     .then(function(res) {
       isFetching = false;
       if (res.error) {
-        if (res.error.code !== 'PGRST116') console.warn('[Poll Error]', res.error);
+        if (res.error.code !== 'PGRST116') {
+          // اگر خطای شبکه واقعی بود، چراغ را قرمز کن
+          updateSyncIndicator('offline');
+        }
         return; 
       }
+      
+      // اگر درخواست موفق بود، یعنی به اینترنت وصل هستیم
+      updateSyncIndicator('online');
       
       if (res.data && res.data.data) {
         var cloudStr = JSON.stringify(res.data.data);
@@ -190,11 +199,12 @@ function fetchLatestCloudData() {
             if (typeof toast === 'function') toast('سینک شد', 'تغییرات دستگاه دیگر اعمال شد', 'success');
           }
         }
-        updateSyncIndicator('online');
       }
     })
     .catch(function(err) {
       isFetching = false;
+      // اگر کل شبکه قطع بود، چراغ قرمز شود
+      updateSyncIndicator('offline');
       console.warn('[Poll Network Error]', err);
     });
 }
