@@ -43,7 +43,7 @@ function transferItemHTML(db, t) {
 
 function pageStock(page) {
   var db = loadDB();
-  var state = { wh: '', q: '', sort: null, dir: null };
+  var state = { wh: '', q: '', sort: null, dir: null, page: 1, perPage: 15 };
   var selectedStocks = {};
 
   var editIcon = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>';
@@ -63,6 +63,7 @@ function pageStock(page) {
         '</select>' +
       '</div>' +
       '<div class="table-scroll" id="s-table"></div>' +
+      '<div id="s-pagination"></div>' +
     '</div>' +
     
     '<div class="bulk-bar" id="stock-bulk-bar" style="background:var(--g3); backdrop-filter:blur(24px); border-radius:100px; padding:10px 10px 10px 20px; box-shadow:0 20px 40px -10px rgba(0,0,0,.3)">' +
@@ -99,9 +100,10 @@ function pageStock(page) {
   }
 
   function draw() {
-    var rows = buildRows();
+    var allRows = buildRows();
+    
     if (state.sort && state.dir) {
-      rows = sortRows(rows, state.sort, state.dir, function (r, k) {
+      allRows = sortRows(allRows, state.sort, state.dir, function (r, k) {
         if (k === 'name')     return r.p.name;
         if (k === 'wh')       return r.w.name;
         if (k === 'qty')      return r.s.quantity;
@@ -111,12 +113,24 @@ function pageStock(page) {
         return '';
       });
     }
+
+    var totalPages = Math.ceil(allRows.length / state.perPage) || 1;
+    if (state.page > totalPages) state.page = totalPages;
+    if (state.page < 1) state.page = 1;
+
+    var startIndex = (state.page - 1) * state.perPage;
+    var rows = allRows.slice(startIndex, startIndex + state.perPage);
+
     var tbl = $('#s-table');
+    var pag = $('#s-pagination');
+
     if (!rows.length) {
       tbl.innerHTML = emptyState('موردی یافت نشد', 'فیلترها را تغییر دهید یا کالای جدیدی اضافه کنید');
+      pag.innerHTML = '';
       updateBulkBar();
       return;
     }
+    
     var sa = function (key) {
       var c = 'data-sort="' + key + '"';
       if (state.sort === key) c += ' class="' + (state.dir === 'asc' ? 'sort-asc' : 'sort-desc') + '"';
@@ -174,13 +188,24 @@ function pageStock(page) {
           '</td>' +
         '</tr>';
       }).join('') + '</tbody></table>';
-      
+
+    // رندر دکمه‌های صفحه‌بندی
+    pag.innerHTML = '<div class="pagination-container">' +
+      '<button type="button" class="btn xs ghost" id="pg-prev" ' + (state.page === 1 ? 'disabled' : '') + '>' + IC.chevR + ' قبلی</button>' +
+      '<span class="pagination-info">صفحه ' + state.page + ' از ' + totalPages + '</span>' +
+      '<button type="button" class="btn xs ghost" id="pg-next" ' + (state.page === totalPages ? 'disabled' : '') + '>بعدی ' + IC.chevL + '</button>' +
+    '</div>';
+    
+    $('#pg-prev').addEventListener('click', function() { if (state.page > 1) { state.page--; draw(); } });
+    $('#pg-next').addEventListener('click', function() { if (state.page < totalPages) { state.page++; draw(); } });
+
     $$('th[data-sort]', tbl).forEach(function (th) {
       th.addEventListener('click', function () {
         var k = th.dataset.sort;
         if (state.sort !== k) { state.sort = k; state.dir = 'asc'; }
         else if (state.dir === 'asc') { state.dir = 'desc'; }
         else { state.sort = null; state.dir = null; }
+        state.page = 1;
         draw();
       });
     });
@@ -263,7 +288,7 @@ function pageStock(page) {
       if (!e.target.closest('.img-trigger') && !e.target.closest('.img-pop')) hidePopover();
     });
 
-    // 👇 فرم ویرایش کامل (با عکس و همه مشخصات) 👇
+    // فرم ویرایش
     $$('[data-edit]', tbl).forEach(function(btn) {
       btn.addEventListener('click', function(e) {
         e.stopPropagation();
@@ -280,7 +305,6 @@ function pageStock(page) {
           desc: 'تغییر تمام مشخصات کالا و موجودی در این انبار',
           body: 
             '<div class="form-grid" style="gap:14px">' +
-              // باکس عکس
               '<div class="full" style="display:flex; gap:14px; align-items:flex-start; padding:12px; background:var(--surface-2); border-radius:16px; border:1px dashed var(--border-2)">' +
                 '<div id="edit-img-preview" style="width:64px; height:64px; border-radius:12px; background:var(--surface); display:grid; place-items:center; color:var(--muted); border:1px solid var(--border); flex-shrink:0; overflow:hidden">' + 
                   (editCurrentImage ? '<img src="'+esc(editCurrentImage)+'" style="width:100%;height:100%;object-fit:cover">' : IC.image) + 
@@ -345,7 +369,6 @@ function pageStock(page) {
           ]
         });
         
-        // لاجیک آپلود عکس در مودال
         setTimeout(function() {
           var imgBtn = document.getElementById('edit-img-btn');
           var imgInput = document.getElementById('edit-img-input');
@@ -425,7 +448,6 @@ function pageStock(page) {
     });
   }
 
-  // تابع حذف مستقیم (بدون مودال) برای دکمه نگه‌داشتن
   function executeDirectDelete(ids) {
     var fresh = loadDB();
     var backup = fresh.stocks.filter(function(s) { return ids.indexOf(s.id) >= 0; });
@@ -444,8 +466,16 @@ function pageStock(page) {
     go('stock');
   }
 
-  $('#s-q').addEventListener('input', function (e) { state.q = e.target.value.trim(); draw(); });
-  $('#s-wh').addEventListener('change', function (e) { state.wh = e.target.value; draw(); });
+  $('#s-q').addEventListener('input', function (e) { 
+    state.q = e.target.value.trim(); 
+    state.page = 1;
+    draw(); 
+  });
+  $('#s-wh').addEventListener('change', function (e) { 
+    state.wh = e.target.value; 
+    state.page = 1;
+    draw(); 
+  });
 
   document.getElementById('stock-bulk-clear').addEventListener('click', function(e) {
     e.stopPropagation();
@@ -453,7 +483,6 @@ function pageStock(page) {
     draw();
   });
 
-  // 👇 منطق نگه داشتن ۳ ثانیه‌ای برای دکمه حذف گروهی با نمایش متن راهنما 👇
   var delBtn = document.getElementById('stock-bulk-delete');
   var delTxt = document.getElementById('bulk-del-txt');
   var holdTimer = null, holdInterval = null, holdProgress = 0;
@@ -465,7 +494,6 @@ function pageStock(page) {
     holdProgress = 0;
     progressBar.style.width = '0%';
     
-    // تغییر متن و نمایش پیام راهنما
     delTxt.textContent = 'نگه دارید...';
     toast('برای تایید حذف، ۳ ثانیه نگه دارید', '', 'info');
 
@@ -483,7 +511,7 @@ function pageStock(page) {
       
       var ids = Object.keys(selectedStocks).filter(function(k) { return selectedStocks[k]; });
       if (ids.length > 0) {
-        executeDirectDelete(ids); // حذف بدون تایید دوم
+        executeDirectDelete(ids);
       }
     }, holdDuration);
   }
@@ -492,7 +520,7 @@ function pageStock(page) {
     if (holdTimer) clearTimeout(holdTimer);
     if (holdInterval) clearInterval(holdInterval);
     progressBar.style.width = '0%';
-    delTxt.textContent = 'حذف'; // برگرداندن متن به حالت اول
+    delTxt.textContent = 'حذف';
   }
 
   delBtn.addEventListener('mousedown', startHold);
