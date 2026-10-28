@@ -65,7 +65,13 @@ var IC = {
   undo: svg('<polyline points="9 14 4 9 9 4"/><path d="M20 20v-7a4 4 0 0 0-4-4H4"/>'),
   sort: svg('<polyline points="8 6 12 2 16 6"/><polyline points="16 18 12 22 8 18"/><line x1="12" y1="2" x2="12" y2="22"/>'),
   bellRing: svg('<path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/><path d="M2 8a9 9 0 0 1 2-5.7"/><path d="M22 8a9 9 0 0 0-2-5.7"/>'),
-  arrowDown: svg('<line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/>')
+  arrowDown: svg('<line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/>'),
+  
+  // 👇 آیکون‌های جدید سینک 👇
+  cloud: svg('<path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/>'),
+  cloudSync: svg('<path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/><polyline points="9 14 12 11 15 14"/><line x1="12" y1="11" x2="12" y2="17"/>'),
+  cloudCheck: svg('<path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/><polyline points="8 15 11 18 16 12"/>'),
+  cloudOff: svg('<path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/><line x1="3" y1="3" x2="21" y2="21"/>')
 };
 
 var BRAND_A = svg('<path d="M5 19L12 4L19 19"/><path d="M8.5 13.5h7"/>', 2.4);
