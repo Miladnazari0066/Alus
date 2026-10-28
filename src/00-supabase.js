@@ -13,18 +13,46 @@ var pollInterval = null;
 var isFetching = false;
 var isSaving = false;
 var pendingData = null;
+var syncToastTimeout = null;
+
+// 👇 ساخت نوار پیشرفت بالای صفحه 👇
+if (!document.getElementById('top-sync-bar')) {
+  var topBar = document.createElement('div');
+  topBar.id = 'top-sync-bar';
+  topBar.className = 'top-sync-bar';
+  document.body.appendChild(topBar);
+}
 
 function updateSyncIndicator(status) {
   var el = document.getElementById('sync-indicator');
   if (!el) return;
-  el.className = 'sync-indicator ' + status;
+  
+  el.className = 'sync-pill ' + status;
+  
   if (status === 'online') {
-    el.innerHTML = '<span class="dot"></span><span class="txt">متصل</span>';
+    el.innerHTML = IC.cloudCheck + '<span class="txt">همگام‌سازی فعال</span>';
   } else if (status === 'syncing') {
-    el.innerHTML = '<span class="dot"></span><span class="txt">در حال ارسال...</span>';
+    el.innerHTML = IC.cloudSync + '<span class="txt">در حال ارسال...</span>';
   } else {
-    el.innerHTML = '<span class="dot"></span><span class="txt">قطع اینترنت</span>';
+    el.innerHTML = IC.cloudOff + '<span class="txt">عدم دسترسی به سرور</span>';
   }
+}
+
+// افکت پالس
+function pulseSyncIndicator() {
+  var el = document.getElementById('sync-indicator');
+  if (el) {
+    el.classList.add('pulse');
+    setTimeout(function() { el.classList.remove('pulse'); }, 1000);
+  }
+}
+
+// نمایش پیام با تاخیر (جلوگیری از اسپم شدن)
+function showSyncToast(title, desc) {
+  if (syncToastTimeout) clearTimeout(syncToastTimeout);
+  syncToastTimeout = setTimeout(function() {
+    if (typeof toast === 'function') toast(title, desc, 'success');
+  }, 1500); // ۱.۵ ثانیه صبر میکند، اگر تغییرات دیگری نیامد، پیام را نشان میدهد
 }
 
 function checkDeviceOnline() {
@@ -78,14 +106,12 @@ function initSupabase() {
     console.log('[Supabase] Clients initialized.');
     checkDeviceOnline();
 
-    // 👇 این بخش حیاتی اصلاح شد تا از پاک شدن دیتا جلوگیری کند 👇
     pullFromCloud().then(function(cloudData) {
       var localData = loadDB();
       var hasCloudData = cloudData && cloudData.users && cloudData.users.length > 0;
       var hasLocalData = localData.users && localData.users.length > 0;
 
       if (hasCloudData) {
-        // اگر در ابر دیتا وجود دارد، آن را جایگزین دیتای محلی میکنیم
         var cloudStr = JSON.stringify(cloudData);
         var localStr = localStorage.getItem(K_DB);
         if (cloudStr !== localStr) {
@@ -94,7 +120,6 @@ function initSupabase() {
           if (typeof render === 'function') render();
         }
       } else if (!hasLocalData) {
-        // اگر نه در ابر دیتا هست و نه محلی، آن‌وقت دیتابیس اولیه ساخته میشود
         console.log('[Sync] Both cloud and local are empty. Creating seed...');
         var seedData = seed();
         localStorage.setItem(K_DB, JSON.stringify(seedData));
@@ -102,7 +127,6 @@ function initSupabase() {
         syncToCloud(seedData);
         if (typeof render === 'function') render();
       } else {
-        // اگر ابر خالی است اما محلی دیتا دارد (مثلاً آفلاین بوده)، محلی را به ابر میفرستیم
         syncToCloud(localData);
       }
 
@@ -128,18 +152,40 @@ function doSync() {
   isSaving = true;
   updateSyncIndicator('syncing');
   
+  // 👇 روشن کردن نوار پیشرفت 👇
+  var topBar = document.getElementById('top-sync-bar');
+  if (topBar) {
+    topBar.classList.remove('done');
+    topBar.classList.add('active');
+  }
+
   supabaseClient.from('alus_sync').upsert({ id: 'main_db', data: dataToSync, updated_at: new Date() })
     .then(function (res) { 
       isSaving = false;
-      if (res.error) console.error('[Sync] Upload error:', res.error);
-      else console.log('[Sync] Upload success');
-      checkDeviceOnline();
+      if (res.error) {
+        console.error('[Sync] Upload error:', res.error);
+      } else {
+        console.log('[Sync] Upload success');
+      }
+      updateSyncIndicator('online');
+      
+      // 👇 پر شدن و محو شدن نوار پیشرفت 👇
+      if (topBar) {
+        topBar.classList.remove('active');
+        topBar.classList.add('done');
+        setTimeout(function() {
+          topBar.classList.remove('done');
+          topBar.style.width = '0%';
+        }, 600);
+      }
+
       if (pendingData) doSync();
     })
     .catch(function(err) { 
       isSaving = false;
       console.error('[Sync] Upload network error:', err);
-      checkDeviceOnline();
+      updateSyncIndicator('offline');
+      if (topBar) topBar.classList.remove('active');
       if (pendingData) doSync();
     });
 }
@@ -188,7 +234,8 @@ function startCloudSync() {
           
           if (typeof render === 'function' && !isInput && !hasModal) {
             render();
-            if (typeof toast === 'function') toast('سینک شد', 'تغییرات از دستگاه دیگر', 'success');
+            pulseSyncIndicator();
+            showSyncToast('اطلاعات به‌روز شد', 'آخرین تغییرات از دستگاه دیگر اعمال شد.');
           }
         }
       }
@@ -230,7 +277,8 @@ function fetchLatestCloudData() {
           
           if (typeof render === 'function' && !isInput && !hasModal) {
             render();
-            if (typeof toast === 'function') toast('سینک شد', 'تغییرات دستگاه دیگر اعمال شد', 'success');
+            pulseSyncIndicator();
+            showSyncToast('اطلاعات به‌روز شد', 'آخرین تغییرات اعمال شد.');
           }
         }
       }
