@@ -103,6 +103,7 @@ function pageStock(page) {
     var ind = function (key) {
       return '<span class="sort-ind">' + (state.sort === key ? (state.dir === 'asc' ? '▲' : '▼') : '⇅') + '</span>';
     };
+    
     tbl.innerHTML = '<table class="dt"><thead><tr>' +
       '<th ' + sa('name')     + '>کالا ' + ind('name') + '</th>' +
       '<th ' + sa('wh')       + '>انبار ' + ind('wh') + '</th>' +
@@ -118,9 +119,12 @@ function pageStock(page) {
         var isLow = r.s.quantity > 0 && r.s.quantity <= minQ;
         var rowCls = isLow ? ' class="row-low"' : '';
         var lowBadge = isLow ? ' <span class="low-stock-badge">' + IC.alert + ' کم</span>' : '';
+        
+        // 👇 اینجا کلاس img-trigger و دیتا اتریبیوت‌ها را اضافه کردیم 👇
         var imgHTML = r.p.image ?
-          '<img class="img-thumb" src="' + esc(r.p.image) + '" alt="">' :
+          '<img class="img-thumb img-trigger" src="' + esc(r.p.image) + '" alt="" data-pid="' + r.p.id + '" data-wid="' + r.w.id + '">' :
           '<div class="img-thumb-placeholder">' + IC.package + '</div>';
+
         return '<tr' + rowCls + '><td><div class="cell-product"><div class="img-wrap">' + imgHTML +
           '<div class="info"><b>' + esc(r.p.name) + '</b>' +
             '<div style="display:flex;gap:4px;margin-top:2px">' +
@@ -134,6 +138,7 @@ function pageStock(page) {
           '<td class="num"><span class="qty-hl">' + (r.s.quantity - (r.s.reservedQty || 0)) + '</span></td>' +
           '<td class="date-cell col-sm-hide">' + relTime(r.s.updatedAt) + '</td></tr>';
       }).join('') + '</tbody></table>';
+      
     $$('th[data-sort]', tbl).forEach(function (th) {
       th.addEventListener('click', function () {
         var k = th.dataset.sort;
@@ -142,6 +147,90 @@ function pageStock(page) {
         else { state.sort = null; state.dir = null; }
         draw();
       });
+    });
+
+    // 👇 مدیریت پاپ‌آپ عکس کالا 👇
+    var pop = document.getElementById('global-img-pop');
+    if (!pop) {
+      pop = document.createElement('div');
+      pop.id = 'global-img-pop';
+      pop.className = 'img-pop';
+      document.body.appendChild(pop);
+    }
+
+    function showPopover(imgEl) {
+      var pid = imgEl.dataset.pid;
+      var wid = imgEl.dataset.wid;
+      var p = getProd(db, pid);
+      var w = getWh(db, wid);
+      var s = findStock(db, pid, wid);
+      
+      if (!p || !w) return;
+      
+      pop.innerHTML = 
+        '<img src="' + imgEl.src + '" alt="">' +
+        '<div class="info">' +
+          '<b>' + esc(p.name) + '</b>' +
+          '<small>کد: ' + esc(p.code || '—') + '</small>' +
+          '<div class="wh-badge">' + esc(w.name) + ' · موجودی: ' + (s ? s.quantity : 0) + ' ' + esc(p.unit) + '</div>' +
+        '</div>';
+
+      var rect = imgEl.getBoundingClientRect();
+      
+      // نمایش در وسط صفحه برای موبایل و کنار عکس برای دسکتاپ
+      var isMobile = window.innerWidth <= 900;
+      pop.classList.add('show');
+      var popRect = pop.getBoundingClientRect();
+      
+      var top, left;
+      if (isMobile) {
+        top = rect.bottom + 10;
+        left = (window.innerWidth - popRect.width) / 2;
+        if (top + popRect.height > window.innerHeight) {
+          top = rect.top - popRect.height - 10;
+        }
+      } else {
+        top = rect.top;
+        left = rect.left + rect.width + 12;
+        if (left + popRect.width > window.innerWidth) {
+          left = rect.left - popRect.width - 12;
+        }
+        if (top + popRect.height > window.innerHeight) {
+          top = window.innerHeight - popRect.height - 12;
+        }
+      }
+      
+      if (top < 10) top = 10;
+
+      pop.style.top = top + 'px';
+      pop.style.left = left + 'px';
+    }
+
+    function hidePopover() {
+      pop.classList.remove('show');
+    }
+
+    $$('.img-trigger', tbl).forEach(function(img) {
+      // برای دسکتاپ
+      img.addEventListener('mouseenter', function() {
+        if (window.innerWidth > 900) showPopover(img);
+      });
+      img.addEventListener('mouseleave', function() {
+        if (window.innerWidth > 900) hidePopover();
+      });
+      
+      // برای موبایل
+      img.addEventListener('click', function(e) {
+        e.stopPropagation();
+        showPopover(img);
+      });
+    });
+
+    // بستن پاپ‌آپ با کلیک در جای دیگر
+    document.addEventListener('click', function(e) {
+      if (!e.target.closest('.img-trigger') && !e.target.closest('.img-pop')) {
+        hidePopover();
+      }
     });
   }
 
