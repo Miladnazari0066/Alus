@@ -1,10 +1,7 @@
 'use strict';
 
 try {
-  // این تابع خودش منتظر می‌ماند تا کتابخانه لود شود، بعد سینک را روشن می‌کند
   if (typeof initSupabase === 'function') initSupabase();
-
-  if (!loadDB().users.length) saveDB(seed());
 
   App.user = currentUser();
   App.route = App.user ? restoreRoute() : { name: 'dashboard', params: {} };
