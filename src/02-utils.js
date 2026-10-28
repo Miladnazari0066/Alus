@@ -140,27 +140,28 @@ function downloadBlob(blob, filename) {
   }
 }
 
-// هش کردن رمز عبور با SHA-256
+// 👇 هش کردن رمز با Salt برای امنیت بیشتر 👇
 function hashPassword(password) {
+  var saltedPassword = 'alus_secure_2024_' + password;
   return new Promise(function(resolve) {
     if (!window.crypto || !window.crypto.subtle) {
       console.warn('Web Crypto API not available, using fallback.');
       var hash = 0;
-      for (var i = 0; i < password.length; i++) {
-        var char = password.charCodeAt(i);
+      for (var i = 0; i < saltedPassword.length; i++) {
+        var char = saltedPassword.charCodeAt(i);
         hash = ((hash << 5) - hash) + char;
         hash = hash & hash;
       }
       return resolve('fallback_' + hash.toString(16));
     }
     
-    var msgBuffer = new TextEncoder().encode(password);
+    var msgBuffer = new TextEncoder().encode(saltedPassword);
     window.crypto.subtle.digest('SHA-256', msgBuffer).then(function(hashBuffer) {
       var hashArray = Array.from(new Uint8Array(hashBuffer));
       var hashHex = hashArray.map(function(b) { return b.toString(16).padStart(2, '0'); }).join('');
       resolve(hashHex);
     }).catch(function() {
-      resolve(password);
+      resolve(saltedPassword);
     });
   });
 }
