@@ -31,11 +31,10 @@ function pageSettings(page) {
     
     '<div class="acc-list">' +
       
-      // ۱. وضعیت سیستم و سرورها
       '<div class="acc-item open" id="acc-status">' +
         '<div class="acc-header" onclick="this.parentElement.classList.toggle(\'open\')">' +
           '<div class="acc-icon info">' + IC.layers + '</div>' +
-          '<div class="acc-titles"><div class="acc-title">وضعیت سرورها و حجم مصرفی</div><div class="acc-sub">وضعیت اتصال دیتابیس و استوریج عکس‌ها</div></div>' +
+          '<div class="acc-titles"><div class="acc-title">وضعیت سرورها و حجم مصرفی</div><div class="acc-sub">وضعیت اتصال دیتابیس، استوریج و سینک زنده</div></div>' +
           '<div class="acc-chevron">' + IC.chevD + '</div>' +
         '</div>' +
         '<div class="acc-body"><div class="acc-content">' +
@@ -45,7 +44,7 @@ function pageSettings(page) {
               '<thead><tr><th>سرویس</th><th>وضعیت اتصال</th><th style="text-align:left">حجم مصرفی</th></tr></thead>' +
               '<tbody>' +
                 '<tr>' +
-                  '<td><div class="cell-product"><div class="img-thumb-placeholder" style="background:rgba(0,122,255,.1);color:var(--blue);border-color:rgba(0,122,255,.2)">' + IC.package + '</div><div class="info"><b>دیتابیس</b><br><small style="font-size:10px;color:var(--muted)">Supabase DB</small></div></div></td>' +
+                  '<td><div class="cell-product"><div class="img-thumb-placeholder" style="background:rgba(0,122,255,.1);color:var(--blue);border-color:rgba(0,122,255,.2)">' + IC.package + '</div><div class="info"><b>دیتابیس مرکزی</b><br><small style="font-size:10px;color:var(--muted)">Supabase DB</small></div></div></td>' +
                   '<td id="db-status-cell" style="font-size:11px;direction:ltr;text-align:left"><span style="color:var(--orange);display:flex;align-items:center;gap:6px;direction:rtl;"><span class="dot" style="width:8px;height:8px;border-radius:50%;background:var(--orange);display:inline-block"></span>در حال بررسی...</span></td>' +
                   '<td class="num" id="db-size-cell">-</td>' +
                 '</tr>' +
@@ -54,13 +53,18 @@ function pageSettings(page) {
                   '<td id="storage-status-cell" style="font-size:11px;direction:ltr;text-align:left"><span style="color:var(--orange);display:flex;align-items:center;gap:6px;direction:rtl;"><span class="dot" style="width:8px;height:8px;border-radius:50%;background:var(--orange);display:inline-block"></span>در حال بررسی...</span></td>' +
                   '<td class="num" id="storage-size-cell">-</td>' +
                 '</tr>' +
+                // 👇 ردیف جدید سینک زنده 👇
+                '<tr>' +
+                  '<td><div class="cell-product"><div class="img-thumb-placeholder" style="background:rgba(52,199,89,.1);color:var(--green);border-color:rgba(52,199,89,.2)">' + IC.refresh + '</div><div class="info"><b>سینک زنده</b><br><small style="font-size:10px;color:var(--muted)">Realtime Sync</small></div></div></td>' +
+                  '<td style="font-size:11px;direction:ltr;text-align:left"><div id="sync-indicator" class="sync-indicator online" style="display:inline-flex;padding:4px 8px;"><span class="dot"></span><span class="txt">متصل</span></div></td>' +
+                  '<td class="num">-</td>' +
+                '</tr>' +
               '</tbody>' +
             '</table>' +
           '</div>' +
         '</div></div>' +
       '</div>' +
 
-      // ۲. اعلان‌ها
       '<div class="acc-item" id="acc-notif">' +
         '<div class="acc-header" onclick="this.parentElement.classList.toggle(\'open\')">' +
           '<div class="acc-icon warn">' + IC.bell + '</div>' +
@@ -77,7 +81,6 @@ function pageSettings(page) {
         '</div></div>' +
       '</div>' +
 
-      // ۳. پشتیبان‌گیری
       '<div class="acc-item" id="acc-backup">' +
         '<div class="acc-header" onclick="this.parentElement.classList.toggle(\'open\')">' +
           '<div class="acc-icon primary">' + IC.download + '</div>' +
@@ -94,7 +97,6 @@ function pageSettings(page) {
         '</div></div>' +
       '</div>' +
 
-      // ۴. مدیریت موجودی (صفر کردن)
       '<div class="acc-item" id="acc-zero">' +
         '<div class="acc-header" onclick="this.parentElement.classList.toggle(\'open\')">' +
           '<div class="acc-icon danger">' + IC.refresh + '</div>' +
@@ -110,7 +112,6 @@ function pageSettings(page) {
         '</div></div>' +
       '</div>' +
 
-      // ۵. تاریخچه صفر کردن
       '<div class="acc-item" id="acc-history">' +
         '<div class="acc-header" onclick="this.parentElement.classList.toggle(\'open\')">' +
           '<div class="acc-icon info">' + IC.history + '</div>' +
@@ -122,7 +123,6 @@ function pageSettings(page) {
         '</div></div>' +
       '</div>' +
 
-      // ۶. ابزارهای تست و بازنشانی
       '<div class="acc-item" id="acc-tools" style="border-color:rgba(255,59,48,.3)">' +
         '<div class="acc-header" onclick="this.parentElement.classList.toggle(\'open\')">' +
           '<div class="acc-icon danger" style="background:linear-gradient(135deg, #FF3B30, #D70015)">' + IC.settings + '</div>' +
@@ -130,7 +130,7 @@ function pageSettings(page) {
           '<div class="acc-chevron">' + IC.chevD + '</div>' +
         '</div>' +
         '<div class="acc-body"><div class="acc-content">' +
-          '<p style="font-size:12.5px;line-height:1.9;margin-bottom:14px;color:var(--text-2)">با دکمه اول می‌توانید ۱۰۰ کالای تصادفی بسازید. دکمه قرمز، تمام اطلاعات (کالاها، اسناد، موجودی و عکس‌ها) را برای همیشه پاک می‌کند.</p>' +
+          '<p style="font-size:12.5px;line-height:1.9;margin-bottom:14px;color:var(--text-2)">با دکمه اول می‌توانید ۱۰۰ کالای تصادفی بسازید. دکمه قرمز، تمام اطلاعات را برای همیشه پاک می‌کند.</p>' +
           '<div class="row">' +
             '<button type="button" class="btn success" id="gen-100-btn">' + IC.plus + ' تولید ۱۰۰ کالای تستی</button>' +
             '<button type="button" class="btn danger" id="factory-reset-btn" style="background: #111; border-color: #333;">' + IC.trash + ' بازنشانی کارخانه‌ای</button>' +
@@ -140,9 +140,6 @@ function pageSettings(page) {
 
     '</div>';
 
-  // -------------------------------------------------------------
-  // توابع وضعیت ابری
-  // -------------------------------------------------------------
   function checkServerStatus() {
     var dbStatusEl = document.getElementById('db-status-cell');
     var dbSizeEl = document.getElementById('db-size-cell');
@@ -197,16 +194,13 @@ function pageSettings(page) {
   setTimeout(checkServerStatus, 500);
   
   document.getElementById('refresh-status-btn').addEventListener('click', function(e) {
-    e.stopPropagation(); // جلوگیری از بسته شدن آکاردئون
+    e.stopPropagation();
     var btn = this;
     btn.innerHTML = IC.refresh + ' در حال بررسی...';
     checkServerStatus();
     setTimeout(function() { btn.innerHTML = IC.refresh + ' بروزرسانی'; }, 1000);
   });
 
-  // -------------------------------------------------------------
-  // بقیه رویدادها
-  // -------------------------------------------------------------
   var reqBtn = $('#req-notif');
   if (reqBtn) { reqBtn.addEventListener('click', function () { requestNotifPermission(); setTimeout(render, 500); }); }
   
@@ -280,10 +274,13 @@ function pageSettings(page) {
           onClick: function (c) {
             var btn = c.querySelector('button.danger');
             if (btn) btn.classList.add('loading');
+            
             localStorage.clear();
             if (typeof clearCache === 'function') clearCache();
+            
             if (typeof supabaseClient !== 'undefined' && supabaseClient) {
-              supabaseClient.from('alus_sync').delete().eq('id', 'main_db').then(function() {
+              var freshSeed = seed(); // ساخت دیتای اولیه
+              supabaseClient.from('alus_sync').upsert({ id: 'main_db', data: freshSeed, updated_at: new Date() }).then(function() {
                 if (typeof supabaseStorageClient !== 'undefined' && supabaseStorageClient) {
                   supabaseStorageClient.storage.from('product-images').list().then(function(res) {
                     if (res.data && res.data.length > 0) {
