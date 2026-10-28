@@ -32,10 +32,25 @@ function toggleTheme() {
   toast(App.theme === 'light' ? 'حالت روشن' : 'حالت تاریک', '', 'success');
 }
 
-function doLogin(u, p) {
+async function doLogin(u, p) {
   var us = loadDB().users;
+  var hashedInput = await hashPassword(p);
+  
   for (var i = 0; i < us.length; i++) {
-    if (us[i].username === u && us[i].password === p && us[i].isActive) {
+    var isMatch = (us[i].password === hashedInput) || (us[i].password === p);
+    
+    if (us[i].username === u && isMatch && us[i].isActive) {
+      if (us[i].password === p) {
+        var db = loadDB();
+        for(var j=0; j<db.users.length; j++) {
+            if(db.users[j].id === us[i].id) {
+                db.users[j].password = hashedInput;
+                break;
+            }
+        }
+        saveDB(db);
+      }
+      
       try { localStorage.setItem(K_SES, us[i].id); } catch (e) {}
       App.user = sanitizeUser(us[i]);
       return App.user;
@@ -143,8 +158,8 @@ function renderLogin() {
     $('#lu').disabled = true;
     $('#lp').disabled = true;
     if (sel) sel.disabled = true;
-    setTimeout(function () {
-      var user = doLogin(u, p);
+    
+    doLogin(u, p).then(function(user) {
       if (!user) {
         busy = false;
         if (btn) btn.classList.remove('loading');
@@ -162,7 +177,7 @@ function renderLogin() {
       try { requestNotifPermission(); } catch (e) {}
       celebrate('خوش آمدید ' + user.name, '', 'success', 1600);
       render();
-    }, 400);
+    });
   });
   attachRippleAll();
 }
@@ -204,7 +219,6 @@ function renderShell() {
     return '<button type="button" class="tab-btn ' + (active ? 'active' : '') + '" data-tab="' + t.key + '">' + t.icon + bdg + '<span>' + t.label + '</span></button>';
   }).join('');
 
-  // 👇 نشانگر سینک از اینجا حذف شد 👇
   app.innerHTML =
     '<div class="nav-wrap"><nav class="navbar">' +
       '<div class="nav-brand">' +
