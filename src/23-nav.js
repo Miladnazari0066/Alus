@@ -212,7 +212,11 @@ function renderShell() {
       '</div>' +
       '<div class="nav-pills">' + pillsHTML + '</div>' +
       '<div class="nav-right">' +
-        // 👇 حذف کد ⌘K از دکمه جستجو و حذف دکمه کیبورد 👇
+        // 👇 نشانگر وضعیت سینک که به هدر اضافه شد 👇
+        '<div id="sync-indicator" class="sync-indicator">' +
+          '<span class="dot"></span>' +
+          '<span class="txt">اتصال...</span>' +
+        '</div>' +
         '<button type="button" class="search-btn" id="search-btn">' + IC.search + '<span>جستجو...</span></button>' +
         '<button type="button" class="icon-btn" id="notif-btn" title="اعلان‌ها">' + IC.bell + (pendingAll ? '<span class="pulse"></span>' : '') + '</button>' +
         '<button type="button" class="icon-btn" id="theme-btn" title="تم">' + (App.theme === 'light' ? IC.moon : IC.sun) + '</button>' +
@@ -237,7 +241,6 @@ function renderShell() {
   });
   var sb = $('#search-btn');
   if (sb) sb.addEventListener('click', openCmd);
-  // دکمه شورت کات حذف شد
   var tb = $('#theme-btn');
   if (tb) tb.addEventListener('click', toggleTheme);
   var nb = $('#notif-btn');
@@ -252,6 +255,11 @@ function renderShell() {
   }
   renderPage();
   attachRippleAll();
+  
+  // بعد از رندر شدن صفحه، وضعیت فعلی را روی نشانگر اعمال میکنیم
+  if (typeof updateSyncIndicator === 'function') {
+    updateSyncIndicator(lastSyncStatus);
+  }
 }
 
 function renderPage() {
