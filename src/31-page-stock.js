@@ -44,11 +44,9 @@ function transferItemHTML(db, t) {
 function pageStock(page) {
   var db = loadDB();
   var state = { wh: '', q: '', sort: null, dir: null };
-  
-  // 👇 وضعیت انتخاب‌های گروهی 👇
   var selectedStocks = {};
 
-  // آیکون مداد برای ویرایش (چون در فایل آیکون‌ها نبود، اینجا تعریفش کردیم)
+  // آیکون مداد برای ویرایش
   var editIcon = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>';
 
   page.innerHTML = '<div class="page-head"><div><h1>موجودی انبارها</h1>' +
@@ -68,11 +66,14 @@ function pageStock(page) {
       '<div class="table-scroll" id="s-table"></div>' +
     '</div>' +
     
-    // 👇 نوار شناور برای عملیات گروهی 👇
-    '<div class="bulk-bar" id="stock-bulk-bar">' +
-      '<span class="bulk-count"><b id="stock-bulk-n">0</b> مورد انتخاب شد</span>' +
-      '<button type="button" class="btn danger sm" id="stock-bulk-delete">' + IC.trash + ' حذف موارد انتخابی</button>' +
-      '<button type="button" class="btn ghost sm" id="stock-bulk-clear">لغو</button>' +
+    // 👇 نوار شناور گروهی (طراحی شیک‌تر) 👇
+    '<div class="bulk-bar" id="stock-bulk-bar" style="background:var(--g3); backdrop-filter:blur(24px); border-radius:100px; padding:10px 10px 10px 20px; box-shadow:0 20px 40px -10px rgba(0,0,0,.3)">' +
+      '<span class="bulk-count" style="font-size:13.5px"><b id="stock-bulk-n" style="font-size:15px">0</b> مورد انتخاب شد</span>' +
+      '<button type="button" class="btn danger sm hold-btn" id="stock-bulk-delete" style="height:40px; padding:0 18px; position:relative; overflow:hidden; border-radius:100px;">' +
+        '<span class="hold-progress"></span>' +
+        '<span class="hold-text" style="display:flex;align-items:center;gap:6px;font-weight:700">' + IC.trash + ' حذف (نگه دارید)</span>' +
+      '</button>' +
+      '<button type="button" class="btn ghost sm" id="stock-bulk-clear" style="height:40px; width:40px; padding:0; border-radius:50%; justify-content:center">' + IC.close + '</button>' +
     '</div>';
 
   function buildRows() {
@@ -127,11 +128,10 @@ function pageStock(page) {
       return '<span class="sort-ind">' + (state.sort === key ? (state.dir === 'asc' ? '▲' : '▼') : '⇅') + '</span>';
     };
     
-    // بررسی وضعیت چک‌باکس "انتخاب همه"
     var allChecked = rows.length > 0 && rows.every(function(r) { return selectedStocks[r.s.id]; });
     
     tbl.innerHTML = '<table class="dt"><thead><tr>' +
-      '<th style="width: 40px; text-align: center;"><input type="checkbox" id="select-all-stocks" style="cursor:pointer;" ' + (allChecked ? 'checked' : '') + '></th>' +
+      '<th style="width: 40px; text-align: center;"><input type="checkbox" id="select-all-stocks" style="cursor:pointer; width:16px; height:16px;" ' + (allChecked ? 'checked' : '') + '></th>' +
       '<th ' + sa('name')     + '>کالا ' + ind('name') + '</th>' +
       '<th ' + sa('wh')       + '>انبار ' + ind('wh') + '</th>' +
       '<th ' + sa('qty')      + ' style="text-align:left">موجودی ' + ind('qty') + '</th>' +
@@ -155,7 +155,7 @@ function pageStock(page) {
         var isChecked = selectedStocks[r.s.id] ? 'checked' : '';
 
         return '<tr' + rowCls + ' data-row-id="' + r.s.id + '">' +
-          '<td style="text-align: center;"><input type="checkbox" class="stock-checkbox" data-id="' + r.s.id + '" style="cursor:pointer;" ' + isChecked + '></td>' +
+          '<td style="text-align: center;"><input type="checkbox" class="stock-checkbox" data-id="' + r.s.id + '" style="cursor:pointer; width:16px; height:16px;" ' + isChecked + '></td>' +
           '<td><div class="cell-product"><div class="img-wrap">' + imgHTML +
           '<div class="info"><b>' + esc(r.p.name) + '</b>' +
             '<div style="display:flex;gap:4px;margin-top:2px">' +
@@ -187,14 +187,11 @@ function pageStock(page) {
       });
     });
 
-    // منطق چک‌باکس‌ها
     var selectAllCb = document.getElementById('select-all-stocks');
     if (selectAllCb) {
       selectAllCb.addEventListener('change', function() {
         var checked = this.checked;
-        rows.forEach(function(r) {
-          selectedStocks[r.s.id] = checked;
-        });
+        rows.forEach(function(r) { selectedStocks[r.s.id] = checked; });
         draw();
       });
     }
@@ -203,14 +200,13 @@ function pageStock(page) {
       cb.addEventListener('change', function() {
         selectedStocks[this.dataset.id] = this.checked;
         updateBulkBar();
-        // برای آپدیت وضعیت چک‌باکس بالای جدول
         var allCbs = $$('.stock-checkbox', tbl);
         var allChk = allCbs.length > 0 && allCbs.every(function(c) { return c.checked; });
         if (selectAllCb) selectAllCb.checked = allChk;
       });
     });
 
-    // مدیریت پاپ‌آپ عکس کالا
+    // مدیریت پاپ‌آپ عکس
     var pop = document.getElementById('global-img-pop');
     if (!pop) {
       pop = document.createElement('div');
@@ -225,7 +221,6 @@ function pageStock(page) {
       var p = getProd(db, pid);
       var w = getWh(db, wid);
       var s = findStock(db, pid, wid);
-      
       if (!p || !w) return;
       
       pop.innerHTML = 
@@ -258,9 +253,7 @@ function pageStock(page) {
       pop.style.left = left + 'px';
     }
 
-    function hidePopover() {
-      pop.classList.remove('show');
-    }
+    function hidePopover() { pop.classList.remove('show'); }
 
     $$('.img-trigger', tbl).forEach(function(img) {
       img.addEventListener('mouseenter', function() { if (window.innerWidth > 900) showPopover(img); });
@@ -272,7 +265,7 @@ function pageStock(page) {
       if (!e.target.closest('.img-trigger') && !e.target.closest('.img-pop')) hidePopover();
     });
 
-    // دکمه‌های ویرایش
+    // 👇 فرم ویرایش کامل (مشکل آیکون غول‌آسا حل شد) 👇
     $$('[data-edit]', tbl).forEach(function(btn) {
       btn.addEventListener('click', function(e) {
         e.stopPropagation();
@@ -284,10 +277,25 @@ function pageStock(page) {
         
         openModal({
           title: 'ویرایش موجودی',
-          desc: prod.name + ' در ' + wh.name,
-          body: '<div class="field"><label>تعداد موجودی <span class="req">*</span></label><input id="edit-qty" type="number" min="0" value="' + stock.quantity + '" /></div>' +
-                '<div class="field" style="margin-top:12px;"><label>حد هشدار (کم‌موجودی)</label><input id="edit-min" type="number" min="0" value="' + (stock.minQuantity || 5) + '" /></div>' +
-                '<div class="hint" style="margin-top:10px;color:var(--orange)">' + IC.alert + ' تعداد نباید کمتر از مقدار رزرو شده (' + (stock.reservedQty || 0) + ') باشد.</div>',
+          desc: 'مدیریت و اصلاح موجودی انبار',
+          body: 
+            '<div style="display:flex;align-items:center;gap:12px;padding:14px;background:var(--surface-2);border-radius:16px;margin-bottom:16px;border:1px solid var(--border)">' +
+              (prod.image ? '<img src="' + esc(prod.image) + '" style="width:50px;height:50px;border-radius:12px;object-fit:cover;">' : '<div class="img-thumb-placeholder" style="width:50px;height:50px">' + IC.package + '</div>') +
+              '<div style="flex:1;min-width:0">' +
+                '<div style="font-weight:800;font-size:14px;color:var(--text)">' + esc(prod.name) + '</div>' +
+                '<div style="font-size:11.5px;color:var(--muted);margin-top:2px">' + esc(wh.name) + '</div>' +
+              '</div>' +
+            '</div>' +
+            
+            '<div class="form-grid" style="gap:12px">' +
+              '<div class="field"><label>تعداد موجودی <span class="req">*</span></label><input id="edit-qty" type="number" min="0" value="' + stock.quantity + '" style="font-weight:800;font-size:16px;color:var(--blue)" /></div>' +
+              '<div class="field"><label>حد هشدار (کم‌موجودی)</label><input id="edit-min" type="number" min="0" value="' + (stock.minQuantity || 5) + '" /></div>' +
+            '</div>' +
+            
+            '<div style="margin-top:16px;padding:12px 14px;background:rgba(255,149,0,.1);border:1px solid rgba(255,149,0,.24);border-radius:12px;font-size:12px;color:#b45309;display:flex;align-items:flex-start;gap:8px">' +
+              '<div style="flex-shrink:0;margin-top:2px">' + IC.alert.replace('width="24"', 'width="16"').replace('height="24"', 'height="16"') + '</div>' +
+              '<div>تعداد موجودی نباید کمتر از مقدار رزرو شده (<b>' + (stock.reservedQty || 0) + ' ' + esc(prod.unit) + '</b>) باشد.</div>' +
+            '</div>',
           actions: [
             { label: 'انصراف', cls: 'ghost', onClick: function(c) { c.remove(); } },
             { label: IC.check + ' ذخیره تغییرات', cls: 'primary', onClick: function(c) {
@@ -306,7 +314,7 @@ function pageStock(page) {
                   saveDB(fresh);
                   toast('ویرایش شد', 'موجودی با موفقیت تغییر کرد', 'success');
                   c.remove();
-                  go('stock'); // رفرش صفحه
+                  go('stock');
                 }
             }}
           ]
@@ -314,7 +322,6 @@ function pageStock(page) {
       });
     });
 
-    // دکمه‌های حذف تکی
     $$('[data-del]', tbl).forEach(function(btn) {
       btn.addEventListener('click', function(e) {
         e.stopPropagation();
@@ -324,7 +331,6 @@ function pageStock(page) {
     });
   }
 
-  // تابع حذف (تکی یا گروهی)
   function deleteStocks(ids) {
     openModal({
       title: 'حذف موجودی',
@@ -335,13 +341,10 @@ function pageStock(page) {
         { label: IC.trash + ' بله، حذف کن', cls: 'danger', onClick: function(c) {
             var fresh = loadDB();
             var backup = fresh.stocks.filter(function(s) { return ids.indexOf(s.id) >= 0; });
-            
             fresh.stocks = fresh.stocks.filter(function(s) { return ids.indexOf(s.id) < 0; });
             saveDB(fresh);
-            
             c.remove();
             selectedStocks = {};
-            
             showUndoToast(ids.length + ' ردیف موجودی حذف شد', function() {
               var f2 = loadDB();
               f2.stocks = f2.stocks.concat(backup);
@@ -349,7 +352,6 @@ function pageStock(page) {
               toast('بازگردانی شد', 'موجودی‌ها بازگشتند', 'success');
               go('stock');
             }, 5000);
-            
             go('stock');
         }}
       ]
@@ -359,17 +361,51 @@ function pageStock(page) {
   $('#s-q').addEventListener('input', function (e) { state.q = e.target.value.trim(); draw(); });
   $('#s-wh').addEventListener('change', function (e) { state.wh = e.target.value; draw(); });
 
-  // دکمه‌های Bulk
   $('#stock-bulk-clear').addEventListener('click', function() {
     selectedStocks = {};
     draw();
   });
-  
-  $('#stock-bulk-delete').addEventListener('click', function() {
-    var ids = Object.keys(selectedStocks).filter(function(k) { return selectedStocks[k]; });
-    if (!ids.length) return;
-    deleteStocks(ids);
-  });
+
+  // 👇 منطق نگه داشتن ۳ ثانیه‌ای برای دکمه حذف گروهی 👇
+  var delBtn = document.getElementById('stock-bulk-delete');
+  var holdTimer = null, holdInterval = null, holdProgress = 0;
+  var holdDuration = 3000;
+  var progressBar = delBtn.querySelector('.hold-progress');
+
+  function startHold(e) {
+    e.preventDefault();
+    holdProgress = 0;
+    progressBar.style.width = '0%';
+    holdInterval = setInterval(function() {
+      holdProgress += 50;
+      var pct = (holdProgress / holdDuration) * 100;
+      if (pct > 100) pct = 100;
+      progressBar.style.width = pct + '%';
+    }, 50);
+    
+    holdTimer = setTimeout(function() {
+      clearInterval(holdInterval);
+      progressBar.style.width = '0%';
+      
+      var ids = Object.keys(selectedStocks).filter(function(k) { return selectedStocks[k]; });
+      if (ids.length > 0) {
+        deleteStocks(ids);
+      }
+    }, holdDuration);
+  }
+
+  function cancelHold() {
+    if (holdTimer) clearTimeout(holdTimer);
+    if (holdInterval) clearInterval(holdInterval);
+    progressBar.style.width = '0%';
+  }
+
+  delBtn.addEventListener('mousedown', startHold);
+  delBtn.addEventListener('touchstart', startHold, { passive: false });
+  delBtn.addEventListener('mouseup', cancelHold);
+  delBtn.addEventListener('mouseleave', cancelHold);
+  delBtn.addEventListener('touchend', cancelHold);
+  delBtn.addEventListener('touchcancel', cancelHold);
 
   draw();
 }
