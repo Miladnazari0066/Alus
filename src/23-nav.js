@@ -87,54 +87,36 @@ function render() {
 function renderLogin() {
   $$('.celebrate').forEach(function (el) { el.remove(); });
   
-  // 👇 طراحی مینیمال و شیک برای صفحه ورود 👇
+  // 👇 طراحی فوق مینیمال: فقط لوگو و نام Alus در سمت چپ 👇
   app.innerHTML = '<div class="login">' +
     '<div class="login-left">' +
-      '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;gap:20px;text-align:center;padding-top:20px;">' +
+      '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;gap:16px;text-align:center;padding-top:10px;">' +
         '<div class="badge-i" style="width:90px;height:90px;border-radius:50%;display:grid;place-items:center;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);backdrop-filter:blur(10px);box-shadow:0 20px 40px rgba(0,0,0,.15);">' +
           '<div style="width:45px;height:45px;color:#fff">' + BRAND_A + '</div>' +
         '</div>' +
-        '<div>' +
-          '<div class="alus-wm wm" style="font-size:42px;color:#fff !important;-webkit-text-fill-color:#fff;background:none !important;direction:ltr;font-weight:900;letter-spacing:-1.5px;text-shadow:0 4px 20px rgba(0,0,0,.2);line-height:1;">Alus</div>' +
-          '<div style="font-size:12px;color:rgba(255,255,255,.85);margin-top:8px;direction:ltr;letter-spacing:3px;font-weight:700;">FURNITURE MANAGEMENT</div>' +
-        '</div>' +
+        '<div class="alus-wm wm" style="font-size:42px;color:#fff !important;-webkit-text-fill-color:#fff;background:none !important;direction:ltr;font-weight:900;letter-spacing:-1.5px;text-shadow:0 4px 20px rgba(0,0,0,.2);line-height:1;">Alus</div>' +
       '</div>' +
-      '<div style="opacity:.5;font-size:11px;text-align:center;color:#fff;padding-bottom:20px;font-family:monospace;">© ۱۴۰۴ · Alus</div>' +
     '</div>' +
     
     '<div class="login-right"><div class="login-card">' +
       '<h1>خوش آمدید 👋</h1>' +
       '<div class="sub">برای ادامه وارد حساب خود شوید</div>' +
       '<form class="login-form" id="lf">' +
-        '<div class="field"><label>' + IC.users + ' انتخاب سریع کاربر</label>' +
-          '<select id="lu-select"><option value="">— انتخاب کنید —</option>' +
-            '<option value="admin">راهبر سیستم</option>' +
-            '<option value="manager">مدیر</option>' +
-            '<option value="acc">حسابدار</option>' +
-            '<option value="wh">انباردار</option>' +
-          '</select>' +
-          '<div class="hint">' + IC.info + ' با انتخاب، نام کاربری و رمز به‌صورت خودکار پر می‌شود</div>' +
-        '</div>' +
         '<div class="field"><label>نام کاربری</label>' +
-          '<input id="lu" required placeholder="admin" autocomplete="username" /></div>' +
+          '<input id="lu" required placeholder="نام کاربری خود را وارد کنید" autocomplete="username" style="direction:ltr;text-align:right" />' +
+        '</div>' +
         '<div class="field"><label>رمز عبور</label>' +
           '<div class="pw-wrap">' +
-            '<input id="lp" type="password" required placeholder="••••••••" autocomplete="current-password" />' +
+            '<input id="lp" type="password" required placeholder="••••••••" autocomplete="current-password" style="direction:ltr;text-align:right" />' +
             '<button type="button" class="pw-toggle" id="pw-tog" title="نمایش رمز">' + IC.eye + '</button>' +
-          '</div></div>' +
-        '<button class="btn primary block" type="submit" style="margin-top:6px;height:48px;font-size:14.5px">' + IC.check + ' ورود به سیستم</button>' +
+          '</div>' +
+        '</div>' +
+        '<button class="btn primary block" type="submit" style="margin-top:10px;height:48px;font-size:14.5px">' + IC.check + ' ورود به سیستم</button>' +
       '</form>' +
     '</div></div>' +
   '</div>';
 
   var busy = false;
-  var sel = $('#lu-select');
-  if (sel) {
-    sel.addEventListener('change', function () {
-      if (sel.value) { $('#lu').value = sel.value; $('#lp').value = '1111'; }
-      else { $('#lu').value = ''; $('#lp').value = ''; }
-    });
-  }
   var pwTog = $('#pw-tog');
   if (pwTog) {
     pwTog.addEventListener('click', function () {
@@ -144,6 +126,7 @@ function renderLogin() {
       else { pw.type = 'password'; pwTog.innerHTML = IC.eye; }
     });
   }
+  
   $('#lf').addEventListener('submit', function (e) {
     e.preventDefault();
     if (busy) return;
@@ -152,16 +135,21 @@ function renderLogin() {
     var p = $('#lp').value;
     var btn = $('#lf button[type="submit"]');
     if (btn) btn.classList.add('loading');
-    $('#lu').disabled = true; $('#lp').disabled = true;
-    if (sel) sel.disabled = true;
+    $('#lu').disabled = true; 
+    $('#lp').disabled = true;
+    
     doLogin(u, p).then(function(user) {
       if (!user) {
         busy = false;
         if (btn) btn.classList.remove('loading');
-        $('#lu').disabled = false; $('#lp').disabled = false;
-        if (sel) sel.disabled = false;
+        $('#lu').disabled = false; 
+        $('#lp').disabled = false;
+        
         var card = $('.login-card');
-        if (card) { card.style.animation = 'shake .5s'; setTimeout(function () { card.style.animation = ''; }, 500); }
+        if (card) { 
+          card.style.animation = 'shake .5s'; 
+          setTimeout(function () { card.style.animation = ''; }, 500); 
+        }
         toast('ورود ناموفق', 'نام کاربری یا رمز اشتباه است', 'error');
         return;
       }
