@@ -2695,3 +2695,18 @@ tr.row-low:hover td { background: rgba(255,149,0,.08); }
   cursor: not-allowed;
   pointer-events: none;
 }
+/* ============================================================
+   PRESENCE ONLINE DOT
+   ============================================================ */
+.avatar-sm .online-dot {
+  position: absolute;
+  bottom: -1px;
+  left: -1px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--green);
+  border: 2px solid var(--surface);
+  box-shadow: 0 0 4px var(--green);
+  animation: pulse 2s ease-in-out infinite;
+}
