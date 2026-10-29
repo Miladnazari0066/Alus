@@ -17,7 +17,7 @@ function savePrefs() {
 
 function sanitizeUser(u) {
   if (!u) return null;
-  return { id: u.id, name: u.name, username: u.username, role: u.role, isActive: u.isActive };
+  return { id: u.id, name: u.name, username: u.username, role: u.role, isActive: u.isActive, permissions: u.permissions || {} };
 }
 
 function currentUser() {
