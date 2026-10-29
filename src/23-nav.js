@@ -86,21 +86,22 @@ function render() {
 
 function renderLogin() {
   $$('.celebrate').forEach(function (el) { el.remove(); });
+  
+  // 👇 طراحی مینیمال و شیک برای صفحه ورود 👇
   app.innerHTML = '<div class="login">' +
     '<div class="login-left">' +
-      '<div class="llogo"><div class="badge-i">' + BRAND_A + '</div>' +
-        '<div><div class="alus-wm wm">Alus</div><div class="tagline">Furniture Management</div></div></div>' +
-      '<div class="ltag">' +
-        '<h2>کنترل هوشمند موجودی<br>و جابه‌جایی مبلمان</h2>' +
-        '<p>مدیریت دقیق انبارها، ورود از تأمین‌کننده و انتقال با سه مرحله تأیید — همه در یک پنل یکپارچه.</p>' +
-        '<div class="lfeat">' +
-          '<div class="lfeat-item">' + IC.shield + '<span>سه مرحله تأیید برای هر انتقال</span></div>' +
-          '<div class="lfeat-item">' + IC.grid + '<span>تعریف دست و سرویس با اقلام تشکیل‌دهنده</span></div>' +
-          '<div class="lfeat-item">' + IC.chart + '<span>گزارش‌های حرفه‌ای با خروجی Excel و PDF</span></div>' +
+      '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;gap:20px;text-align:center;padding-top:20px;">' +
+        '<div class="badge-i" style="width:90px;height:90px;border-radius:50%;display:grid;place-items:center;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);backdrop-filter:blur(10px);box-shadow:0 20px 40px rgba(0,0,0,.15);">' +
+          '<div style="width:45px;height:45px;color:#fff">' + BRAND_A + '</div>' +
+        '</div>' +
+        '<div>' +
+          '<div class="alus-wm wm" style="font-size:42px;color:#fff !important;-webkit-text-fill-color:#fff;background:none !important;direction:ltr;font-weight:900;letter-spacing:-1.5px;text-shadow:0 4px 20px rgba(0,0,0,.2);line-height:1;">Alus</div>' +
+          '<div style="font-size:12px;color:rgba(255,255,255,.85);margin-top:8px;direction:ltr;letter-spacing:3px;font-weight:700;">FURNITURE MANAGEMENT</div>' +
         '</div>' +
       '</div>' +
-      '<div style="opacity:.65;font-size:12px">© ۱۴۰۴ · Alus · نسخه ۱٫۱</div>' +
+      '<div style="opacity:.5;font-size:11px;text-align:center;color:#fff;padding-bottom:20px;font-family:monospace;">© ۱۴۰۴ · Alus</div>' +
     '</div>' +
+    
     '<div class="login-right"><div class="login-card">' +
       '<h1>خوش آمدید 👋</h1>' +
       '<div class="sub">برای ادامه وارد حساب خود شوید</div>' +
