@@ -1,18 +1,18 @@
 'use strict';
 
 var NAV = [
-  { key: 'dashboard',     label: 'داشبورد',        icon: IC.home,     roles: ['admin', 'manager', 'accountant', 'warehouse_officer'] },
-  { key: 'stock',         label: 'موجودی',         icon: IC.layers,   roles: ['admin', 'manager', 'accountant', 'warehouse_officer'] },
-  { key: 'transfers',     label: 'جابه‌جایی',      icon: IC.swap,     roles: ['admin', 'manager', 'accountant', 'warehouse_officer'] },
-  { key: 'inbounds',      label: 'ورود کالا',      icon: IC.inbound,  roles: ['admin', 'manager', 'accountant', 'warehouse_officer'] },
-  { key: 'reports',       label: 'گزارش‌ها',       icon: IC.chart,    roles: ['admin', 'manager', 'accountant', 'warehouse_officer'] },
-  { key: 'newTransfer',   label: 'درخواست جدید',   icon: IC.plus,     roles: ['admin', 'manager', 'warehouse_officer'] },
-  { key: 'newInbound',    label: 'ثبت ورود',       icon: IC.factory,  roles: ['admin', 'manager', 'warehouse_officer'] },
-  { key: 'directCustomer',label: 'ارسال به مشتری', icon: IC.truck,    roles: ['admin', 'manager', 'warehouse_officer'] },
-  { key: 'stockInit',     label: 'مقداردهی',       icon: IC.sparkle,  roles: ['admin', 'manager', 'warehouse_officer'] },
-  { key: 'products',      label: 'کالاها',         icon: IC.tag,      roles: ['admin', 'manager'] },
-  { key: 'users',         label: 'کاربران',        icon: IC.users,    roles: ['admin', 'manager'] },
-  { key: 'settings',      label: 'تنظیمات',        icon: IC.settings, roles: ['admin'] }
+  { key: 'dashboard',     label: 'داشبورد',        icon: IC.home,     perm: 'view_reports' },
+  { key: 'stock',         label: 'موجودی',         icon: IC.layers,   perm: 'manage_products' },
+  { key: 'transfers',     label: 'جابه‌جایی',      icon: IC.swap,     perm: 'create_transfer' },
+  { key: 'inbounds',      label: 'ورود کالا',      icon: IC.inbound,  perm: 'create_inbound' },
+  { key: 'reports',       label: 'گزارش‌ها',       icon: IC.chart,    perm: 'view_reports' },
+  { key: 'newTransfer',   label: 'درخواست جدید',   icon: IC.plus,     perm: 'create_transfer' },
+  { key: 'newInbound',    label: 'ثبت ورود',       icon: IC.factory,  perm: 'create_inbound' },
+  { key: 'directCustomer',label: 'ارسال به مشتری', icon: IC.truck,    perm: 'create_transfer' },
+  { key: 'stockInit',     label: 'مقداردهی',       icon: IC.sparkle,  perm: 'manage_products' },
+  { key: 'products',      label: 'کالاها',         icon: IC.tag,      perm: 'manage_products' },
+  { key: 'users',         label: 'کاربران',        icon: IC.users,    perm: 'manage_users' },
+  { key: 'settings',      label: 'تنظیمات',        icon: IC.settings, perm: 'manage_settings' }
 ];
 
 function go(name, params) {
@@ -184,15 +184,13 @@ function renderLogin() {
 
 function renderShell() {
   var user = App.user;
-  var navItem = null;
-  for (var i = 0; i < NAV.length; i++) {
-    if (NAV[i].key === App.route.name) { navItem = NAV[i]; break; }
-  }
-  if (!navItem || navItem.roles.indexOf(user.role) < 0) {
+  var items = NAV.filter(function (n) { return hasPermission(user, n.perm); });
+  
+  if (!items.length) {
+    items = [NAV[0]]; // اگر کاربر هیچ دسترسی نداشت، حداقل داشبورد را ببیند
     App.route = { name: 'dashboard', params: {} };
-    saveRoute();
   }
-  var items = NAV.filter(function (n) { return n.roles.indexOf(user.role) >= 0; });
+
   var db = loadDB();
   var pendingAll = db.transfers.filter(function (t) { return t.status.indexOf('pending') === 0; }).length + lowStockItems(db).length;
   var pendingTransfers = db.transfers.filter(function (t) { return t.type !== 'inbound' && t.status.indexOf('pending') === 0; }).length;
@@ -263,6 +261,7 @@ function renderShell() {
       else openUserMenu(um);
     });
   }
+  
   renderPage();
   attachRippleAll();
 }
