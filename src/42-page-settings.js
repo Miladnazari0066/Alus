@@ -26,11 +26,35 @@ function pageSettings(page) {
     });
   }
 
+  var currentPref = (App.prefs.theme || 'smart');
+  var autoSeasonName = { spring: 'بهار', summer: 'تابستان', autumn: 'پاییز', winter: 'زمستان' }[getAutoSeason()];
+
   page.innerHTML = '<div class="page-head"><div><h1>تنظیمات</h1>' +
     '<div class="sub">مدیریت سیستمی — فقط راهبر</div></div></div>' +
     
     '<div class="acc-list">' +
       
+      // 👇 بخش جدید: تم و ظاهر 👇
+      '<div class="acc-item open" id="acc-theme">' +
+        '<div class="acc-header" onclick="this.parentElement.classList.toggle(\'open\')">' +
+          '<div class="acc-icon primary">' + IC.sun + '</div>' +
+          '<div class="acc-titles"><div class="acc-title">ظاهر و تم برنامه</div><div class="acc-sub">رنگ‌بندی فصلی یا حالت روشن/تاریک</div></div>' +
+          '<div class="acc-chevron">' + IC.chevD + '</div>' +
+        '</div>' +
+        '<div class="acc-body"><div class="acc-content">' +
+          '<p style="font-size:12.5px;line-height:1.9;margin-bottom:16px;color:var(--text-2)">سیستم می‌تواند بر اساس ماه شمسی، رنگ‌بندی خود را تغییر دهد. الان فصل <b>' + autoSeasonName + '</b> است.</p>' +
+          '<div style="display:flex; gap:8px; flex-wrap:wrap">' +
+            '<button type="button" class="btn ' + (currentPref === 'smart' ? 'primary' : 'ghost') + '" data-set-theme="smart">✨ هوشمند (خودکار)</button>' +
+            '<button type="button" class="btn ' + (currentPref === 'spring' ? 'primary' : 'ghost') + '" data-set-theme="spring">🌸 بهار</button>' +
+            '<button type="button" class="btn ' + (currentPref === 'summer' ? 'primary' : 'ghost') + '" data-set-theme="summer">☀️ تابستان</button>' +
+            '<button type="button" class="btn ' + (currentPref === 'autumn' ? 'primary' : 'ghost') + '" data-set-theme="autumn">🍂 پاییز</button>' +
+            '<button type="button" class="btn ' + (currentPref === 'winter' ? 'primary' : 'ghost') + '" data-set-theme="winter">❄️ زمستان</button>' +
+            '<button type="button" class="btn ' + (currentPref === 'light' ? 'primary' : 'ghost') + '" data-set-theme="light">☀️ روشن</button>' +
+            '<button type="button" class="btn ' + (currentPref === 'dark' ? 'primary' : 'ghost') + '" data-set-theme="dark">🌙 تاریک</button>' +
+          '</div>' +
+        '</div></div>' +
+      '</div>' +
+
       '<div class="acc-item open" id="acc-status">' +
         '<div class="acc-header" onclick="this.parentElement.classList.toggle(\'open\')">' +
           '<div class="acc-icon info">' + IC.layers + '</div>' +
@@ -53,7 +77,6 @@ function pageSettings(page) {
                   '<td id="storage-status-cell" style="font-size:11px;direction:ltr;text-align:left"><span style="color:var(--orange);display:flex;align-items:center;gap:6px;direction:rtl;"><span class="dot" style="width:8px;height:8px;border-radius:50%;background:var(--orange);display:inline-block"></span>در حال بررسی...</span></td>' +
                   '<td class="num" id="storage-size-cell">-</td>' +
                 '</tr>' +
-                // 👇 ردیف سینک زنده با کلاس‌های جدید 👇
                 '<tr>' +
                   '<td><div class="cell-product"><div class="img-thumb-placeholder" style="background:rgba(52,199,89,.1);color:var(--green);border-color:rgba(52,199,89,.2)">' + IC.cloud + '</div><div class="info"><b>سینک زنده</b><br><small style="font-size:10px;color:var(--muted)">Realtime Sync</small></div></div></td>' +
                   '<td style="font-size:11px;direction:ltr;text-align:left"><div id="sync-indicator" class="sync-pill online" style="display:inline-flex;"></div></td>' +
@@ -140,7 +163,25 @@ function pageSettings(page) {
 
     '</div>';
 
-  // آپدیت نشانگر در تنظیمات
+  // منطق کلیک روی دکمه‌های تم
+  $$('[data-set-theme]').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var t = btn.dataset.setTheme;
+      App.prefs.theme = t;
+      savePrefs();
+      
+      if (t === 'smart') {
+        App.theme = getAutoSeason();
+      } else {
+        App.theme = t;
+      }
+      
+      document.documentElement.setAttribute('data-theme', App.theme);
+      toast('تم تغییر کرد', 'ظاهر برنامه با موفقیت بروزرسانی شد', 'success');
+      render(); // رفرش صفحه تنظیمات برای آپدیت رنگ دکمه‌ها
+    });
+  });
+
   if (typeof updateSyncIndicator === 'function') {
     updateSyncIndicator(navigator.onLine ? 'online' : 'offline');
   }
@@ -271,7 +312,7 @@ function pageSettings(page) {
       title: 'بازنشانی کارخانه‌ای',
       desc: 'هشدار! این عملیات غیرقابل بازگشت است.',
       body: '<div style="padding:12px 14px;background:rgba(255,59,48,.1);border-radius:14px;font-size:13px;color:#b91c1c;line-height:1.8">' +
-        IC.alert + ' با این کار، <b>تمام کالاها، موجودی‌ها، اسناد و عکس‌ها</b> (هم در مرورگر و هم در سرورهای ابری) برای همیشه پاک می‌شوند. آیا مطمئن هستید؟</div>',
+        IC.alert + ' با این کار، <b>تمام کالاها، موجودی‌ها، اسناد و عکس‌ها</b> برای همیشه پاک می‌شوند. آیا مطمئن هستید؟</div>',
       actions: [
         { label: 'انصراف', cls: 'ghost', onClick: function (c) { c.remove(); } },
         {
@@ -284,7 +325,7 @@ function pageSettings(page) {
             if (typeof clearCache === 'function') clearCache();
             
             if (typeof supabaseClient !== 'undefined' && supabaseClient) {
-              var freshSeed = seed(); // ساخت دیتای اولیه
+              var freshSeed = seed(); 
               supabaseClient.from('alus_sync').upsert({ id: 'main_db', data: freshSeed, updated_at: new Date() }).then(function() {
                 if (typeof supabaseStorageClient !== 'undefined' && supabaseStorageClient) {
                   supabaseStorageClient.storage.from('product-images').list().then(function(res) {
