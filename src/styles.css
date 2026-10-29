@@ -2710,3 +2710,82 @@ tr.row-low:hover td { background: rgba(255,149,0,.08); }
   box-shadow: 0 0 4px var(--green);
   animation: pulse 2s ease-in-out infinite;
 }
+/* ============================================================
+   SEASONAL THEMES
+   ============================================================ */
+
+/* 🌸 بهار (Spring) */
+[data-theme="spring"] {
+  --bg: #f2fcf5;
+  --surface: #ffffff;
+  --surface-2: #e8f7ec;
+  --surface-3: #d1f0d9;
+  --text: #064e3b;
+  --text-2: #065f46;
+  --muted: #10b981;
+  --border: rgba(16, 185, 129, 0.15);
+  --border-2: rgba(16, 185, 129, 0.3);
+  --blue: #059669;
+  --grad: linear-gradient(135deg, #10b981 0%, #06b6d4 50%, #ec4899 100%);
+  --grad-2: linear-gradient(135deg, #10b981, #06b6d4);
+  --g1: rgba(255,255,255,.7);
+  --g2: rgba(255,255,255,.85);
+  --g3: rgba(255,255,255,.95);
+}
+
+/* ☀️ تابستان (Summer) */
+[data-theme="summer"] {
+  --bg: #fffcf5;
+  --surface: #ffffff;
+  --surface-2: #fff7e6;
+  --surface-3: #ffebc2;
+  --text: #431407;
+  --text-2: #7c2d12;
+  --muted: #f59e0b;
+  --border: rgba(245, 158, 11, 0.15);
+  --border-2: rgba(245, 158, 11, 0.3);
+  --blue: #ea580c;
+  --grad: linear-gradient(135deg, #f59e0b 0%, #ea580c 50%, #3b82f6 100%);
+  --grad-2: linear-gradient(135deg, #f59e0b, #ea580c);
+  --g1: rgba(255,255,255,.7);
+  --g2: rgba(255,255,255,.85);
+  --g3: rgba(255,255,255,.95);
+}
+
+/* 🍂 پاییز (Autumn) */
+[data-theme="autumn"] {
+  --bg: #fdf5e6;
+  --surface: #fffaf0;
+  --surface-2: #fdf0d5;
+  --surface-3: #f5e0b7;
+  --text: #451a03;
+  --text-2: #78350f;
+  --muted: #d97706;
+  --border: rgba(217, 119, 6, 0.15);
+  --border-2: rgba(217, 119, 6, 0.3);
+  --blue: #b45309;
+  --grad: linear-gradient(135deg, #d97706 0%, #dc2626 50%, #78350f 100%);
+  --grad-2: linear-gradient(135deg, #d97706, #dc2626);
+  --g1: rgba(255,255,255,.7);
+  --g2: rgba(255,255,255,.85);
+  --g3: rgba(255,255,255,.95);
+}
+
+/* ❄️ زمستان (Winter) */
+[data-theme="winter"] {
+  --bg: #f0f8ff;
+  --surface: #ffffff;
+  --surface-2: #e6f2ff;
+  --surface-3: #cce6ff;
+  --text: #0f172a;
+  --text-2: #1e293b;
+  --muted: #64748b;
+  --border: rgba(14, 165, 233, 0.15);
+  --border-2: rgba(14, 165, 233, 0.3);
+  --blue: #0ea5e9;
+  --grad: linear-gradient(135deg, #0ea5e9 0%, #6366f1 50%, #94a3b8 100%);
+  --grad-2: linear-gradient(135deg, #0ea5e9, #6366f1);
+  --g1: rgba(255,255,255,.7);
+  --g2: rgba(255,255,255,.85);
+  --g3: rgba(255,255,255,.95);
+}
