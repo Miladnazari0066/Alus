@@ -35,24 +35,22 @@ function toggleTheme() {
 async function doLogin(u, p) {
   var us = loadDB().users;
   var hashedInput = await hashPassword(p);
-  
   for (var i = 0; i < us.length; i++) {
     var isMatch = (us[i].password === hashedInput) || (us[i].password === p);
-    
     if (us[i].username === u && isMatch && us[i].isActive) {
       if (us[i].password === p) {
         var db = loadDB();
         for(var j=0; j<db.users.length; j++) {
-            if(db.users[j].id === us[i].id) {
-                db.users[j].password = hashedInput;
-                break;
-            }
+          if(db.users[j].id === us[i].id) {
+            db.users[j].password = hashedInput;
+            break;
+          }
         }
         saveDB(db);
       }
-      
       try { localStorage.setItem(K_SES, us[i].id); } catch (e) {}
       App.user = sanitizeUser(us[i]);
+      if (typeof startPresence === 'function') startPresence();
       return App.user;
     }
   }
@@ -60,6 +58,8 @@ async function doLogin(u, p) {
 }
 
 function doLogout() {
+  if (typeof saveLastSeen === 'function') saveLastSeen();
+  if (typeof stopPresence === 'function') stopPresence();
   try { localStorage.removeItem(K_SES); } catch (e) {}
   clearRoute();
   App.user = null;
@@ -73,6 +73,7 @@ function render() {
     App.user = currentUser();
     if (!App.user) { renderLogin(); return; }
     renderShell();
+    if (typeof updateMyActivity === 'function') updateMyActivity(App.route.name);
   } catch (e) {
     var errEl = document.getElementById('err');
     if (errEl) {
@@ -129,13 +130,8 @@ function renderLogin() {
   var sel = $('#lu-select');
   if (sel) {
     sel.addEventListener('change', function () {
-      if (sel.value) {
-        $('#lu').value = sel.value;
-        $('#lp').value = '1111';
-      } else {
-        $('#lu').value = '';
-        $('#lp').value = '';
-      }
+      if (sel.value) { $('#lu').value = sel.value; $('#lp').value = '1111'; }
+      else { $('#lu').value = ''; $('#lp').value = ''; }
     });
   }
   var pwTog = $('#pw-tog');
@@ -155,22 +151,16 @@ function renderLogin() {
     var p = $('#lp').value;
     var btn = $('#lf button[type="submit"]');
     if (btn) btn.classList.add('loading');
-    $('#lu').disabled = true;
-    $('#lp').disabled = true;
+    $('#lu').disabled = true; $('#lp').disabled = true;
     if (sel) sel.disabled = true;
-    
     doLogin(u, p).then(function(user) {
       if (!user) {
         busy = false;
         if (btn) btn.classList.remove('loading');
-        $('#lu').disabled = false;
-        $('#lp').disabled = false;
+        $('#lu').disabled = false; $('#lp').disabled = false;
         if (sel) sel.disabled = false;
         var card = $('.login-card');
-        if (card) {
-          card.style.animation = 'shake .5s';
-          setTimeout(function () { card.style.animation = ''; }, 500);
-        }
+        if (card) { card.style.animation = 'shake .5s'; setTimeout(function () { card.style.animation = ''; }, 500); }
         toast('ورود ناموفق', 'نام کاربری یا رمز اشتباه است', 'error');
         return;
       }
@@ -185,12 +175,7 @@ function renderLogin() {
 function renderShell() {
   var user = App.user;
   var items = NAV.filter(function (n) { return hasPermission(user, n.perm); });
-  
-  if (!items.length) {
-    items = [NAV[0]]; // اگر کاربر هیچ دسترسی نداشت، حداقل داشبورد را ببیند
-    App.route = { name: 'dashboard', params: {} };
-  }
-
+  if (!items.length) { items = [NAV[0]]; App.route = { name: 'dashboard', params: {} }; }
   var db = loadDB();
   var pendingAll = db.transfers.filter(function (t) { return t.status.indexOf('pending') === 0; }).length + lowStockItems(db).length;
   var pendingTransfers = db.transfers.filter(function (t) { return t.type !== 'inbound' && t.status.indexOf('pending') === 0; }).length;
@@ -198,7 +183,7 @@ function renderShell() {
   var pillsHTML = items.map(function (it) {
     return '<button type="button" class="nav-pill ' + (App.route.name === it.key ? 'active' : '') + '" data-nav="' + it.key + '">' +
       it.icon + '<span>' + it.label + '</span>' +
-      (it.key === 'transfers' && pendingTransfers ? '<span class="nbadge">' + pendingTransfers + '</span>' : '') + 
+      (it.key === 'transfers' && pendingTransfers ? '<span class="nbadge">' + pendingTransfers + '</span>' : '') +
       '</button>';
   }).join('');
 
@@ -261,7 +246,6 @@ function renderShell() {
       else openUserMenu(um);
     });
   }
-  
   renderPage();
   attachRippleAll();
 }
@@ -284,11 +268,8 @@ function renderPage() {
     settings:       typeof pageSettings      === 'function' ? pageSettings      : null
   };
   var fn = fns[App.route.name] || fns.dashboard;
-  if (typeof fn === 'function') {
-    fn(page);
-  } else {
-    page.innerHTML = '<div class="widget">' + emptyState('صفحه بارگذاری نشد', 'فایل این صفحه هنوز اضافه نشده') + '</div>';
-  }
+  if (typeof fn === 'function') fn(page);
+  else page.innerHTML = '<div class="widget">' + emptyState('صفحه بارگذاری نشد', 'فایل این صفحه هنوز اضافه نشده') + '</div>';
   attachRippleAll();
 }
 
