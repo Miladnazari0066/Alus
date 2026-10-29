@@ -18,12 +18,14 @@ var PAGE_LABELS = {
 function pageUsers(page) {
   var db = loadDB();
   var canEdit = canManageUsers(App.user);
+  var isAdmin = App.user.role === 'admin';
   var assignable = App.user.role === 'admin' ?
     ['warehouse_officer', 'accountant', 'manager', 'admin'] :
     ['warehouse_officer', 'accountant', 'manager'];
   var state = { sort: null, dir: null };
 
   var shieldIcon = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>';
+  var editIcon = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>';
 
   page.innerHTML = '<div class="page-head"><div><h1>کاربران</h1></div></div>' +
     (canEdit ?
@@ -89,7 +91,7 @@ function pageUsers(page) {
       '<th ' + sa('username') + '>نام کاربری ' + ind('username') + '</th>' +
       '<th ' + sa('role')     + '>نقش ' + ind('role') + '</th>' +
       '<th ' + sa('status')   + '>وضعیت ' + ind('status') + '</th>' +
-      '<th style="width:120px;text-align:left">عملیات</th></tr></thead><tbody>' +
+      '<th style="width:130px;text-align:left">عملیات</th></tr></thead><tbody>' +
       
       rows.map(function (u, i) {
         var isSelf = u.id === App.user.id;
@@ -97,7 +99,6 @@ function pageUsers(page) {
         var isOnline = online.hasOwnProperty(u.id);
         var presence = online[u.id];
         
-        // 👇 وضعیت آنلاین/آفلاین 👇
         var statusInfo;
         if (isOnline && presence) {
           var pageLabel = PAGE_LABELS[presence.page] || 'نامشخص';
@@ -122,6 +123,8 @@ function pageUsers(page) {
         var actionCell = isSelf ? '<span class="muted small">—</span>' :
           (editable ?
             '<div style="display:flex; gap:4px; justify-content:flex-end;">' +
+              // 👇 دکمه ویرایش فقط برای ادمین نمایش داده میشود 👇
+              (isAdmin ? '<button type="button" class="btn xs ghost" data-edit-user="' + u.id + '" title="ویرایش نام کاربری و رمز">' + editIcon + '</button>' : '') +
               '<button type="button" class="btn xs ghost" data-perm="' + u.id + '" title="مدیریت دسترسی‌ها">' + shieldIcon + '</button>' +
               '<button type="button" class="btn xs ' + (u.isActive ? 'warn' : 'success') + '" data-tog="' + u.id + '">' +
                 (u.isActive ? 'غیرفعال' : 'فعال') + '</button>' +
@@ -181,6 +184,59 @@ function pageUsers(page) {
         saveDB(fresh);
         toast('نقش تغییر کرد', u.name + ' → ' + ROLES[u.role], 'success');
         render();
+      });
+    });
+
+    // 👇 لاجیک ویرایش نام کاربری و رمز 👇
+    $$('[data-edit-user]').forEach(function(b) {
+      b.addEventListener('click', function() {
+        var targetUid = b.dataset.editUser;
+        var targetUser = loadDB().users.filter(function(x) { return x.id === targetUid; })[0];
+        if (!targetUser) return;
+
+        openModal({
+          title: 'ویرایش حساب کاربری',
+          desc: 'تغییر اطلاعات ورود برای ' + targetUser.name,
+          body: 
+            '<div class="form-grid" style="gap:12px">' +
+              '<div class="field full"><label>نام و نام خانوادگی</label><input id="eu-name" value="' + esc(targetUser.name) + '" /></div>' +
+              '<div class="field full"><label>نام کاربری (Username) <span class="req">*</span></label><input id="eu-username" value="' + esc(targetUser.username) + '" style="font-family:monospace;direction:ltr;text-align:left" /></div>' +
+              '<div class="field full"><label>رمز عبور جدید</label><input id="eu-password" type="text" placeholder="برای عدم تغییر، خالی بگذارید" style="font-family:monospace;direction:ltr;text-align:left" /><div class="hint">' + IC.info + ' در صورت وارد کردن رمز، رمز قبلی کاملاً بازنویسی می‌شود.</div></div>' +
+            '</div>',
+          actions: [
+            { label: 'انصراف', cls: 'ghost', onClick: function(c) { c.remove(); } },
+            { label: IC.check + ' ذخیره تغییرات', cls: 'primary', onClick: async function(c) {
+                var newName = document.getElementById('eu-name').value.trim();
+                var newUsername = document.getElementById('eu-username').value.trim();
+                var newPass = document.getElementById('eu-password').value;
+                
+                if (!newName || !newUsername) { toast('اطلاعات ناقص', 'نام و نام کاربری الزامی است', 'error'); return; }
+                
+                var fresh = loadDB();
+                // چک کردن اینکه نام کاربری جدید تکراری نباشد
+                if (fresh.users.some(function(x) { return x.username === newUsername && x.id !== targetUid; })) {
+                  toast('تکراری', 'این نام کاربری قبلاً برای شخص دیگری ثبت شده است', 'error');
+                  return;
+                }
+
+                var fu = fresh.users.filter(function(x) { return x.id === targetUid; })[0];
+                if (!fu) return;
+
+                fu.name = newName;
+                fu.username = newUsername;
+                
+                // اگر رمز جدید وارد شده بود، هش میکنیم و جایگزین میکنیم
+                if (newPass.trim() !== '') {
+                  fu.password = await hashPassword(newPass.trim());
+                }
+                
+                saveDB(fresh);
+                toast('ویرایش شد', 'اطلاعات ورود کاربر با موفقیت تغییر کرد', 'success');
+                c.remove();
+                render();
+            }}
+          ]
+        });
       });
     });
 
@@ -253,7 +309,6 @@ function pageUsers(page) {
     });
   }
   
-  // 👇 ثبت تابع draw برای آپدیت خودکار با تغییر Presence 👇
   window._usersDrawFn = draw;
   
   draw();
