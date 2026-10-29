@@ -8,6 +8,8 @@ function pageUsers(page) {
     ['warehouse_officer', 'accountant', 'manager'];
   var state = { sort: null, dir: null };
 
+  var shieldIcon = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>';
+
   page.innerHTML = '<div class="page-head"><div><h1>کاربران</h1></div></div>' +
     (canEdit ?
       '<div class="widget" style="margin-bottom:16px;max-width:900px">' +
@@ -18,7 +20,7 @@ function pageUsers(page) {
             '<input id="uu" required placeholder="m.ahmadi" style="font-family:monospace;direction:ltr;text-align:left" /></div>' +
           '<div class="field"><label>رمز <span class="req">*</span></label>' +
             '<input id="up" required type="password" /></div>' +
-          '<div class="field"><label>نقش</label>' +
+          '<div class="field"><label>نقش پیش‌فرض</label>' +
             '<select id="ur">' +
               assignable.map(function (r) { return '<option value="' + r + '">' + ROLES[r] + '</option>'; }).join('') +
             '</select></div>' +
@@ -62,7 +64,7 @@ function pageUsers(page) {
       '<th ' + sa('username') + '>نام کاربری ' + ind('username') + '</th>' +
       '<th ' + sa('role')     + '>نقش ' + ind('role') + '</th>' +
       '<th ' + sa('status')   + '>وضعیت ' + ind('status') + '</th>' +
-      '<th></th></tr></thead><tbody>' +
+      '<th style="width:120px;text-align:left">عملیات</th></tr></thead><tbody>' +
       rows.map(function (u, i) {
         var isSelf = u.id === App.user.id;
         var editable = canEditUser(u);
@@ -71,11 +73,16 @@ function pageUsers(page) {
             assignable.map(function (r) { return '<option value="' + r + '" ' + (u.role === r ? 'selected' : '') + '>' + ROLES[r] + '</option>'; }).join('') +
           '</select>' :
           '<span class="role-badge ' + u.role + '">' + ROLES[u.role] + '</span>';
+        
         var actionCell = isSelf ? '<span class="muted small">—</span>' :
           (editable ?
-            '<button type="button" class="btn xs ' + (u.isActive ? 'warn' : 'success') + '" data-tog="' + u.id + '">' +
-              (u.isActive ? 'غیرفعال' : 'فعال') + '</button>' :
+            '<div style="display:flex; gap:4px; justify-content:flex-end;">' +
+              '<button type="button" class="btn xs ghost" data-perm="' + u.id + '" title="مدیریت دسترسی‌ها">' + shieldIcon + '</button>' +
+              '<button type="button" class="btn xs ' + (u.isActive ? 'warn' : 'success') + '" data-tog="' + u.id + '">' +
+                (u.isActive ? 'غیرفعال' : 'فعال') + '</button>' +
+            '</div>' :
             '<span class="muted small">—</span>');
+            
         return '<tr><td><span class="row-num">' + (i + 1) + '</span></td>' +
           '<td><div class="user-cell"><div class="avatar-sm">' + esc(initials(u.name)) + '</div>' +
             '<div class="info"><b>' + esc(u.name) + '</b><span>' + (isSelf ? 'خودتان' : '') + '</span></div></div></td>' +
@@ -98,6 +105,7 @@ function pageUsers(page) {
         draw();
       });
     });
+    
     $$('[data-tog]').forEach(function (b) {
       b.addEventListener('click', function () {
         var fresh = loadDB();
@@ -110,6 +118,7 @@ function pageUsers(page) {
         render();
       });
     });
+
     $$('[data-role]').forEach(function (sel) {
       sel.addEventListener('change', function () {
         var fresh = loadDB();
@@ -122,6 +131,53 @@ function pageUsers(page) {
         saveDB(fresh);
         toast('نقش تغییر کرد', u.name + ' → ' + ROLES[u.role], 'success');
         render();
+      });
+    });
+
+    // مدیریت دسترسی‌های سفارشی
+    $$('[data-perm]').forEach(function(b) {
+      b.addEventListener('click', function() {
+        var uid = b.dataset.perm;
+        var u = loadDB().users.filter(function(x) { return x.id === uid; })[0];
+        if (!u) return;
+
+        // ساخت چک‌باکس‌ها
+        var checkboxesHTML = '';
+        for (var key in ALL_PERMISSIONS) {
+          var isChecked = hasPermission(u, key) ? 'checked' : '';
+          checkboxesHTML += 
+            '<label style="display:flex; align-items:center; gap:8px; padding:10px; background:var(--surface-2); border-radius:10px; border:1px solid var(--border); cursor:pointer; margin-bottom:8px">' +
+              '<input type="checkbox" class="perm-cb" data-key="' + key + '" ' + isChecked + ' style="width:16px; height:16px; cursor:pointer">' +
+              '<span style="font-size:12.5px; font-weight:600; color:var(--text-2)">' + ALL_PERMISSIONS[key] + '</span>' +
+            '</label>';
+        }
+
+        openModal({
+          title: 'مدیریت دسترسی‌ها',
+          desc: 'برای ' + u.name + ' (' + ROLES[u.role] + ')',
+          body: '<div style="max-height:400px; overflow-y:auto; padding:4px">' + checkboxesHTML + '</div>',
+          actions: [
+            { label: 'بازگشت به پیش‌فرض نقش', cls: 'danger', onClick: function(c) {
+                var fresh = loadDB();
+                var fu = fresh.users.filter(function(x){return x.id === uid;})[0];
+                if (fu) { delete fu.permissions; saveDB(fresh); toast('بازنشانی شد', 'دسترسی‌ها به حالت پیش‌فرض برگشت', 'success'); c.remove(); render(); }
+            }},
+            { label: 'ذخیره تغییرات', cls: 'primary', onClick: function(c) {
+                var fresh = loadDB();
+                var fu = fresh.users.filter(function(x){return x.id === uid;})[0];
+                if (!fu) return;
+                fu.permissions = {};
+                var cbs = c.querySelectorAll('.perm-cb');
+                for (var i = 0; i < cbs.length; i++) {
+                  fu.permissions[cbs[i].dataset.key] = cbs[i].checked;
+                }
+                saveDB(fresh);
+                toast('ذخیره شد', 'دسترسی‌ها با موفقیت اعمال شد', 'success');
+                c.remove();
+                render();
+            }}
+          ]
+        });
       });
     });
   }
@@ -145,7 +201,7 @@ function pageUsers(page) {
       
       fresh.users.push({
         id: uid(), name: name, username: username, password: hashedPassword,
-        role: role, isActive: true
+        role: role, isActive: true, permissions: {}
       });
       saveDB(fresh);
       toast('افزوده شد', name, 'success');
