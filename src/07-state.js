@@ -7,12 +7,46 @@ var App = {
   prefs: {}
 };
 
+// تشخیص خودکار فصل بر اساس تقویم شمسی
+function getAutoSeason() {
+  try {
+    var monthStr = new Intl.DateTimeFormat('fa-IR', { month: 'numeric' }).format(new Date());
+    // اعداد فارسی را به انگلیسی تبدیل میکنیم
+    var faDigits = '۰۱۲۳۴۵۶۷۸۹';
+    var enDigits = '0123456789';
+    for (var i = 0; i < 10; i++) {
+      monthStr = monthStr.replace(new RegExp(faDigits[i], 'g'), enDigits[i]);
+    }
+    var m = parseInt(monthStr, 10);
+    
+    if (m >= 1 && m <= 3) return 'spring';   // فروردین تا خرداد
+    if (m >= 4 && m <= 6) return 'summer';   // تیر تا شهریور
+    if (m >= 7 && m <= 9) return 'autumn';   // مهر تا آذر
+    return 'winter';                         // دی تا اسفند
+  } catch (e) {
+    return 'spring'; // پیش‌فرض
+  }
+}
+
 try { App.prefs = JSON.parse(localStorage.getItem(K_PREF) || '{}'); } catch (e) { App.prefs = {}; }
-App.theme = App.prefs.theme || 'light';
+
+// منطق انتخاب تم
+var savedTheme = App.prefs.theme || 'smart';
+if (savedTheme === 'smart') {
+  App.theme = getAutoSeason();
+} else {
+  App.theme = savedTheme;
+}
+
 document.documentElement.setAttribute('data-theme', App.theme);
 
 function savePrefs() {
-  try { localStorage.setItem(K_PREF, JSON.stringify({ theme: App.theme, searchHistory: App.prefs.searchHistory || [] })); } catch (e) {}
+  try { 
+    localStorage.setItem(K_PREF, JSON.stringify({ 
+      theme: App.prefs.theme || 'smart', 
+      searchHistory: App.prefs.searchHistory || [] 
+    })); 
+  } catch (e) {}
 }
 
 function sanitizeUser(u) {
