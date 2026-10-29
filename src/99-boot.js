@@ -18,7 +18,6 @@ async function upgradePasswords() {
 
 function showWelcomeGuide() {
   if (localStorage.getItem('alus_welcome_shown') === '1') return;
-  
   setTimeout(function() {
     openModal({
       title: 'به پنل مدیریت Alus خوش آمدید 👋',
@@ -43,7 +42,7 @@ function showWelcomeGuide() {
         }}
       ]
     });
-  }, 2500); // نمایش بعد از لود کامل صفحه و اسپلش
+  }, 2500);
 }
 
 try {
@@ -59,8 +58,8 @@ try {
     try { showSplash(); } catch (e) { console.error('[splash]', e); }
 
     render();
+    if (App.user && typeof startPresence === 'function') startPresence();
     showWelcomeGuide();
-
   });
 
 } catch (err) {
