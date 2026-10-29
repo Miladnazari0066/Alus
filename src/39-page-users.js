@@ -1,5 +1,20 @@
 'use strict';
 
+var PAGE_LABELS = {
+  dashboard: 'داشبورد',
+  stock: 'موجودی',
+  stockInit: 'مقداردهی',
+  transfers: 'جابه‌جایی‌ها',
+  inbounds: 'ورود کالا',
+  reports: 'گزارش‌ها',
+  newTransfer: 'ثبت درخواست',
+  newInbound: 'ثبت ورود',
+  directCustomer: 'ارسال به مشتری',
+  products: 'مدیریت کالاها',
+  users: 'مدیریت کاربران',
+  settings: 'تنظیمات'
+};
+
 function pageUsers(page) {
   var db = loadDB();
   var canEdit = canManageUsers(App.user);
@@ -36,6 +51,10 @@ function pageUsers(page) {
           '<b style="color:var(--text-2)">' + db.users.filter(function (u) { return u.isActive; }).length + '</b> فعال · ' +
           db.users.length + ' کل' +
         '</span>' +
+        '<span id="online-count-badge" style="font-size:12px;color:var(--green);display:flex;align-items:center;gap:4px;margin-right:12px">' +
+          '<span style="width:7px;height:7px;border-radius:50%;background:var(--green);display:inline-block"></span>' +
+          '<b id="online-count">0</b> آنلاین' +
+        '</span>' +
       '</div>' +
       '<div class="table-scroll" id="u-table"></div>' +
     '</div>';
@@ -51,6 +70,11 @@ function pageUsers(page) {
         return '';
       });
     }
+    
+    var online = (typeof getOnlineUsers === 'function') ? getOnlineUsers() : {};
+    var onlineCountEl = document.getElementById('online-count');
+    if (onlineCountEl) onlineCountEl.textContent = Object.keys(online).length;
+    
     var ind = function (key) {
       return '<span class="sort-ind">' + (state.sort === key ? (state.dir === 'asc' ? '▲' : '▼') : '⇅') + '</span>';
     };
@@ -59,15 +83,36 @@ function pageUsers(page) {
       if (state.sort === key) c += ' class="' + (state.dir === 'asc' ? 'sort-asc' : 'sort-desc') + '"';
       return c;
     };
+    
     var table = '<table class="dt"><thead><tr><th>#</th>' +
       '<th ' + sa('name')     + '>کاربر ' + ind('name') + '</th>' +
       '<th ' + sa('username') + '>نام کاربری ' + ind('username') + '</th>' +
       '<th ' + sa('role')     + '>نقش ' + ind('role') + '</th>' +
       '<th ' + sa('status')   + '>وضعیت ' + ind('status') + '</th>' +
       '<th style="width:120px;text-align:left">عملیات</th></tr></thead><tbody>' +
+      
       rows.map(function (u, i) {
         var isSelf = u.id === App.user.id;
         var editable = canEditUser(u);
+        var isOnline = online.hasOwnProperty(u.id);
+        var presence = online[u.id];
+        
+        // 👇 وضعیت آنلاین/آفلاین 👇
+        var statusInfo;
+        if (isOnline && presence) {
+          var pageLabel = PAGE_LABELS[presence.page] || 'نامشخص';
+          statusInfo = '<span style="color:var(--green);font-size:11px;display:flex;align-items:center;gap:4px;">' +
+            '<span style="width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 4px var(--green);display:inline-block"></span>' +
+            'آنلاین · ' + pageLabel +
+          '</span>';
+        } else if (u.lastSeen) {
+          statusInfo = '<span style="color:var(--muted);font-size:11px;display:block">آخرین بازدید: ' + relTime(u.lastSeen) + '</span>';
+        } else {
+          statusInfo = '<span style="color:var(--muted);font-size:11px;display:block">آفلاین</span>';
+        }
+        
+        var avatarExtra = isOnline ? '<span class="online-dot"></span>' : '';
+        
         var roleCell = editable ?
           '<select class="role-select" data-role="' + u.id + '">' +
             assignable.map(function (r) { return '<option value="' + r + '" ' + (u.role === r ? 'selected' : '') + '>' + ROLES[r] + '</option>'; }).join('') +
@@ -82,10 +127,15 @@ function pageUsers(page) {
                 (u.isActive ? 'غیرفعال' : 'فعال') + '</button>' +
             '</div>' :
             '<span class="muted small">—</span>');
-            
+        
         return '<tr><td><span class="row-num">' + (i + 1) + '</span></td>' +
-          '<td><div class="user-cell"><div class="avatar-sm">' + esc(initials(u.name)) + '</div>' +
-            '<div class="info"><b>' + esc(u.name) + '</b><span>' + (isSelf ? 'خودتان' : '') + '</span></div></div></td>' +
+          '<td><div class="user-cell">' +
+            '<div class="avatar-sm" style="position:relative">' + esc(initials(u.name)) + avatarExtra + '</div>' +
+            '<div class="info">' +
+              '<b>' + esc(u.name) + '</b>' +
+              '<span>' + statusInfo + (isSelf ? ' · خودتان' : '') + '</span>' +
+            '</div>' +
+          '</div></td>' +
           '<td><span class="code-chip" style="direction:ltr;unicode-bidi:isolate;display:inline-block">' + esc(u.username) + '</span></td>' +
           '<td>' + roleCell + '</td>' +
           '<td>' + (u.isActive ?
@@ -118,7 +168,7 @@ function pageUsers(page) {
         render();
       });
     });
-
+    
     $$('[data-role]').forEach(function (sel) {
       sel.addEventListener('change', function () {
         var fresh = loadDB();
@@ -134,14 +184,11 @@ function pageUsers(page) {
       });
     });
 
-    // مدیریت دسترسی‌های سفارشی
     $$('[data-perm]').forEach(function(b) {
       b.addEventListener('click', function() {
         var uid = b.dataset.perm;
         var u = loadDB().users.filter(function(x) { return x.id === uid; })[0];
         if (!u) return;
-
-        // ساخت چک‌باکس‌ها
         var checkboxesHTML = '';
         for (var key in ALL_PERMISSIONS) {
           var isChecked = hasPermission(u, key) ? 'checked' : '';
@@ -151,16 +198,15 @@ function pageUsers(page) {
               '<span style="font-size:12.5px; font-weight:600; color:var(--text-2)">' + ALL_PERMISSIONS[key] + '</span>' +
             '</label>';
         }
-
         openModal({
           title: 'مدیریت دسترسی‌ها',
           desc: 'برای ' + u.name + ' (' + ROLES[u.role] + ')',
           body: '<div style="max-height:400px; overflow-y:auto; padding:4px">' + checkboxesHTML + '</div>',
           actions: [
-            { label: 'بازگشت به پیش‌فرض نقش', cls: 'danger', onClick: function(c) {
+            { label: 'بازگشت به پیش‌فرض', cls: 'danger', onClick: function(c) {
                 var fresh = loadDB();
                 var fu = fresh.users.filter(function(x){return x.id === uid;})[0];
-                if (fu) { delete fu.permissions; saveDB(fresh); toast('بازنشانی شد', 'دسترسی‌ها به حالت پیش‌فرض برگشت', 'success'); c.remove(); render(); }
+                if (fu) { delete fu.permissions; saveDB(fresh); toast('بازنشانی شد', '', 'success'); c.remove(); render(); }
             }},
             { label: 'ذخیره تغییرات', cls: 'primary', onClick: function(c) {
                 var fresh = loadDB();
@@ -172,7 +218,7 @@ function pageUsers(page) {
                   fu.permissions[cbs[i].dataset.key] = cbs[i].checked;
                 }
                 saveDB(fresh);
-                toast('ذخیره شد', 'دسترسی‌ها با موفقیت اعمال شد', 'success');
+                toast('ذخیره شد', 'دسترسی‌ها اعمال شد', 'success');
                 c.remove();
                 render();
             }}
@@ -196,18 +242,20 @@ function pageUsers(page) {
         toast('تکرار', 'این نام کاربری قبلاً ثبت شده', 'error');
         return;
       }
-      
       var hashedPassword = await hashPassword(password);
-      
       fresh.users.push({
         id: uid(), name: name, username: username, password: hashedPassword,
-        role: role, isActive: true, permissions: {}
+        role: role, isActive: true, permissions: {}, lastSeen: null
       });
       saveDB(fresh);
       toast('افزوده شد', name, 'success');
       render();
     });
   }
+  
+  // 👇 ثبت تابع draw برای آپدیت خودکار با تغییر Presence 👇
+  window._usersDrawFn = draw;
+  
   draw();
   attachRippleAll();
 }
