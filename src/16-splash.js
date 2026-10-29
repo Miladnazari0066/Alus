@@ -23,7 +23,7 @@ function showSplash() {
           '</div>' +
         '</div>' +
         '<div class="splash-wordmark"><span>A</span><span>l</span><span>u</span><span>s</span></div>' +
-        '<div class="splash-tagline">Furniture Management</div>' +
+        // 👇 عبارت Furniture Management از اینجا حذف شد 👇
         '<div class="splash-progress-track"><div class="splash-progress-bar"></div></div>' +
         '<div class="splash-percent">0%</div>' +
       '</div>';
