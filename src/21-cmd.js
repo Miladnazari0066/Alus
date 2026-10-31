@@ -5,7 +5,10 @@ function openCmd() {
   var bd = document.createElement('div');
   bd.className = 'cmd-bd';
   bd.id = 'cmd-bd';
-  var items = NAV.filter(function (i) { return i.roles.indexOf(App.user.role) >= 0; });
+  
+  // 👇 اصلاح شد: به جای roles از سیستم دسترسی‌های جدید (perm) استفاده میکند 👇
+  var items = NAV.filter(function (i) { return hasPermission(App.user, i.perm); });
+  
   bd.innerHTML = '<div class="cmd"><input id="cmd-input" placeholder="جستجو یا اجرای دستور..." autocomplete="off" /><div class="cmd-list" id="cmd-list"></div></div>';
   document.body.appendChild(bd);
   var input = $('#cmd-input');
@@ -33,8 +36,8 @@ function openCmd() {
     var navItems = items.map(function (i) {
       return { label: i.label, icon: i.icon, kbd: '↵', run: function () { go(i.key); }, sec: 'صفحه‌ها' };
     });
+    
     var acts = [
-      // 👇 گزینه میانبرهای کیبورد از این لیست حذف شد 👇
       { label: 'مرکز اعلان‌ها',    icon: IC.bell,    run: function () { openNotif(); }, sec: 'اقدامات' },
       { label: App.theme === 'light' ? 'حالت تاریک' : 'حالت روشن', icon: App.theme === 'light' ? IC.moon : IC.sun, run: toggleTheme, sec: 'تنظیمات' },
       { label: 'خروج از حساب', icon: IC.logout, run: doLogout, sec: 'تنظیمات' }
