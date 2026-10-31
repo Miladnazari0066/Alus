@@ -98,16 +98,14 @@ function pageStockInit(page) {
     var btn = $('#img-btn');
     if (btn) { btn.classList.add('loading'); btn.textContent = 'در حال آپلود...'; }
 
-    // فشرده‌سازی و آپلود به ابر
     compressImage(f, 400, 0.75).then(function (dataUrl) {
-      // تبدیل Base64 به Blob (فایل فیزیکی) برای ارسال به Supabase
       var arr = dataUrl.split(','), mime = arr[0].match(/:(.*?);/)[1],
           bstr = atob(arr[1]), n = bstr.length, u8arr = new Uint8Array(n);
       while(n--){ u8arr[n] = bstr.charCodeAt(n); }
       var blob = new Blob([u8arr], {type:mime});
 
       uploadImageToCloud(blob).then(function(publicUrl) {
-        currentImage = publicUrl; // فقط لینک عکس رو ذخیره میکنیم
+        currentImage = publicUrl;
         updateImagePreview();
         toast('آپلود موفق', 'تصویر در ابر ذخیره شد', 'success');
       }).catch(function(err) {
@@ -178,12 +176,18 @@ function pageStockInit(page) {
       var stockList = fresh.stocks.filter(function (s) { return s.productId === match.id && s.quantity > 0; });
       var totalQ = stockList.reduce(function (a, s) { return a + s.quantity; }, 0);
       var compCount = (match.components || []).length;
-      statusBox.innerHTML = '<div style="margin-top:8px;padding:12px 14px;background:rgba(52,199,89,.10);border:1px solid rgba(52,199,89,.22);border-radius:16px;font-size:12.5px;color:#047857;display:flex;align-items:center;gap:8px;flex-wrap:wrap">' +
-        IC.check + ' کالای موجود: <b>' + esc(match.name) + '</b> ' +
-        '<span class="unit-chip">' + esc(match.unit || '—') + '</span>' +
-        (compCount ? ' <span class="kit-chip" style="cursor:default">' + IC.grid + ' ' + compCount + ' قلم</span>' : '') +
-        (totalQ > 0 ? ' <span style="opacity:.8">(موجودی فعلی: ' + totalQ + ')</span>' : '') +
+      
+      // 👇 باکس مینیمال کالای موجود 👇
+      statusBox.innerHTML = '<div style="margin-top:10px;padding:12px 14px;background:rgba(52,199,89,.08);border:1px solid rgba(52,199,89,.2);border-radius:12px;font-size:12px;color:#047857;display:flex;align-items:center;gap:8px;">' +
+        '<div style="flex-shrink:0; width:16px; height:16px;">' + IC.check + '</div>' +
+        '<div style="line-height:1.6">' +
+          'کالای موجود: <b>' + esc(match.name) + '</b> ' +
+          '<span class="unit-chip" style="margin:0 4px">' + esc(match.unit || '—') + '</span>' +
+          (compCount ? ' <span class="kit-chip" style="margin:0 4px;cursor:default">' + compCount + ' قلم</span>' : '') +
+          (totalQ > 0 ? '<br><span style="opacity:.8">موجودی فعلی در کل انبارها: ' + totalQ + '</span>' : '') +
+        '</div>' +
       '</div>';
+      
       if (match.unit && match.unit !== unitSel.value) {
         var found = false;
         for (var k = 0; k < UNITS.length; k++) if (UNITS[k] === match.unit) { found = true; break; }
@@ -197,8 +201,12 @@ function pageStockInit(page) {
       currentImage = '';
       updateImagePreview();
       if (comps.length) { comps = []; renderKit(); }
-      statusBox.innerHTML = '<div style="margin-top:8px;padding:12px 14px;background:rgba(0,122,255,.10);border:1px solid rgba(0,122,255,.22);border-radius:16px;font-size:12.5px;color:var(--blue);display:flex;align-items:center;gap:8px">' +
-        IC.plus + ' کالای جدید ساخته می‌شود: <b>' + esc(val) + '</b></div>';
+      
+      // 👇 باکس مینیمال کالای جدید 👇
+      statusBox.innerHTML = '<div style="margin-top:10px;padding:12px 14px;background:rgba(0,122,255,.08);border:1px solid rgba(0,122,255,.2);border-radius:12px;font-size:12px;color:var(--blue);display:flex;align-items:center;gap:8px;">' +
+        '<div style="flex-shrink:0; width:16px; height:16px;">' + IC.plus + '</div>' +
+        '<div>کالای جدید ساخته می‌شود: <b>' + esc(val) + '</b></div>' +
+      '</div>';
     }
   }
 
@@ -213,8 +221,11 @@ function pageStockInit(page) {
     var s = findStock(tmp, m.id, wid);
     var rq = s ? (s.reservedQty || 0) : 0;
     if (rq > 0) {
-      box.innerHTML = '<div style="padding:12px 16px;background:rgba(255,149,0,.1);border-radius:16px;font-size:12.5px;color:#b45309">' +
-        IC.alert + ' این کالا ' + rq + ' ' + esc(m.unit || '') + ' رزرو دارد. مقدار جدید نباید کمتر از ' + rq + ' باشد.</div>';
+      // 👇 باکس مینیمال هشدار رزرو 👇
+      box.innerHTML = '<div style="padding:12px 14px;background:rgba(255,149,0,.08);border:1px solid rgba(255,149,0,.2);border-radius:12px;font-size:12px;color:#b45309;display:flex;align-items:flex-start;gap:8px;">' +
+        '<div style="flex-shrink:0; width:16px; height:16px; margin-top:2px;">' + IC.alert + '</div>' +
+        '<div style="line-height:1.6">این کالا <b>' + rq + ' ' + esc(m.unit || '') + '</b> رزرو دارد. مقدار جدید نباید کمتر از ' + rq + ' باشد.</div>' +
+      '</div>';
     } else {
       box.innerHTML = '';
     }
