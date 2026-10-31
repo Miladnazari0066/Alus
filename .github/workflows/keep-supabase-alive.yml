@@ -1,0 +1,23 @@
+name: Keep Supabase Alive
+
+on:
+  schedule:
+    # این کرون هر ۳ روز یک بار ساعت ۱۲ ظهر UTC اجرا میشود
+    - cron: '0 12 */3 * *'
+  workflow_dispatch: # این خط اجازه میدهد دستی هم اجرا کنید
+
+jobs:
+  ping-supabase:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Supabase Database
+        run: |
+          curl -X GET "${{ secrets.SUPABASE_URL }}/rest/v1/alus_sync?select=id&limit=1" \
+          -H "apikey: ${{ secrets.SUPABASE_ANON_KEY }}" \
+          -H "Authorization: Bearer ${{ secrets.SUPABASE_ANON_KEY }}"
+      
+      - name: Ping Supabase Storage
+        run: |
+          curl -X GET "${{ secrets.STORAGE_URL }}/storage/v1/object/list/product-images" \
+          -H "apikey: ${{ secrets.STORAGE_ANON_KEY }}" \
+          -H "Authorization: Bearer ${{ secrets.STORAGE_ANON_KEY }}"
