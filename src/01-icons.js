@@ -3,7 +3,8 @@
 /* SVG icon factory — all icons go through this */
 function svg(p, w) {
   if (w === undefined) w = 2;
-  return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="' + w + '" stroke-linecap="round" stroke-linejoin="round">' + p + '</svg>';
+  // 👇 width="1em" height="1em" اضافه شد تا هر آیکونی که کلاس CSS نداره، غول‌آسا نشه 👇
+  return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="' + w + '" stroke-linecap="round" stroke-linejoin="round">' + p + '</svg>';
 }
 
 var IC = {
@@ -66,8 +67,6 @@ var IC = {
   sort: svg('<polyline points="8 6 12 2 16 6"/><polyline points="16 18 12 22 8 18"/><line x1="12" y1="2" x2="12" y2="22"/>'),
   bellRing: svg('<path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/><path d="M2 8a9 9 0 0 1 2-5.7"/><path d="M22 8a9 9 0 0 0-2-5.7"/>'),
   arrowDown: svg('<line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/>'),
-  
-  // 👇 آیکون‌های جدید سینک 👇
   cloud: svg('<path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/>'),
   cloudSync: svg('<path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/><polyline points="9 14 12 11 15 14"/><line x1="12" y1="11" x2="12" y2="17"/>'),
   cloudCheck: svg('<path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/><polyline points="8 15 11 18 16 12"/>'),
