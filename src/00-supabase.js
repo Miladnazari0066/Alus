@@ -100,12 +100,11 @@ function initSupabase() {
     console.log('[Supabase] Clients initialized.');
     checkDeviceOnline();
 
-    // 👇 بررسی میکنیم آیا اطلاعات جدیدی هست که هنوز به سرور نرفته باشد 👇
     var isDirty = localStorage.getItem('alus_dirty') === '1';
 
     if (isDirty) {
       console.log('[Sync] Unsynced local changes found. Pushing to cloud...');
-      syncToCloud(loadDB()); // اطلاعات محلی را به زور به سرور میفرستیم
+      syncToCloud(loadDB());
       startCloudSync();
     } else {
       pullFromCloud().then(function(cloudData) {
@@ -125,7 +124,7 @@ function initSupabase() {
           console.log('[Sync] Both cloud and local are empty. Creating seed...');
           var seedData = seed();
           localStorage.setItem(K_DB, JSON.stringify(seedData));
-          localStorage.setItem('alus_dirty', '1'); // علامت گذاری برای آپلود
+          localStorage.setItem('alus_dirty', '1');
           syncToCloud(seedData);
           if (typeof clearCache === 'function') clearCache();
           if (typeof render === 'function') render();
@@ -140,7 +139,6 @@ function initSupabase() {
   }
 }
 
-// 👇 آپلود با تاخیر هوشمند (جلوگیری از ریکوئست های تکراری) 👇
 function syncToCloud(db) {
   if (!supabaseClient) return;
   pendingData = db;
@@ -169,7 +167,7 @@ function doSync() {
         console.error('[Sync] Upload error:', res.error);
       } else {
         console.log('[Sync] Upload success');
-        localStorage.removeItem('alus_dirty'); // 👈 وقتی آپلود موفق شد، علامت را پاک میکنیم
+        localStorage.removeItem('alus_dirty');
       }
       updateSyncIndicator('online');
 
@@ -218,7 +216,9 @@ function startCloudSync() {
   syncChannel = supabaseClient.channel('alus_sync_changes')
     .on('postgres_changes', { event: '*', schema: 'public', table: 'alus_sync' }, function(payload) {
       if (payload.new && payload.new.id === 'main_db' && payload.new.data) {
-        if (isSaving) return;
+        // 👇 اگر تغییری در حافظه محلی در انتظار ارسال است، از روی سرور بازنویسی نکن 👇
+        if (isSaving || localStorage.getItem('alus_dirty') === '1') return; 
+        
         var cloudStr = JSON.stringify(payload.new.data);
         var localStr = localStorage.getItem(K_DB);
         if (cloudStr !== localStr) {
@@ -248,7 +248,7 @@ function startCloudSync() {
 
 function fetchLatestCloudData() {
   if (!supabaseClient || isFetching || isSaving) return;
-  if (localStorage.getItem('alus_dirty') === '1') return; // 👈 اگر اطلاعات آپلود نشده داریم، سینک نمیشویم
+  if (localStorage.getItem('alus_dirty') === '1') return;
   
   isFetching = true;
   
@@ -276,9 +276,6 @@ function fetchLatestCloudData() {
     .catch(function(err) { isFetching = false; });
 }
 
-// -------------------------------------------------------------
-// سیستم حضور آنلاین (Presence)
-// -------------------------------------------------------------
 function startPresence() {
   if (!supabaseClient || !App.user) return;
   if (presenceChannel) return;
@@ -296,14 +293,7 @@ function startPresence() {
           onlineUsers[uid] = state[uid][0];
         }
       });
-      console.log('[Presence] Online users:', Object.keys(onlineUsers).length);
       window.dispatchEvent(new CustomEvent('presence-changed', { detail: onlineUsers }));
-    })
-    .on('presence', { event: 'join' }, function(info) {
-      console.log('[Presence] User joined:', info.key);
-    })
-    .on('presence', { event: 'leave' }, function(info) {
-      console.log('[Presence] User left:', info.key);
     })
     .subscribe(function(status) {
       if (status === 'SUBSCRIBED') {
@@ -336,9 +326,7 @@ function stopPresence() {
   }
 }
 
-function getOnlineUsers() {
-  return onlineUsers;
-}
+function getOnlineUsers() { return onlineUsers; }
 
 function saveLastSeen() {
   if (!App.user) return;
