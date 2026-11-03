@@ -1,14 +1,8 @@
 'use strict';
 
-// -------------------------------------------------------------
-// تنظیمات دیتابیس (پروژه اول)
-// -------------------------------------------------------------
 var SUPABASE_URL = 'https://thcflxsjlnenmardrqkz.supabase.co';
 var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRoY2ZseHNqbG5lbm1hcmRycWt6Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc5MzA5Mjc3OCwiZXhwIjoyMTA4NjY4Nzc4fQ.XChyHfZkbMMMsLwMPGBHGQCVkyg83D7oorbcpyYPTDg';
 
-// -------------------------------------------------------------
-// تنظیمات استوریج (پروژه دوم - عکس‌ها)
-// -------------------------------------------------------------
 var STORAGE_SUPABASE_URL = 'https://njmuhoisajdcbyafpsai.supabase.co';
 var STORAGE_SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5qbXVob2lzYWpkY2J5YWZwc2FpIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc5MzA5MzY1OSwiZXhwIjoyMTA4NjY5NjU5fQ.4lapNcxrfLxp2B7tIoF1QwMwqb1zZeXv4ajiecAb01c';
 
@@ -23,8 +17,8 @@ var isFetching = false;
 var isSaving = false;
 var pendingData = null;
 var syncToastTimeout = null;
+var syncDebounceTimer = null;
 
-// ساخت نوار پیشرفت بالای صفحه
 if (!document.getElementById('top-sync-bar')) {
   var topBar = document.createElement('div');
   topBar.id = 'top-sync-bar';
@@ -89,7 +83,6 @@ window.addEventListener('offline', function() {
   document.head.appendChild(script);
 })();
 
-// پاکسازی آدرس برای جلوگیری از خطای 404 (حذف /rest/v1 یا /storage/v1)
 function cleanUrl(url) {
   if (!url) return '';
   return url.replace(/\/+$/, '').replace(/\/rest\/v1\/?$/, '').replace(/\/storage\/v1\/?$/, '');
@@ -107,40 +100,56 @@ function initSupabase() {
     console.log('[Supabase] Clients initialized.');
     checkDeviceOnline();
 
-    pullFromCloud().then(function(cloudData) {
-      var localData = loadDB();
-      var hasCloudData = cloudData && cloudData.users && cloudData.users.length > 0;
-      var hasLocalData = localData.users && localData.users.length > 0;
+    // 👇 بررسی میکنیم آیا اطلاعات جدیدی هست که هنوز به سرور نرفته باشد 👇
+    var isDirty = localStorage.getItem('alus_dirty') === '1';
 
-      if (hasCloudData) {
-        var cloudStr = JSON.stringify(cloudData);
-        var localStr = localStorage.getItem(K_DB);
-        if (cloudStr !== localStr) {
-          localStorage.setItem(K_DB, cloudStr);
+    if (isDirty) {
+      console.log('[Sync] Unsynced local changes found. Pushing to cloud...');
+      syncToCloud(loadDB()); // اطلاعات محلی را به زور به سرور میفرستیم
+      startCloudSync();
+    } else {
+      pullFromCloud().then(function(cloudData) {
+        var localData = loadDB();
+        var hasCloudData = cloudData && cloudData.users && cloudData.users.length > 0;
+        var hasLocalData = localData.users && localData.users.length > 0;
+
+        if (hasCloudData) {
+          var cloudStr = JSON.stringify(cloudData);
+          var localStr = localStorage.getItem(K_DB);
+          if (cloudStr !== localStr) {
+            localStorage.setItem(K_DB, cloudStr);
+            if (typeof clearCache === 'function') clearCache();
+            if (typeof render === 'function') render();
+          }
+        } else if (!hasLocalData) {
+          console.log('[Sync] Both cloud and local are empty. Creating seed...');
+          var seedData = seed();
+          localStorage.setItem(K_DB, JSON.stringify(seedData));
+          localStorage.setItem('alus_dirty', '1'); // علامت گذاری برای آپلود
+          syncToCloud(seedData);
           if (typeof clearCache === 'function') clearCache();
           if (typeof render === 'function') render();
+        } else {
+          syncToCloud(localData);
         }
-      } else if (!hasLocalData) {
-        var seedData = seed();
-        localStorage.setItem(K_DB, JSON.stringify(seedData));
-        if (typeof clearCache === 'function') clearCache();
-        syncToCloud(seedData);
-        if (typeof render === 'function') render();
-      } else {
-        syncToCloud(localData);
-      }
-      startCloudSync();
-    });
+        startCloudSync();
+      });
+    }
   } catch(e) {
     console.error('[Supabase] Init error:', e);
   }
 }
 
+// 👇 آپلود با تاخیر هوشمند (جلوگیری از ریکوئست های تکراری) 👇
 function syncToCloud(db) {
   if (!supabaseClient) return;
   pendingData = db;
   if (isSaving) return;
-  doSync();
+  
+  clearTimeout(syncDebounceTimer);
+  syncDebounceTimer = setTimeout(function() {
+    doSync();
+  }, 500);
 }
 
 function doSync() {
@@ -156,8 +165,12 @@ function doSync() {
   supabaseClient.from('alus_sync').upsert({ id: 'main_db', data: dataToSync, updated_at: new Date() })
     .then(function (res) {
       isSaving = false;
-      if (res.error) console.error('[Sync] Upload error:', res.error);
-      else console.log('[Sync] Upload success');
+      if (res.error) {
+        console.error('[Sync] Upload error:', res.error);
+      } else {
+        console.log('[Sync] Upload success');
+        localStorage.removeItem('alus_dirty'); // 👈 وقتی آپلود موفق شد، علامت را پاک میکنیم
+      }
       updateSyncIndicator('online');
 
       if (topBar) {
@@ -235,6 +248,8 @@ function startCloudSync() {
 
 function fetchLatestCloudData() {
   if (!supabaseClient || isFetching || isSaving) return;
+  if (localStorage.getItem('alus_dirty') === '1') return; // 👈 اگر اطلاعات آپلود نشده داریم، سینک نمیشویم
+  
   isFetching = true;
   
   supabaseClient.from('alus_sync').select('data').eq('id', 'main_db').maybeSingle()
@@ -337,7 +352,10 @@ function saveLastSeen() {
         break;
       }
     }
-    if (changed) saveDB(db);
+    if (changed) {
+      _dbCache = db;
+      localStorage.setItem(K_DB, JSON.stringify(db));
+    }
   } catch(e) { console.error('[LastSeen]', e); }
 }
 
