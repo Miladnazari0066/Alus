@@ -24,15 +24,15 @@ function showWelcomeGuide() {
       desc: 'راهنمای سریع برای شروع کار با سیستم',
       body: 
         '<div style="line-height:1.9; font-size:13px; color:var(--text-2)">' +
-          '<p style="margin-bottom:12px">این سیستم برای مدیریت موجودی مبلمان طراحی شده است. برای شروع، پیشنهاد می‌کنیم این مراحل را طی کنید:</p>' +
+          '<p style="margin-bottom:12px">این سیستم برای مدیریت موجودی مبلمان طراحی شده است. برای شروع:</p>' +
           '<ul style="padding-right:20px; margin-bottom:16px; display:flex; flex-direction:column; gap:8px">' +
-            '<li><b>۱. تعریف کالاها:</b> از منوی «مقداردهی» می‌توانید کالاها را با عکس ثبت کنید.</li>' +
+            '<li><b>۱. تعریف کالاها:</b> از منوی «مقداردهی» کالاها را با عکس ثبت کنید.</li>' +
             '<li><b>۲. ثبت موجودی اولیه:</b> موجودی انبار مرکزی را مشخص کنید.</li>' +
-            '<li><b>۳. گردش کار:</b> با ثبت «ورود کالا» و «درخواست انتقال»، چرخه تأیید سه‌مرحله‌ای را تجربه کنید.</li>' +
+            '<li><b>۳. گردش کار:</b> با ثبت «ورود کالا» و «درخواست انتقال» چرخه تأیید را تجربه کنید.</li>' +
             '<li><b>۴. مدیریت کاربران:</b> از بخش «کاربران» برای همکاران خود اکانت بسازید.</li>' +
           '</ul>' +
           '<div style="background:rgba(0,122,255,.1); border:1px solid rgba(0,122,255,.24); padding:12px; border-radius:12px; font-size:12px; color:#0369a1">' +
-            IC.info + ' شما می‌توانید در هر زمان از طریق صفحه «تنظیمات» از اطلاعات پشتیبان تهیه کنید.' +
+            IC.info + ' در هر زمان از صفحه «تنظیمات» می‌توانید پشتیبان تهیه کنید.' +
           '</div>' +
         '</div>',
       actions: [
@@ -49,8 +49,7 @@ try {
   if (typeof initSupabase === 'function') initSupabase();
 
   upgradePasswords().then(function() {
-    if (!loadDB().users.length) saveDB(seed());
-
+    // 👇 خط خطرناک حذف شد. دیگر seed در boot.js ساخته نمیشود، فقط initSupabase این کار را میکند.
     App.user = currentUser();
     App.route = App.user ? restoreRoute() : { name: 'dashboard', params: {} };
 
