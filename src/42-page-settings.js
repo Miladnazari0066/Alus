@@ -34,7 +34,6 @@ function pageSettings(page) {
     
     '<div class="acc-list">' +
       
-      // 👇 بخش جدید: تم و ظاهر 👇
       '<div class="acc-item open" id="acc-theme">' +
         '<div class="acc-header" onclick="this.parentElement.classList.toggle(\'open\')">' +
           '<div class="acc-icon primary">' + IC.sun + '</div>' +
@@ -68,12 +67,14 @@ function pageSettings(page) {
               '<thead><tr><th>سرویس</th><th>وضعیت اتصال</th><th style="text-align:left">حجم مصرفی</th></tr></thead>' +
               '<tbody>' +
                 '<tr>' +
-                  '<td><div class="cell-product"><div class="img-thumb-placeholder" style="background:rgba(0,122,255,.1);color:var(--blue);border-color:rgba(0,122,255,.2)">' + IC.package + '</div><div class="info"><b>دیتابیس مرکزی</b><br><small style="font-size:10px;color:var(--muted)">Supabase DB</small></div></div></td>' +
+                  // 👇 متن اصلاح شد 👇
+                  '<td><div class="cell-product"><div class="img-thumb-placeholder" style="background:rgba(0,122,255,.1);color:var(--blue);border-color:rgba(0,122,255,.2)">' + IC.package + '</div><div class="info"><b>دیتابیس مرکزی</b><br><small style="font-size:10px;color:var(--muted)">Cloud Database</small></div></div></td>' +
                   '<td id="db-status-cell" style="font-size:11px;direction:ltr;text-align:left"><span style="color:var(--orange);display:flex;align-items:center;gap:6px;direction:rtl;"><span class="dot" style="width:8px;height:8px;border-radius:50%;background:var(--orange);display:inline-block"></span>در حال بررسی...</span></td>' +
                   '<td class="num" id="db-size-cell">-</td>' +
                 '</tr>' +
                 '<tr>' +
-                  '<td><div class="cell-product"><div class="img-thumb-placeholder" style="background:rgba(175,82,222,.1);color:var(--purple);border-color:rgba(175,82,222,.2)">' + IC.image + '</div><div class="info"><b>استوریج عکس‌ها</b><br><small style="font-size:10px;color:var(--muted)">Supabase Storage</small></div></div></td>' +
+                  // 👇 متن اصلاح شد 👇
+                  '<td><div class="cell-product"><div class="img-thumb-placeholder" style="background:rgba(175,82,222,.1);color:var(--purple);border-color:rgba(175,82,222,.2)">' + IC.image + '</div><div class="info"><b>استوریج عکس‌ها</b><br><small style="font-size:10px;color:var(--muted)">Cloud Storage</small></div></div></td>' +
                   '<td id="storage-status-cell" style="font-size:11px;direction:ltr;text-align:left"><span style="color:var(--orange);display:flex;align-items:center;gap:6px;direction:rtl;"><span class="dot" style="width:8px;height:8px;border-radius:50%;background:var(--orange);display:inline-block"></span>در حال بررسی...</span></td>' +
                   '<td class="num" id="storage-size-cell">-</td>' +
                 '</tr>' +
@@ -163,7 +164,6 @@ function pageSettings(page) {
 
     '</div>';
 
-  // منطق کلیک روی دکمه‌های تم
   $$('[data-set-theme]').forEach(function(btn) {
     btn.addEventListener('click', function() {
       var t = btn.dataset.setTheme;
@@ -178,7 +178,7 @@ function pageSettings(page) {
       
       document.documentElement.setAttribute('data-theme', App.theme);
       toast('تم تغییر کرد', 'ظاهر برنامه با موفقیت بروزرسانی شد', 'success');
-      render(); // رفرش صفحه تنظیمات برای آپدیت رنگ دکمه‌ها
+      render();
     });
   });
 
