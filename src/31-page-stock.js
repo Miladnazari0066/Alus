@@ -41,7 +41,6 @@ function transferItemHTML(db, t) {
   '</div>';
 }
 
-// 👇 لیسنر سراسری برای بستن پاپ‌آپ عکس (فقط یک بار اجرا می‌شود) 👇
 document.addEventListener('click', function(e) {
   var pop = document.getElementById('global-img-pop');
   if (pop && pop.classList.contains('show')) {
@@ -238,7 +237,6 @@ function pageStock(page) {
       });
     });
 
-    // پاپ‌آپ عکس
     var pop = document.getElementById('global-img-pop');
     if (!pop) {
       pop = document.createElement('div');
@@ -291,7 +289,6 @@ function pageStock(page) {
       img.addEventListener('click', function(e) { e.stopPropagation(); showPopover(img); });
     });
 
-    // فرم ویرایش
     $$('[data-edit]', tbl).forEach(function(btn) {
       btn.addEventListener('click', function(e) {
         e.stopPropagation();
