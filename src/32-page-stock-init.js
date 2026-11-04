@@ -40,7 +40,8 @@ function pageStockInit(page) {
             '<div class="img-upload-preview" id="img-preview">' + IC.image + '</div>' +
             '<div class="img-upload-info">' +
               '<label for="img-input">انتخاب یا تغییر تصویر</label>' +
-              '<small>فرمت JPG/PNG · تصویر مستقیماً در ابر (Supabase) ذخیره می‌شود</small>' +
+              // 👇 متن اصلاح شد 👇
+              '<small>فرمت JPG/PNG · تصویر مستقیماً در فضای ابری ذخیره می‌شود</small>' +
               '<div class="img-upload-actions">' +
                 '<button type="button" class="btn ghost sm" id="img-btn">' + IC.upload + ' انتخاب فایل</button>' +
                 '<button type="button" class="btn ghost sm" id="img-clear" style="display:none">' + IC.trash + ' حذف</button>' +
@@ -109,7 +110,7 @@ function pageStockInit(page) {
         updateImagePreview();
         toast('آپلود موفق', 'تصویر در ابر ذخیره شد', 'success');
       }).catch(function(err) {
-        toast('خطای آپلود', err.message || 'اتصال به استوریج برقرار نشد', 'error');
+        toast('خطای آپلود', err.message || 'اتصال به سرور برقرار نشد', 'error');
       }).finally(function() {
         if (btn) { btn.classList.remove('loading'); btn.innerHTML = IC.upload + ' انتخاب فایل'; }
       });
@@ -177,7 +178,6 @@ function pageStockInit(page) {
       var totalQ = stockList.reduce(function (a, s) { return a + s.quantity; }, 0);
       var compCount = (match.components || []).length;
       
-      // 👇 باکس مینیمال کالای موجود 👇
       statusBox.innerHTML = '<div style="margin-top:10px;padding:12px 14px;background:rgba(52,199,89,.08);border:1px solid rgba(52,199,89,.2);border-radius:12px;font-size:12px;color:#047857;display:flex;align-items:center;gap:8px;">' +
         '<div style="flex-shrink:0; width:16px; height:16px;">' + IC.check + '</div>' +
         '<div style="line-height:1.6">' +
@@ -202,7 +202,6 @@ function pageStockInit(page) {
       updateImagePreview();
       if (comps.length) { comps = []; renderKit(); }
       
-      // 👇 باکس مینیمال کالای جدید 👇
       statusBox.innerHTML = '<div style="margin-top:10px;padding:12px 14px;background:rgba(0,122,255,.08);border:1px solid rgba(0,122,255,.2);border-radius:12px;font-size:12px;color:var(--blue);display:flex;align-items:center;gap:8px;">' +
         '<div style="flex-shrink:0; width:16px; height:16px;">' + IC.plus + '</div>' +
         '<div>کالای جدید ساخته می‌شود: <b>' + esc(val) + '</b></div>' +
@@ -221,9 +220,8 @@ function pageStockInit(page) {
     var s = findStock(tmp, m.id, wid);
     var rq = s ? (s.reservedQty || 0) : 0;
     if (rq > 0) {
-      // 👇 باکس مینیمال هشدار رزرو 👇
       box.innerHTML = '<div style="padding:12px 14px;background:rgba(255,149,0,.08);border:1px solid rgba(255,149,0,.2);border-radius:12px;font-size:12px;color:#b45309;display:flex;align-items:flex-start;gap:8px;">' +
-        '<div style="flex-shrink:0; width:16px; height:16px; margin-top:2px;">' + IC.alert + '</div>' +
+        '<div style="flex-shrink:0; width:16px;height:16px;margin-top:2px;">' + IC.alert + '</div>' +
         '<div style="line-height:1.6">این کالا <b>' + rq + ' ' + esc(m.unit || '') + '</b> رزرو دارد. مقدار جدید نباید کمتر از ' + rq + ' باشد.</div>' +
       '</div>';
     } else {
