@@ -1,10 +1,10 @@
 'use strict';
 
-var SUPABASE_URL = 'https://thcflxsjlnenmardrqkz.supabase.co';
-var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRoY2ZseHNqbG5lbm1hcmRycWt6Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc5MzA5Mjc3OCwiZXhwIjoyMTA4NjY4Nzc4fQ.XChyHfZkbMMMsLwMPGBHGQCVkyg83D7oorbcpyYPTDg';
+var CLOUD_URL = 'https://thcflxsjlnenmardrqkz.supabase.co';
+var CLOUD_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRoY2ZseHNqbG5lbm1hcmRycWt6Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc5MzA5Mjc3OCwiZXhwIjoyMTA4NjY4Nzc4fQ.XChyHfZkbMMMsLwMPGBHGQCVkyg83D7oorbcpyYPTDg';
 
-var STORAGE_SUPABASE_URL = 'https://njmuhoisajdcbyafpsai.supabase.co';
-var STORAGE_SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5qbXVob2lzYWpkY2J5YWZwc2FpIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc5MzA5MzY1OSwiZXhwIjoyMTA4NjY5NjU5fQ.4lapNcxrfLxp2B7tIoF1QwMwqb1zZeXv4ajiecAb01c';
+var STORAGE_URL = 'https://njmuhoisajdcbyafpsai.supabase.co';
+var STORAGE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5qbXVob2lzYWpkY2J5YWZwc2FpIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc5MzA5MzY1OSwiZXhwIjoyMTA4NjY5NjU5fQ.4lapNcxrfLxp2B7tIoF1QwMwqb1zZeXv4ajiecAb01c';
 
 var supabaseClient = null;
 var supabaseStorageClient = null;
@@ -67,17 +67,17 @@ window.addEventListener('offline', function() {
   updateSyncIndicator('offline');
 });
 
-(function loadSupabaseSDK() {
-  if (window.supabase) { initSupabase(); return; }
+(function loadCloudSDK() {
+  if (window.supabase) { initCloud(); return; }
   var script = document.createElement('script');
   script.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.8/dist/umd/supabase.min.js';
   script.async = true;
-  script.onload = function () { initSupabase(); };
+  script.onload = function () { initCloud(); };
   script.onerror = function () {
     var script2 = document.createElement('script');
     script2.src = 'https://unpkg.com/@supabase/supabase-js@2.39.8/dist/umd/supabase.min.js';
     script2.async = true;
-    script2.onload = function () { initSupabase(); };
+    script2.onload = function () { initCloud(); };
     document.head.appendChild(script2);
   };
   document.head.appendChild(script);
@@ -88,16 +88,16 @@ function cleanUrl(url) {
   return url.replace(/\/+$/, '').replace(/\/rest\/v1\/?$/, '').replace(/\/storage\/v1\/?$/, '');
 }
 
-function initSupabase() {
+function initCloud() {
   if (!window.supabase || supabaseClient) return;
   try {
-    var dbUrl = cleanUrl(SUPABASE_URL);
-    var stUrl = cleanUrl(STORAGE_SUPABASE_URL);
-    supabaseClient = window.supabase.createClient(dbUrl, SUPABASE_ANON_KEY);
+    var dbUrl = cleanUrl(CLOUD_URL);
+    var stUrl = cleanUrl(STORAGE_URL);
+    supabaseClient = window.supabase.createClient(dbUrl, CLOUD_ANON_KEY);
     if (stUrl) {
-      supabaseStorageClient = window.supabase.createClient(stUrl, STORAGE_SUPABASE_ANON_KEY);
+      supabaseStorageClient = window.supabase.createClient(stUrl, STORAGE_ANON_KEY);
     }
-    console.log('[Supabase] Clients initialized.');
+    console.log('[Cloud] Clients initialized.');
     checkDeviceOnline();
 
     var isDirty = localStorage.getItem('alus_dirty') === '1';
@@ -135,7 +135,7 @@ function initSupabase() {
       });
     }
   } catch(e) {
-    console.error('[Supabase] Init error:', e);
+    console.error('[Cloud] Init error:', e);
   }
 }
 
@@ -196,7 +196,7 @@ function pullFromCloud() {
 
 function uploadImageToCloud(file) {
   return new Promise(function(resolve, reject) {
-    if (!supabaseStorageClient) return reject(new Error('استوریج متصل نیست.'));
+    if (!supabaseStorageClient) return reject(new Error('سرور ابری متصل نیست.'));
     var fileName = 'img_' + Date.now() + '_' + Math.floor(Math.random() * 1000) + '.jpg';
     supabaseStorageClient.storage.from('product-images')
       .upload(fileName, file, { contentType: 'image/jpeg', upsert: false })
@@ -216,7 +216,6 @@ function startCloudSync() {
   syncChannel = supabaseClient.channel('alus_sync_changes')
     .on('postgres_changes', { event: '*', schema: 'public', table: 'alus_sync' }, function(payload) {
       if (payload.new && payload.new.id === 'main_db' && payload.new.data) {
-        // 👇 اگر تغییری در حافظه محلی در انتظار ارسال است، از روی سرور بازنویسی نکن 👇
         if (isSaving || localStorage.getItem('alus_dirty') === '1') return; 
         
         var cloudStr = JSON.stringify(payload.new.data);
