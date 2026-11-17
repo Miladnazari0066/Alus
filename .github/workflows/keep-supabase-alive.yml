@@ -1,27 +1,26 @@
-name: Keep Supabase Alive
+name: Debug Supabase Connection
 
 on:
-  schedule:
-    # هر ۳ روز یک بار ساعت ۱۲ ظهر UTC اجرا می‌شود
-    - cron: '0 12 */3 * *'
-  workflow_dispatch: # اجازه اجرای دستی
+  workflow_dispatch:
 
 jobs:
-  ping-supabase:
+  debug:
     runs-on: ubuntu-latest
     steps:
-      - name: Ping Supabase Database (IPv4 Forced)
+      - name: Check URL and DNS
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
         run: |
-          curl -4 -sS --fail-with-body \
-            --retry 3 --retry-delay 5 --retry-all-errors \
-            -X GET "${{ secrets.SUPABASE_URL }}/rest/v1/alus_sync?select=id&limit=1" \
-            -H "apikey: ${{ secrets.SUPABASE_ANON_KEY }}" \
-            -H "Authorization: Bearer ${{ secrets.SUPABASE_ANON_KEY }}"
-
-      - name: Ping Supabase Storage (IPv4 Forced)
-        run: |
-          curl -4 -sS --fail-with-body \
-            --retry 3 --retry-delay 5 --retry-all-errors \
-            -X GET "${{ secrets.STORAGE_URL }}/storage/v1/object/list/product-images" \
-            -H "apikey: ${{ secrets.STORAGE_ANON_KEY }}" \
-            -H "Authorization: Bearer ${{ secrets.STORAGE_ANON_KEY }}"
+          echo "تست بررسی آدرس..."
+          echo "طول آدرس ذخیره شده: ${#SUPABASE_URL}"
+          
+          if [[ "$SUPABASE_URL" == https://* ]]; then
+            echo "✅ آدرس با https شروع می‌شود."
+            HOSTNAME=$(echo $SUPABASE_URL | sed 's|https://||')
+            echo "🌐 دامنه استخراج شده: $HOSTNAME"
+            
+            echo "در حال تست DNS..."
+            nslookup $HOSTNAME || echo "❌ خطای DNS: گیت‌هاب نمی‌تواند این دامنه را پیدا کند!"
+          else
+            echo "❌ خطا: آدرس (SUPABASE_URL) خالی است یا با https شروع نمی‌شود!"
+          fi
